@@ -48,7 +48,7 @@ char** createNewBoard(){
                         board[i][j] = 'q';
                 }
                 if (i == 1)
-                    board[i][j] = 'p';
+                    board[i][j] = 'm';
 
                 //black pieces
                 if (i == 0){
@@ -64,7 +64,7 @@ char** createNewBoard(){
                         board[i][j] = 'Q';
                 }
                 if (i == 1)
-                    board[i][j] = 'P';
+                    board[i][j] = 'M';
             }
             else {//blank pieces
                 board[i][j] = '_';
@@ -75,69 +75,201 @@ char** createNewBoard(){
 }
 
 boolean isMoveLegal(char** board, Location* org, Location* des, boolean userColor){
-    char orgPiece = *((*(board+(org->x)))+org->y);
-    char desPiece = *((*(board+(des->x)))+des->y);
-
-    if (!(isMoveLegalColorWise(orgPiece,desPiece,userColor)))
+    char orgPiece = getPiece(board,org);
+    if (isLocationOutOfBounds(org) || isLocationOutOfBounds(des))
+        return 0;
+    if (!(isLegalDesPiece(board, orgPiece, des,userColor)))
         return 0;
 
     switch(orgPiece) {
-        case 'p':
-        case 'P':
-            return isPawnMoveLegal(org, des);
+        case 'm':
+            if (!isWhitePawnMoveLegal(board, org, des))
+                return 0;
+            break;
+        case 'M':
+            if (!isBlackPawnMoveLegal(board, org, des))
+                return 0;
+            break;
         case 'r':
         case 'R':
-            return isRookMoveLegal(org, des);
+            if (!isRookMoveLegal(board, org, des))
+                return 0;
+            break;
         case 'n':
         case 'N':
-            return isKnightMoveLegal(org, des);
+            if (!isKnightMoveLegal(board, org, des))
+                return 0;
+            break;
         case 'b':
         case 'B':
-            return isBishopMoveLegal(org, des);
+            if (!isBishopMoveLegal(board, org, des))
+                return 0;
+            break;
         case 'k':
         case 'K':
-            return isKingMoveLegal(org, des);
+            if (!isKingMoveLegal(board, org, des))
+                return 0;
+            break;
         case 'q':
         case 'Q':
-            return isQueenMoveLegal(org, des);
+            if (!isQueenMoveLegal(board, org, des))
+                return 0;
+            break;
     }
+    if (isKingThreatened(board, org, des, userColor))
+        return 0;
+    return 1;
 }
 
-boolean isMoveLegalColorWise(char orgPiece, char desPiece, boolean userColor){
+char getPiece(char** board, Location* loc){
+    return *((*(board + (loc->x))) + loc->y);
+}
+
+boolean isLocationOutOfBounds(Location* des){
+    return ((des->x < 8) && (des->x > -1) && (des->y < 8) && (des->y > -1) );
+}
+
+boolean isCoordinatesOutOfBounds(int x, int y){
+    return isLocationOutOfBounds(createNewLocation(x,y));
+}
+
+boolean isLegalDesPiece(char** board, char orgPiece, Location* des, boolean userColor){
+    char desPiece = getPiece(board,des);
     if (((getPieceColor(orgPiece) == 0) && (userColor == 1)) || ((getPieceColor(orgPiece) == 1) && (userColor == 0))) //if origion piece does not belong to user
         return 0;
     if (((getPieceColor(desPiece) == 0) && (userColor == 0)) || ((getPieceColor(desPiece) == 1) && (userColor == 1))) //if destenation piece belongs to user
         return 0;
-    if (getPieceColor(orgPiece) == -1)//if origin piece is empty
+    if (getPieceColor(orgPiece) == '_')//if origin piece is empty
         return 0;
     return 1;
 }
 
 int getPieceColor(char piece){
-    if ((piece == 'p')||(piece == 'r')||(piece == 'n')||(piece == 'b')||(piece == 'k')||(piece == 'q'))
+    if ((piece == 'm')||(piece == 'r')||(piece == 'n')||(piece == 'b')||(piece == 'k')||(piece == 'q'))
         return 0;
-    if ((piece == 'P')||(piece == 'R')||(piece == 'N')||(piece == 'B')||(piece == 'K')||(piece == 'Q'))
+    if ((piece == 'M')||(piece == 'R')||(piece == 'N')||(piece == 'B')||(piece == 'K')||(piece == 'Q'))
         return 1;
-    return -1;
+    return EMPTY_PIECE;
 }
 
-boolean isPawnMoveLegal(Location* org, Location* des){
-    
-}
-boolean isRookMoveLegal(Location* org, Location* des){
+boolean isWhitePawnMoveLegal(char** board, Location* org, Location* des) {
+    char desPiece = getPiece(board,des);
+    if (desPiece == '_' && org->y == des->y) { //move forward to an empty piece
+        if ((org->x == 1) && (des->x == 3)) { //first move of pawn can be a double move
+            return 1;
+        }
+        if (org->x+1 == des->x)
+            return 1;
+    }
+    if ((org->x+1 == des->x)&&((org->y+1 == des->y)||(org->y-1 == des->y)))//eating move, color wise legal has been checked already
+        return 1;
+    return 0;
 
 }
-boolean isKnightMoveLegal(Location* org, Location* des){
+
+boolean isBlackPawnMoveLegal(char** board, Location* org, Location* des){
+    char desPiece = getPiece(board,des);
+    if (desPiece == '_' && org->y == des->y) { //move forward to an empty piece
+        if ((org->x == 6) && (des->x == 5)) { //first move of pawn can be a double move
+            return 1;
+        }
+        if (org->x-1 == des->x)
+            return 1;
+    }
+    if ((org->x-1 == des->x)&&((org->y+1 == des->y)||(org->y-1 == des->y)))//eating move, color wise legal has been checked already
+        return 1;
+    return 0;
 
 }
-boolean isBishopMoveLegal(Location* org, Location* des){
+boolean isRookMoveLegal(char** board, Location* org, Location* des){
+    if (org->x == des->x){
+        for (int j = fmin(org->y,des->y)+1; j< fmax(org->y,des->y)-1; j++)
+            if (!isCoordinatesEmpty(board, org->x, j))
+             return -1;
+    }
+    if (org->y == des->y){
+        for (int i = fmin(org->x,des->x)+1; i< fmax(org->x,des->x)-1; i++)
+            if (!isCoordinatesEmpty(board, i, org->y))
+                return -1;
+    }
+    return 0;
 
 }
-boolean isKingMoveLegal(Location* org, Location* des){
+boolean isKnightMoveLegal(char** board, Location* org, Location* des){
+    if ((org->x + 2 == des->x) && (org->y + 1 == des->y))
+        return 1;
+    if ((org->x + 1 == des->x) && (org->y + 2 == des->y))
+        return 1;
+    if ((org->x - 1 == des->x) && (org->y + 2 == des->y))
+        return 1;
+    if ((org->x - 2 == des->x) && (org->y + 1 == des->y))
+        return 1;
+    if ((org->x - 2 == des->x) && (org->y - 1 == des->y))
+        return 1;
+    if ((org->x - 1 == des->x) && (org->y - 2 == des->y))
+        return 1;
+    if ((org->x + 1 == des->x) && (org->y - 2 == des->y))
+        return 1;
+    if ((org->x + 2 == des->x) && (org->y - 1 == des->y))
+        return 1;
+    return 0;
+}
+boolean isBishopMoveLegal(char** board, Location* org, Location* des){
+    if ((org->x < des->x)&&(org->y < des->y)) {
+        return (isBishopLegalDirection(board, org, des, &addInt, &addInt));
+    }
+    if ((org->x < des->x)&&(org->y > des->y)){
+        return (isBishopLegalDirection(board, org, des, &addInt, &subInt));
+    }
+    if ((org->x > des->x)&&(org->y > des->y)){
+        return (isBishopLegalDirection(board, org, des, &subInt, &subInt));
+    }
+    if ((org->x > des->x)&&(org->y < des->y)){
+        return (isBishopLegalDirection(board, org, des, &subInt, &addInt));
+    }
+    return 0;
+}
+boolean isKingMoveLegal(char** board, Location* org, Location* des){
+    if ((org->x != des->x) ||(org->y != des->y))
+        return ((org->y == des->y)||(org->y+1 == des->y)||(org->y-1 == des->y)) && ((org->x == des->x)||(org->x+1 == des->x) || (org->x-1 == des->x));
+    return 0;
+}
+
+
+boolean isQueenMoveLegal(char** board, Location* org, Location* des){
+    return (isBishopMoveLegal(board,org,des) || isRookMoveLegal(board,org,des));
+}
+
+boolean isKingThreatened(char** board, Location* org, Location* des, boolean userColor){
 
 }
-boolean isQueenMoveLegal(Location* org, Location* des){
 
+Location* createNewLocation(int x, int y){
+    Location* newLocation = (Location*) malloc(sizeof(Location));
+    return newLocation;
+}
+
+boolean isCoordinatesEmpty(char** board, int x, int y){
+    return ((getPiece(board,createNewLocation(x,y) == '_')));
+}
+
+int addInt(int a, int b) {
+    return a+b;
+}
+int subInt(int a, int b) {
+    return a-b;
+}
+boolean isBishopLegalDirection(char** board, Location* org, Location* des, int (*addOrSubX)(int,int), int (*addOrSubY)(int,int)){
+    int i = 1;
+    while (!isCoordinatesOutOfBounds(addOrSubX(org->x,i), addOrSubY(org->y,i)) && (addOrSubX(org->x,i) < des->x) && (addOrSubY(org->y,i) < des->y)) {//while ib bounds and not in destination row or column
+        if (!isCoordinatesEmpty(board, addOrSubX(org->x, i), addOrSubY(org->y, i))) //if there is another piece in the way
+            return 0;
+        i++;
+    }
+    if ((addOrSubX(org->x,i) == des->x)&&(addOrSubY(org->y,i) == des->y))//if we reached destination piece
+        return 1;
+    else
+        return 0;
 }
 
 boolean movePiece(char** board, Location org, Location des){

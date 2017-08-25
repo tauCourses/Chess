@@ -5,7 +5,9 @@
 #include <stdlib.h>
 #include <rpcndr.h>
 #include "SPArrayList.h"
+#include "math.h"
 #define historySize 3;
+#define EMPTY_PIECE '_';
 
 typedef struct Location{
     int x,y;
