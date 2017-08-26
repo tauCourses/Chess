@@ -1,7 +1,7 @@
 #include "game.h"
 
 typedef struct Game Game;
-Game* createNewGame(int mode, int difficulty, char userColor){
+Game* createNewGame(int mode, int difficulty, bool userColor){
     Game* game = (Game*) calloc(1,sizeof(Game));
     if(game == NULL)
     {
@@ -24,7 +24,8 @@ Game* createNewGame(int mode, int difficulty, char userColor){
     }
     game->difficulty = difficulty;
     game->userColor = userColor;
-
+    game->WKingLoc = newLocation(0,3);
+    game->BKingLoc = newLocation(7,3);
     return game;
 }
 
@@ -71,58 +72,56 @@ char** createNewBoard(){
             }
 
             else {//blank pieces
-                board[i][j] = '_';
+                board[i][j] = EMPTY_PIECE;
             }
         }
     }
     return board;
 }
 
-bool isMoveLegal(char** board, Location* org, Location* des, bool userColor){
-    char orgPiece = getPiece(board,org);
-    printf("isMoveLegal: move of '%c' from (%d,%d) to (%d,%d): ",orgPiece,org->x,org->y,des->x,des->y);
+bool isMoveLegal(Game* game, Location* org, Location* des, bool currentPlayerColor){
     if (isLocationOutOfBounds(org) || isLocationOutOfBounds(des))
         return 0;
-    if (!(isLegalDesPiece(board, orgPiece, des,userColor)))
+    char orgPiece = getPiece(game->board,org);
+    char desPiece = getPiece(game->board,des);
+    printf("isMoveLegal: move of '%c' from (%d,%d) to (%d,%d): ",orgPiece,org->x,org->y,des->x,des->y);
+    if (!(isLegalDesPiece(game->board, orgPiece, desPiece,currentPlayerColor)))
         return 0;
-
     switch(orgPiece) {
         case 'm':
-            if (!isWhitePawnMoveLegal(board, org, des))
+            if (!isWhitePawnMoveLegal(game->board, org, des))
                 return 0;
             break;
         case 'M':
-            if (!isBlackPawnMoveLegal(board, org, des))
+            if (!isBlackPawnMoveLegal(game->board, org, des))
                 return 0;
             break;
         case 'r':
         case 'R':
-            if (!isRookMoveLegal(board, org, des))
+            if (!isRookMoveLegal(game->board, org, des))
                 return 0;
             break;
         case 'n':
         case 'N':
-            if (!isKnightMoveLegal(board, org, des))
+            if (!isKnightMoveLegal(org, des))
                 return 0;
             break;
         case 'b':
         case 'B':
-            if (!isBishopMoveLegal(board, org, des))
+            if (!isBishopMoveLegal(game->board, org, des))
                 return 0;
             break;
         case 'k':
         case 'K':
-            if (!isKingMoveLegal(board, org, des))
+            if (!isKingMoveLegal(game->board, org, des))
                 return 0;
             break;
         case 'q':
         case 'Q':
-            if (!isQueenMoveLegal(board, org, des))
+            if (!isQueenMoveLegal(game->board, org, des))
                 return 0;
             break;
     }
-    if (isKingThreatened(board, org, des, userColor))
-        return 0;
     return 1;
 }
 
@@ -130,43 +129,51 @@ char getPiece(char** board, Location* loc){
     return (*(*(board +loc->x)+loc->y));
 }
 
+void setPiece(char** board, Location* loc, char newPiece){
+    (*(*(board +loc->x)+loc->y)) = newPiece;
+}
+
+
 bool isLocationOutOfBounds(Location* des){
     return ((des->x > 7) || (des->x < 0) || (des->y > 7) || (des->y < 0));
 }
 
 bool isCoordinatesOutOfBounds(int x, int y){
-    return isLocationOutOfBounds(createNewLocation(x,y));
+    return isLocationOutOfBounds(newLocation(x,y));
 }
 
-bool isLegalDesPiece(char** board, char orgPiece, Location* des, bool userColor){
-    char desPiece = getPiece(board,des);
-    if (((getPieceColor(orgPiece) == 0) && (userColor == 1)) || ((getPieceColor(orgPiece) == 1) && (userColor == 0))) //if origion piece does not belong to user
+bool isLegalDesPiece(char** board, char orgPiece, char desPiece, bool currentPlayerColor){
+    if (((getPieceColor(orgPiece) == WHITE) && (currentPlayerColor == BLACK)) || ((getPieceColor(orgPiece) == BLACK) && (currentPlayerColor == WHITE))) //if origion piece does not belong to user
         return 0;
-    if (((getPieceColor(desPiece) == 0) && (userColor == 0)) || ((getPieceColor(desPiece) == 1) && (userColor == 1))) //if destenation piece belongs to user
+    if (((getPieceColor(desPiece) == WHITE) && (currentPlayerColor == WHITE)) || ((getPieceColor(desPiece) == BLACK) && (currentPlayerColor == BLACK))) //if destenation piece belongs to user
         return 0;
-    if (getPieceColor(orgPiece) == '_')//if origin piece is empty
+    if (getPieceColor(orgPiece) == EMPTY_PIECE)//if origin piece is empty
         return 0;
     return 1;
 }
 
 int getPieceColor(char piece){
     if ((piece == 'm')||(piece == 'r')||(piece == 'n')||(piece == 'b')||(piece == 'k')||(piece == 'q'))
-        return 0;
+        return WHITE;
     if ((piece == 'M')||(piece == 'R')||(piece == 'N')||(piece == 'B')||(piece == 'K')||(piece == 'Q'))
-        return 1;
+        return BLACK;
     return EMPTY_PIECE;
+}
+
+int getPieceColorInCoordinates(Game* game, int x, int y){
+    return getPieceColor(getPiece(game->board, newLocation(x,y)));
 }
 
 bool isWhitePawnMoveLegal(char** board, Location* org, Location* des) {
     char desPiece = getPiece(board,des);
-    if ((desPiece == '_') && (org->y == des->y)) { //move forward to an empty piece
+    if ((desPiece == EMPTY_PIECE) && (org->y == des->y)) { //move forward to an empty piece
         if ((org->x == 1) && (des->x == 3)) { //first move of pawn can be a double move
             return 1;
         }
         if (org->x+1 == des->x)
             return 1;
     }
-    if ((desPiece != '_')&&((org->x+1 == des->x)&&((org->y+1 == des->y)||(org->y-1 == des->y))))//eating move, piece color was checked in isLegalDesPiece
+    if ((desPiece != EMPTY_PIECE)&&((org->x+1 == des->x)&&((org->y+1 == des->y)||(org->y-1 == des->y))))//eating move, piece color was checked in isLegalDesPiece
         return 1;
     return 0;
 
@@ -174,14 +181,14 @@ bool isWhitePawnMoveLegal(char** board, Location* org, Location* des) {
 
 bool isBlackPawnMoveLegal(char** board, Location* org, Location* des){
     char desPiece = getPiece(board,des);
-    if (desPiece == '_' && org->y == des->y) { //move forward to an empty piece
+    if (desPiece == EMPTY_PIECE && org->y == des->y) { //move forward to an empty piece
         if ((org->x == 6) && (des->x == 5)) { //first move of pawn can be a double move
             return 1;
         }
         if (org->x-1 == des->x)
             return 1;
     }
-    if ((desPiece != '_')&&(org->x-1 == des->x)&&((org->y+1 == des->y)||(org->y-1 == des->y)))//eating move, color wise legal has been checked already
+    if ((desPiece != EMPTY_PIECE)&&(org->x-1 == des->x)&&((org->y+1 == des->y)||(org->y-1 == des->y)))//eating move, color wise legal has been checked already
         return 1;
     return 0;
 
@@ -204,7 +211,7 @@ bool isRookMoveLegal(char** board, Location* org, Location* des){
     return 0;
 
 }
-bool isKnightMoveLegal(char** board, Location* org, Location* des){
+bool isKnightMoveLegal(Location* org, Location* des){
     if ((org->x + 2 == des->x) && (org->y + 1 == des->y))
         return 1;
     if ((org->x + 1 == des->x) && (org->y + 2 == des->y))
@@ -263,11 +270,8 @@ bool isQueenMoveLegal(char** board, Location* org, Location* des){
     return (isBishopMoveLegal(board,org,des) || isRookMoveLegal(board,org,des));
 }
 
-bool isKingThreatened(char** board, Location* org, Location* des, bool userColor){
-	return 0;
-}
 
-Location* createNewLocation(int x, int y){
+Location* newLocation(int x, int y){
     Location* newLocation = (Location*) malloc(sizeof(Location));
     newLocation->x = x;
     newLocation->y = y;
@@ -275,7 +279,7 @@ Location* createNewLocation(int x, int y){
 }
 
 bool isCoordinatesEmpty(char** board, int x, int y){
-    return ((getPiece(board,createNewLocation(x,y)) == '_'));
+    return ((getPiece(board,newLocation(x,y)) == EMPTY_PIECE));
 }
 
 int addInt(int a, int b) {
@@ -285,7 +289,39 @@ int subInt(int a, int b) {
     return a-b;
 }
 
+bool isKingThreatened(Game* game, bool currentPlayerColor){
+    Location* kingLoc = currentPlayerColor ? game->BKingLoc : game->WKingLoc;
+    char currentPieceColor;
+    for (int i=0; i<8; i++){
+        for (int j=0; j<8; j++){
+            currentPieceColor = getPieceColorInCoordinates(game,i,j);
+            if ((currentPieceColor != EMPTY_PIECE)&&(currentPieceColor != currentPlayerColor)){ //current piece is enemy's piece
+                if (isMoveLegal(game,newLocation(i,j),kingLoc,currentPieceColor))
+                    return 1;
+            }
+        }
+    }
+    return 0;
+}
 
-bool movePiece(char** board, Location org, Location des){
-	return 0;
+bool movePiece(Game* game, Location* org, Location* des, bool currentPlayerColor){
+    char orgPiece = getPiece(game->board,org);
+    char desPiece = getPiece(game->board,des);
+    if (isMoveLegal(game, org, des, currentPlayerColor)){
+        setPiece(game->board, org, EMPTY_PIECE);
+        setPiece(game->board, des, orgPiece);
+        if (isKingThreatened(game, currentPlayerColor)){
+            setPiece(game->board, org, orgPiece);
+            setPiece(game->board, des, desPiece);
+            return 0;
+        }
+        //make move and update king's location if needed
+        if (orgPiece == 'k')
+            game->WKingLoc = des;
+        if (orgPiece == 'K')
+            game->BKingLoc = des;
+        return 1;
+    }
+    else
+        return 0;
 }
