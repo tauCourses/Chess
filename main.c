@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include "game.h"
+#include "gameTests.h"
 
 int main() {
-    printf("Hello, World!\n");
+    runLegalMovesTests();
     return 0;
 }
