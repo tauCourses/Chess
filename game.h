@@ -3,42 +3,28 @@
 #define CHESS_GAME_H
 #include <stdbool.h>
 #include <stdlib.h>
-//#include <rpcndr.h>
 #include "SPArrayList.h"
 #include "math.h"
+#include "Infrastructure.h"
 #define historySize 3
 #define EMPTY_PIECE '_'
 #define WHITE 0
 #define BLACK 1
 
-typedef struct Location{
-    int x,y;
-} Location;
-
-//typedef struct Piece{
-//    char type;
-//    bool color;
-//    Location location;
-//} Piece;
-
-
-typedef struct Game{
-    char** board;
-    int mode;
-    int difficulty;
-    bool userColor;
-    SPArrayList *history;
-    Location* WKingLoc;
-    Location* BKingLoc;
-} Game;
 
 Game* createNewGame(int mode, int difficulty, bool userColor);
 
 char** createNewBoard();
 
+void destroyBoard(char** board);
+
+void destroyGame(Game* game);
+
 bool isMoveLegal(Game* game, Location* org, Location* des, bool currentPlayerColor);
 
 char getPiece(char** board, Location* loc);
+
+char getPieceInCoordinates(char** board, int x, int y);
 
 bool isLocationOutOfBounds(Location* des);
 
@@ -65,6 +51,8 @@ bool isQueenMoveLegal(char** board, Location* org, Location* des);
 
 bool isKingThreatened(Game* game, bool currentPlayerColor);
 
+bool wouldKingBeThreatened(Game* game, Location* org, Location* des, bool currentPlayerColor);
+
 Location* newLocation(int x, int y);
 
 bool isCoordinatesEmpty(char** board, int x, int y);
@@ -77,6 +65,10 @@ bool isBishopLegalDirection(char** board, Location* org, Location* des, int (*ad
 
 bool movePiece(Game* game, Location* org, Location* des, bool currentPlayerColor);
 
-int getPieceColorInCoordinates(Game* game, int x, int y);
+int getPieceColorInCoordinates(char** board, int x, int y);
+
+bool isCheckmateOrTie(Game* game, bool currentPlayerColor);
+
+SPArrayList* getMoves(char** board,char currentPiece,Location* currentLoc,bool currentUserColor);
 
 #endif //CHESS_GAME_H

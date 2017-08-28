@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "Infrastructure.h"
 
 
 /**
@@ -40,11 +41,7 @@
  * spArrayListIsFull       - Returns if the array list reached its max capacity.
  * spArrayListIsEmpty      - Returns true if the array list contains no elements.
  */
-typedef struct sp_array_list_t {
-	int* elements;
-	int actualSize;
-	int maxSize;
-} SPArrayList;
+
 
 /**
  * A type used for errors
@@ -103,10 +100,10 @@ SP_ARRAY_LIST_MESSAGE spArrayListClear(SPArrayList* src);
  * SP_ARRAY_LIST_INVALID_ARGUMENT if src == NULL 
  * SP_ARRAY_LIST_SUCCESS - otherwise
  */
-SP_ARRAY_LIST_MESSAGE spArrayListPush(SPArrayList* src, int elem);
+SP_ARRAY_LIST_MESSAGE spArrayListPush(SPArrayList* src, Location elem);
 
 /**
- * Use the arrayList as a stack. After invoking thie function,
+ * Use the arrayList as a stack. After invoking this function,
  * the first element will return and remove, and all other elements will push left.
  * if array is empty it return -1
  * @param src - the source array list
@@ -114,7 +111,7 @@ SP_ARRAY_LIST_MESSAGE spArrayListPush(SPArrayList* src, int elem);
  * -1 if src == NULL or src is empty 
  * element at index 0
  */
-int spArrayListPop(SPArrayList* src);
+Location spArrayListPop(SPArrayList* src);
 
 /**
  * Inserts element at a specified index. The elements residing at and after the

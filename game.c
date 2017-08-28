@@ -2,7 +2,7 @@
 
 typedef struct Game Game;
 Game* createNewGame(int mode, int difficulty, bool userColor){
-    Game* game = (Game*) calloc(1,sizeof(Game));
+    Game* game = (Game*) malloc(sizeof(Game));
     if(game == NULL)
     {
         printf("ERROR: Failed to allocate memory for game.");
@@ -79,6 +79,22 @@ char** createNewBoard(){
     return board;
 }
 
+void destroyBoard(char** board){
+    free(board[0]);
+    free(board);
+}
+
+void destroyGame(Game* game){
+    if (game == NULL)
+        return;
+    if (game->board != NULL)
+        destroyBoard(game->board);
+    if (game->history != NULL)
+        spArrayListDestroy(game->history);
+    free(game);
+}
+
+
 bool isMoveLegal(Game* game, Location* org, Location* des, bool currentPlayerColor){
     if (isLocationOutOfBounds(org) || isLocationOutOfBounds(des))
         return 0;
@@ -133,13 +149,23 @@ void setPiece(char** board, Location* loc, char newPiece){
     (*(*(board +loc->x)+loc->y)) = newPiece;
 }
 
+char getPieceInCoordinates(char** board, int x, int y){
+    Location* newLoc = newLocation(x,y);
+    char piece = (getPiece(board,newLoc));
+    free(newLoc);
+    return piece;
+}
+
 
 bool isLocationOutOfBounds(Location* des){
     return ((des->x > 7) || (des->x < 0) || (des->y > 7) || (des->y < 0));
 }
 
 bool isCoordinatesOutOfBounds(int x, int y){
-    return isLocationOutOfBounds(newLocation(x,y));
+    Location* newLoc = newLocation(x,y);
+    char piece =  isLocationOutOfBounds(newLoc);
+    free(newLoc);
+    return piece;
 }
 
 bool isLegalDesPiece(char** board, char orgPiece, char desPiece, bool currentPlayerColor){
@@ -160,8 +186,11 @@ int getPieceColor(char piece){
     return EMPTY_PIECE;
 }
 
-int getPieceColorInCoordinates(Game* game, int x, int y){
-    return getPieceColor(getPiece(game->board, newLocation(x,y)));
+int getPieceColorInCoordinates(char** board, int x, int y){
+    Location* newLoc = newLocation(x,y);
+    char piece = getPieceColor(getPiece(board, newLoc));
+    free(newLoc);
+    return piece;
 }
 
 bool isWhitePawnMoveLegal(char** board, Location* org, Location* des) {
@@ -272,14 +301,17 @@ bool isQueenMoveLegal(char** board, Location* org, Location* des){
 
 
 Location* newLocation(int x, int y){
-    Location* newLocation = (Location*) malloc(sizeof(Location));
+    Location* newLocation = (Location*) malloc(2*sizeof(int));
     newLocation->x = x;
     newLocation->y = y;
     return newLocation;
 }
 
 bool isCoordinatesEmpty(char** board, int x, int y){
-    return ((getPiece(board,newLocation(x,y)) == EMPTY_PIECE));
+    Location* newLoc = newLocation(x,y);
+    bool ans = ((getPiece(board,newLoc) == EMPTY_PIECE));
+    free(newLoc);
+    return ans;
 }
 
 int addInt(int a, int b) {
@@ -292,29 +324,41 @@ int subInt(int a, int b) {
 bool isKingThreatened(Game* game, bool currentPlayerColor){
     Location* kingLoc = currentPlayerColor ? game->BKingLoc : game->WKingLoc;
     char currentPieceColor;
+    Location* currentLoc;
     for (int i=0; i<8; i++){
         for (int j=0; j<8; j++){
-            currentPieceColor = getPieceColorInCoordinates(game,i,j);
+            currentPieceColor = getPieceColorInCoordinates(game->board,i,j);
+            currentLoc = newLocation(i,j);
             if ((currentPieceColor != EMPTY_PIECE)&&(currentPieceColor != currentPlayerColor)){ //current piece is enemy's piece
-                if (isMoveLegal(game,newLocation(i,j),kingLoc,currentPieceColor))
+                if (isMoveLegal(game,currentLoc,kingLoc,currentPieceColor))
                     return 1;
             }
+            free(currentLoc);
         }
     }
+    return 0;
+}
+
+bool wouldKingBeThreatened(Game* game, Location* org, Location* des, bool currentPlayerColor){
+    char orgPiece = getPiece(game->board,org);
+    char desPiece = getPiece(game->board,des);
+
+    setPiece(game->board, org, EMPTY_PIECE);
+    setPiece(game->board, des, orgPiece);
+    if (isKingThreatened(game, currentPlayerColor)){
+        setPiece(game->board, org, orgPiece);
+        setPiece(game->board, des, desPiece);
+        return 1;
+    }
+    setPiece(game->board, org, orgPiece);
+    setPiece(game->board, des, desPiece);
     return 0;
 }
 
 bool movePiece(Game* game, Location* org, Location* des, bool currentPlayerColor){
     char orgPiece = getPiece(game->board,org);
     char desPiece = getPiece(game->board,des);
-    if (isMoveLegal(game, org, des, currentPlayerColor)){
-        setPiece(game->board, org, EMPTY_PIECE);
-        setPiece(game->board, des, orgPiece);
-        if (isKingThreatened(game, currentPlayerColor)){
-            setPiece(game->board, org, orgPiece);
-            setPiece(game->board, des, desPiece);
-            return 0;
-        }
+    if (isMoveLegal(game, org, des, currentPlayerColor)&& !wouldKingBeThreatened(game,org,des,currentPlayerColor)){
         //make move and update king's location if needed
         if (orgPiece == 'k')
             game->WKingLoc = des;
@@ -324,4 +368,37 @@ bool movePiece(Game* game, Location* org, Location* des, bool currentPlayerColor
     }
     else
         return 0;
+}
+
+bool isCheckmateOrTie(Game* game, bool currentPlayerColor){
+    char currentPiece;
+    Location* currentLoc;
+    Location optionalLoc;
+    SPArrayList* optionalMoves;
+    bool isCheckmate = 1;
+    bool isTie = 1;
+
+    for (int i=0; i<8; i++){
+        for (int j=0; j<8; j++){
+            currentLoc = newLocation(i,j);
+            currentPiece = getPiece(game->board,currentLoc);
+            if ((currentPiece != EMPTY_PIECE)&&(getPieceColor(currentPiece) != currentPlayerColor)){ //current piece is enemy's piece
+
+                optionalMoves = getMoves(game->board,currentPiece,currentLoc,getPieceColor(currentPiece));
+                while (!spArrayListIsEmpty(optionalMoves)){ //for all optional moves for current piece
+                    isTie = 0;
+                    optionalLoc = spArrayListPop(optionalMoves);
+                    if (!wouldKingBeThreatened(game,currentLoc,&optionalLoc,getPieceColor(currentPiece))) //if there exists a move that does not threats king
+                        isCheckmate = 0;
+                }
+                spArrayListDestroy(optionalMoves);
+            }
+            free(currentLoc);
+        }
+    }
+    return (isCheckmate|isTie);
+}
+
+SPArrayList* getMoves(char** board,char currentPiece,Location* currentLoc,bool currentUserColor){
+
 }

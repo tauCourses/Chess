@@ -2,6 +2,7 @@
 
 int runLegalMovesTests(){
     Game* game = createNewGame(1,1,0);
+    printBoard(game->board);
     bool userColor = WHITE;
     bool x;
     Location* des;
@@ -20,14 +21,20 @@ int runLegalMovesTests(){
     for (int i=0; i<8; i++){
         for (int j=0; j<8; j++){
             des = newLocation(i,j);
-            x = movePiece(game,org,des,userColor);;
+            x = movePiece(game,org,des,userColor);
             if (x)
                 printf("*** true **** moved from from (%d,%d) to (%d,%d):\n",org->x,org->y,i,j);
             else
                 printf("false\n");
         }
     }
+    printBoard(game->board);
+    org = newLocation(0,0);
+    des = newLocation(4,0);
+    movePiece(game,org,des,userColor);
+    printBoard(game->board);
 
+    printf("%c",1+'A');
 /*  //checks legal moves for org
     for (int i=0; i<8; i++){
         for (int j=0; j<8; j++){
