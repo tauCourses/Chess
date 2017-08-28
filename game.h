@@ -69,6 +69,8 @@ int getPieceColorInCoordinates(char** board, int x, int y);
 
 bool isCheckmateOrTie(Game* game, bool currentPlayerColor);
 
-SPArrayList* getMoves(char** board,char currentPiece,Location* currentLoc,bool currentUserColor);
+SPArrayList* getMoves(Game* game,Location* currentLoc,bool currentUserColor);
+
+bool enemysColor(bool currentPlayerColor);
 
 #endif //CHESS_GAME_H

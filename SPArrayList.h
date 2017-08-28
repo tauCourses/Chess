@@ -100,7 +100,7 @@ SP_ARRAY_LIST_MESSAGE spArrayListClear(SPArrayList* src);
  * SP_ARRAY_LIST_INVALID_ARGUMENT if src == NULL 
  * SP_ARRAY_LIST_SUCCESS - otherwise
  */
-SP_ARRAY_LIST_MESSAGE spArrayListPush(SPArrayList* src, Location elem);
+SP_ARRAY_LIST_MESSAGE spArrayListPush(SPArrayList* src, Location* elem);
 
 /**
  * Use the arrayList as a stack. After invoking this function,
@@ -111,7 +111,7 @@ SP_ARRAY_LIST_MESSAGE spArrayListPush(SPArrayList* src, Location elem);
  * -1 if src == NULL or src is empty 
  * element at index 0
  */
-Location spArrayListPop(SPArrayList* src);
+Location* spArrayListPop(SPArrayList* src);
 
 /**
  * Inserts element at a specified index. The elements residing at and after the
@@ -127,7 +127,7 @@ Location spArrayListPop(SPArrayList* src);
  * SP_ARRAY_LIST_FULL - if the source array list reached its maximum capacity
  * SP_ARRAY_LIST_SUCCESS - otherwise
  */
-SP_ARRAY_LIST_MESSAGE spArrayListAddAt(SPArrayList* src, int elem, int index);
+SP_ARRAY_LIST_MESSAGE spArrayListAddAt(SPArrayList* src, Location* elem, int index);
 
 /**
  * Inserts element at a the beginning of the source element. The elements
@@ -141,7 +141,7 @@ SP_ARRAY_LIST_MESSAGE spArrayListAddAt(SPArrayList* src, int elem, int index);
  * SP_ARRAY_LIST_FULL - if the source array list reached its maximum capacity
  * SP_ARRAY_LIST_SUCCESS - otherwise
  */
- SP_ARRAY_LIST_MESSAGE spArrayListAddFirst(SPArrayList* src, int elem);
+SP_ARRAY_LIST_MESSAGE spArrayListAddFirst(SPArrayList* src, Location* elem);
 
 /**
  * Inserts element at a the end of the source element. If the array list
@@ -154,7 +154,7 @@ SP_ARRAY_LIST_MESSAGE spArrayListAddAt(SPArrayList* src, int elem, int index);
  * SP_ARRAY_LIST_FULL - if the source array list reached its maximum capacity
  * SP_ARRAY_LIST_SUCCESS - otherwise
  */
-SP_ARRAY_LIST_MESSAGE spArrayListAddLast(SPArrayList* src, int elem);
+SP_ARRAY_LIST_MESSAGE spArrayListAddLast(SPArrayList* src, Location* elem);
 
 /**
  * Removes an element from a specified index. The elements residing after the
@@ -209,7 +209,7 @@ SP_ARRAY_LIST_MESSAGE spArrayListRemoveLast(SPArrayList* src);
  * Undefined value if either src == NULL or index out of bound.
  * Otherwise, the element at the specified index is returned.
  */
-int spArrayListGetAt(SPArrayList* src, int index);
+Location* spArrayListGetAt(SPArrayList* src, int index);
 
 /**
  * Returns the element at the beginning of the list. The function is called
@@ -220,7 +220,7 @@ int spArrayListGetAt(SPArrayList* src, int index);
  * Undefined value if either src == NULL or the list is empty
  * Otherwise, the element at the beginning of the list is returned.
  */
-int spArrayListGetFirst(SPArrayList* src);
+Location* spArrayListGetFirst(SPArrayList* src);
 
 /**
  * Returns the element at the end of the list. The function is called
@@ -231,7 +231,7 @@ int spArrayListGetFirst(SPArrayList* src);
  * Undefined value if either src == NULL or the list is empty
  * Otherwise, the element at the end of the list is returned.
  */
-int spArrayListGetLast(SPArrayList* src);
+Location* spArrayListGetLast(SPArrayList* src);
 
 /**
  * Returns the maximum capacity of the list. The function is called

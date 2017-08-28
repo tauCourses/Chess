@@ -141,7 +141,7 @@ Location* spArrayListGetAt(SPArrayList* src, int index)
 		return NULL;
 	if(index < 0 || index >= src->actualSize)
 		return NULL;
-	return src->elements[index];
+	return &(src->elements[index]);
 }
 
 Location* spArrayListGetFirst(SPArrayList* src)

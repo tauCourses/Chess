@@ -72,3 +72,83 @@ void removePawns(Game* game){
         }
     }
 }
+
+void runMoveTests() {
+    Game *game = createNewGame(1, 1, 0);
+    printBoard(game->board);
+    bool userColor = WHITE;
+    bool x;
+
+    removePawns(game);
+
+    Location *org = newLocation(0, 2);
+    Location *des = newLocation(4,6);
+
+    printBoard(game->board);
+    movePiece(game,org,des,userColor);
+    printBoard(game->board);
+    printf("is king threatend? - %d\n",isKingThreatened(game,BLACK));
+    org = newLocation(4,6);
+    des = newLocation(7,3);
+    movePiece(game,org,des,userColor);
+    printBoard(game->board);
+}
+
+void runArrayListTests(){
+    SPArrayList* list = spArrayListCreate(4);
+    Location* loc1 = newLocation(1,1);
+    Location* loc2 = newLocation(2,2);
+    Location* loc3 = newLocation(3,3);
+    Location* loc4 = newLocation(4,4);
+    Location* loc5 = newLocation(5,5);
+
+    spArrayListPrint(list);
+    spArrayListPush(list, loc1);
+    //spArrayListAddLast(list, loc1);
+    spArrayListPrint(list);
+    //spArrayListAddLast(list, loc2);
+    spArrayListPush(list, loc2);
+    spArrayListPrint(list);
+    spArrayListPop(list);
+    spArrayListPrint(list);
+    printf("Is list empty? %d\n", spArrayListIsEmpty(list));
+    spArrayListPop(list);
+    printf("Is list empty? %d\n", spArrayListIsEmpty(list));
+}
+
+void runGamePlayTests() {
+    Game *game = createNewGame(1, 1, 0);
+    printBoard(game->board);
+    bool userColor = WHITE;
+    bool x;
+
+    removePawns(game);
+
+    Location *org = newLocation(0, 2);
+    Location *des = newLocation(4,6);
+
+    printBoard(game->board);
+   // movePiece(game,org,des,userColor);
+   // printBoard(game->board);
+    //printf("is Check for black? - %d\n",isKingThreatened(game,BLACK));
+   // printf("is checkOrTie for black? - %d\n",isCheckmateOrTie(game,BLACK));
+    org = newLocation(7,7);
+    des = newLocation(6,7);
+    movePiece(game,org,des,enemysColor(userColor));
+    printBoard(game->board);
+
+    org = newLocation(6,7);
+    des = newLocation(6,3);
+    movePiece(game,org,des,enemysColor(userColor));
+    printBoard(game->board);
+    printf("is Check for black? - %d\n",isKingThreatened(game,BLACK));
+    printf("is checkOrTie for black? - %d\n",isCheckmateOrTie(game,BLACK));
+
+    org = newLocation(0,2);
+    des = newLocation(4,6);
+    movePiece(game,org,des,userColor);
+    printBoard(game->board);
+    printf("is Check for black? - %d\n",isKingThreatened(game,BLACK));
+    printf("is checkOrTie for black? - %d\n",isCheckmateOrTie(game,BLACK));
+
+}

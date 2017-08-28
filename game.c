@@ -100,7 +100,7 @@ bool isMoveLegal(Game* game, Location* org, Location* des, bool currentPlayerCol
         return 0;
     char orgPiece = getPiece(game->board,org);
     char desPiece = getPiece(game->board,des);
-    printf("isMoveLegal: move of '%c' from (%d,%d) to (%d,%d): ",orgPiece,org->x,org->y,des->x,des->y);
+    //printf("isMoveLegal: move of '%c' from (%d,%d) to (%d,%d):\n",orgPiece,org->x,org->y,des->x,des->y);
     if (!(isLegalDesPiece(game->board, orgPiece, desPiece,currentPlayerColor)))
         return 0;
     switch(orgPiece) {
@@ -329,10 +329,8 @@ bool isKingThreatened(Game* game, bool currentPlayerColor){
         for (int j=0; j<8; j++){
             currentPieceColor = getPieceColorInCoordinates(game->board,i,j);
             currentLoc = newLocation(i,j);
-            if ((currentPieceColor != EMPTY_PIECE)&&(currentPieceColor != currentPlayerColor)){ //current piece is enemy's piece
-                if (isMoveLegal(game,currentLoc,kingLoc,currentPieceColor))
+            if ((currentPieceColor == enemysColor(currentPlayerColor)) && (isMoveLegal(game,currentLoc,kingLoc,currentPieceColor))) //current piece is enemy's piece
                     return 1;
-            }
             free(currentLoc);
         }
     }
@@ -360,20 +358,27 @@ bool movePiece(Game* game, Location* org, Location* des, bool currentPlayerColor
     char desPiece = getPiece(game->board,des);
     if (isMoveLegal(game, org, des, currentPlayerColor)&& !wouldKingBeThreatened(game,org,des,currentPlayerColor)){
         //make move and update king's location if needed
+        printf("\nmovePiece: moving now '%c' from (%d,%d) to (%d,%d):\n",orgPiece,org->x,org->y,des->x,des->y);
+        setPiece(game->board, org, EMPTY_PIECE);
+        setPiece(game->board, des, orgPiece);
         if (orgPiece == 'k')
             game->WKingLoc = des;
         if (orgPiece == 'K')
             game->BKingLoc = des;
         return 1;
     }
-    else
+    else{
+        printf("\nmovePiece: NOT moving '%c' from (%d,%d) to (%d,%d) for user color:%d\n",orgPiece,org->x,org->y,des->x,des->y,currentPlayerColor);
+        printf("movePiece: isMoveLegal:%d\n",isMoveLegal(game, org, des, currentPlayerColor));
         return 0;
+    }
+
 }
 
 bool isCheckmateOrTie(Game* game, bool currentPlayerColor){
     char currentPiece;
     Location* currentLoc;
-    Location optionalLoc;
+    Location* optionalLoc;
     SPArrayList* optionalMoves;
     bool isCheckmate = 1;
     bool isTie = 1;
@@ -383,12 +388,11 @@ bool isCheckmateOrTie(Game* game, bool currentPlayerColor){
             currentLoc = newLocation(i,j);
             currentPiece = getPiece(game->board,currentLoc);
             if ((currentPiece != EMPTY_PIECE)&&(getPieceColor(currentPiece) != currentPlayerColor)){ //current piece is enemy's piece
-
-                optionalMoves = getMoves(game->board,currentPiece,currentLoc,getPieceColor(currentPiece));
+                optionalMoves = getMoves(game,currentLoc,getPieceColor(currentPiece));
                 while (!spArrayListIsEmpty(optionalMoves)){ //for all optional moves for current piece
                     isTie = 0;
                     optionalLoc = spArrayListPop(optionalMoves);
-                    if (!wouldKingBeThreatened(game,currentLoc,&optionalLoc,getPieceColor(currentPiece))) //if there exists a move that does not threats king
+                    if (!wouldKingBeThreatened(game,currentLoc,optionalLoc,getPieceColor(currentPiece))) //if there exists a move that does not threats king
                         isCheckmate = 0;
                 }
                 spArrayListDestroy(optionalMoves);
@@ -399,6 +403,20 @@ bool isCheckmateOrTie(Game* game, bool currentPlayerColor){
     return (isCheckmate|isTie);
 }
 
-SPArrayList* getMoves(char** board,char currentPiece,Location* currentLoc,bool currentUserColor){
+SPArrayList* getMoves(Game* game,Location* currentLoc,bool currentUserColor){
+    SPArrayList* possibleMoves = spArrayListCreate(63); //maximum number of moves for single piece is 63
+    Location* des;
 
+    for (int i=0; i<8; i++){
+        for (int j=0; j<8; j++){
+            des = newLocation(i,j);
+            if (isMoveLegal(game,currentLoc, des, currentUserColor))
+                spArrayListPush(possibleMoves,des);
+        }
+    }
+    return possibleMoves;
+}
+
+bool enemysColor(bool currentPlayerColor){
+    return (currentPlayerColor ? 0 : 1);
 }

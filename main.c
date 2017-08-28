@@ -3,6 +3,9 @@
 #include "gameTests.h"
 
 int main() {
-    runLegalMovesTests();
+    //runLegalMovesTests();
+    //runMoveTests();
+    //runArrayListTests();
+    runGamePlayTests();
     return 0;
 }
