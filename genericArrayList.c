@@ -32,6 +32,8 @@ genericArrayList* genericArrayListCopy(genericArrayList* src)
 
 	arrayList->actualSize = src->actualSize;
 	arrayList->maxSize = src->maxSize;
+	arrayList->elementSize = src->elementSize;
+	arrayList->destroyElement = src->destroyElement;
 	arrayList->elements = (void**) malloc(arrayList->maxSize * src->elementSize);
 	if(arrayList->elements == NULL)
 	{
@@ -46,6 +48,9 @@ void genericArrayListDestroy(genericArrayList* src)
 {
 	if(src == NULL)
 		return;
+	while (!genericArrayListIsEmpty(src)){
+		src->destroyElement(genericArrayListPop(src));
+	}
 
 	free(src->elements);
 	free(src);
@@ -64,8 +69,11 @@ SP_ARRAY_LIST_MESSAGE genericArrayListPush(genericArrayList* src, void* elem)
 {
     if(src == NULL)
 		return SP_ARRAY_LIST_INVALID_ARGUMENT;
-	if(src->actualSize == src->maxSize)
-        genericArrayListRemoveLast(src);
+	if(src->actualSize == src->maxSize){
+		src->destroyElement(genericArrayListGetLast(src));
+		genericArrayListRemoveLast(src);
+	}
+
 	return genericArrayListAddFirst(src, elem);
 }
 
@@ -76,12 +84,7 @@ void* genericArrayListPop(genericArrayList* src)
 	if(genericArrayListIsEmpty(src))
 		return NULL;
 
-	printf("\nim in pop %d\n",((State*)genericArrayListGetFirst(src))->currentPlayer);
-    void* val = malloc(src->elementSize);
-    memcpy(val, genericArrayListGetFirst(src), src->elementSize);
-
-
-
+    void* val = genericArrayListGetFirst(src);
 	genericArrayListRemoveFirst(src);
 	
 	return val;
@@ -126,10 +129,6 @@ SP_ARRAY_LIST_MESSAGE genericArrayListRemoveAt(genericArrayList* src, int index)
 		return SP_ARRAY_LIST_EMPTY;
 	if(index < 0 || index >= src->actualSize)
 		return SP_ARRAY_LIST_INVALID_ARGUMENT;
-
-    printf("im about to destroy element!\n");
-    src->destroyElement(src->elements[index]);
-    printf("it's done element is dead now.!\n");
 
 	for(int i=index+1; i<src->actualSize;i++)
 		src->elements[i-1] = src->elements[i];

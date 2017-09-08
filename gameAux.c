@@ -38,19 +38,11 @@ State* duplicateState(State* state){
     return newCopy;
 }
 
-void destroyState(void* state){
-    printf("1");
-    destroyBoard(((State*)state)->board);
-    printf("2");
-
-    printf("%d", (((State*)state)->BKingLoc));
-
-    destroyLocation(((State*)state)->BKingLoc);
-    printf("3");
-    destroyLocation(((State*)state)->WKingLoc);
-    printf("4");
-    free(((State*)state));
-    printf("5");
+void destroyState(void* state) {
+    destroyBoard(((State *) state)->board);
+    destroyLocation(((State *) state)->BKingLoc);
+    destroyLocation(((State *) state)->WKingLoc);
+    free(((State *) state));
 }
 
 char** createNewBoard(){

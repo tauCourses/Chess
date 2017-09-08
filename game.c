@@ -306,6 +306,7 @@ bool undoMove(Game* game) {
         printf("Empty history, move cannot be undone\n");
         return 0;
     }
+    destroyState(game->state);
     game->state = genericArrayListPop(game->historyStates);
     return 1;
 }
