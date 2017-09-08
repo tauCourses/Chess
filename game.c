@@ -9,10 +9,10 @@ Game* createNewGame(int mode, int difficulty, bool userColor){
         return NULL;
     }
 
-    game->board = createNewBoard();
+    game->state = createNewState();
     if (mode==1){
-        game->history = spArrayListCreate(historySize);
-        if(game->history == NULL)
+        game->historyStates = genericArrayListCreate(historySize,sizeof(State*),&destroyState);
+        if(game->historyStates == NULL)
         {
             free(game);
             return NULL;
@@ -24,73 +24,17 @@ Game* createNewGame(int mode, int difficulty, bool userColor){
     }
     game->difficulty = difficulty;
     game->userColor = userColor;
-    game->WKingLoc = newLocation(0,3);
-    game->BKingLoc = newLocation(7,3);
     return game;
 }
 
-char** createNewBoard(){
-    char** board = (char **)malloc(sizeof(char *) * 8);
-    board[0] = (char *)malloc(sizeof(char) * 8 * 8);
-    for(int i = 0; i < 8; i++)
-        board[i] = (*board + 8 * i);
-
-    for (int i=0; i<8; i++){
-        for (int j=0; j<8; j++){
-            if ((i < 2) | (i > 5)){ //non-empty pieces
-                //white pieces
-                if (i == 0){
-                    if ((j==0) | (j==7))
-                        board[i][j] = 'r';
-                    if ((j==1) | (j==6))
-                        board[i][j] = 'n';
-                    if ((j==2) | (j==5))
-                        board[i][j] = 'b';
-                    if (j==3)
-                        board[i][j] = 'k';
-                    if (j==4)
-                        board[i][j] = 'q';
-                }
-                if (i == 1)
-                    board[i][j] = 'm';
-
-                //black pieces
-                if (i == 7){
-                    if ((j==0) | (j==7))
-                        board[i][j] = 'R';
-                    if ((j==1) | (j==6))
-                        board[i][j] = 'N';
-                    if ((j==2) | (j==5))
-                        board[i][j] = 'B';
-                    if (j==3)
-                        board[i][j] = 'K';
-                    if (j==4)
-                        board[i][j] = 'Q';
-                }
-                if (i == 6)
-                    board[i][j] = 'M';
-            }
-
-            else {//blank pieces
-                board[i][j] = EMPTY_PIECE;
-            }
-        }
-    }
-    return board;
-}
-
-void destroyBoard(char** board){
-    free(board[0]);
-    free(board);
-}
 
 void destroyGame(Game* game){
     if (game == NULL)
         return;
-    if (game->board != NULL)
-        destroyBoard(game->board);
-    if (game->history != NULL)
-        spArrayListDestroy(game->history);
+    if (game->state != NULL)
+        destroyState(game->state);
+    if (game->historyStates != NULL)
+        genericArrayListDestroy(game->historyStates);
     free(game);
 }
 
@@ -98,23 +42,23 @@ void destroyGame(Game* game){
 bool isMoveLegal(Game* game, Location* org, Location* des, bool currentPlayerColor){
     if (isLocationOutOfBounds(org) || isLocationOutOfBounds(des))
         return 0;
-    char orgPiece = getPiece(game->board,org);
-    char desPiece = getPiece(game->board,des);
+    char orgPiece = getPiece(game->state->board,org);
+    char desPiece = getPiece(game->state->board,des);
     //printf("isMoveLegal: move of '%c' from (%d,%d) to (%d,%d):\n",orgPiece,org->x,org->y,des->x,des->y);
-    if (!(isLegalDesPiece(game->board, orgPiece, desPiece,currentPlayerColor)))
+    if (!(isLegalDesPiece(game->state->board, orgPiece, desPiece,currentPlayerColor)))
         return 0;
     switch(orgPiece) {
         case 'm':
-            if (!isWhitePawnMoveLegal(game->board, org, des))
+            if (!isWhitePawnMoveLegal(game->state->board, org, des))
                 return 0;
             break;
         case 'M':
-            if (!isBlackPawnMoveLegal(game->board, org, des))
+            if (!isBlackPawnMoveLegal(game->state->board, org, des))
                 return 0;
             break;
         case 'r':
         case 'R':
-            if (!isRookMoveLegal(game->board, org, des))
+            if (!isRookMoveLegal(game->state->board, org, des))
                 return 0;
             break;
         case 'n':
@@ -124,49 +68,23 @@ bool isMoveLegal(Game* game, Location* org, Location* des, bool currentPlayerCol
             break;
         case 'b':
         case 'B':
-            if (!isBishopMoveLegal(game->board, org, des))
+            if (!isBishopMoveLegal(game->state->board, org, des))
                 return 0;
             break;
         case 'k':
         case 'K':
-            if (!isKingMoveLegal(game->board, org, des))
+            if (!isKingMoveLegal(game->state->board, org, des))
                 return 0;
             break;
         case 'q':
         case 'Q':
-            if (!isQueenMoveLegal(game->board, org, des))
+            if (!isQueenMoveLegal(game->state->board, org, des))
                 return 0;
             break;
     }
     return 1;
 }
 
-char getPiece(char** board, Location* loc){
-    return (*(*(board +loc->x)+loc->y));
-}
-
-void setPiece(char** board, Location* loc, char newPiece){
-    (*(*(board +loc->x)+loc->y)) = newPiece;
-}
-
-char getPieceInCoordinates(char** board, int x, int y){
-    Location* newLoc = newLocation(x,y);
-    char piece = (getPiece(board,newLoc));
-    free(newLoc);
-    return piece;
-}
-
-
-bool isLocationOutOfBounds(Location* des){
-    return ((des->x > 7) || (des->x < 0) || (des->y > 7) || (des->y < 0));
-}
-
-bool isCoordinatesOutOfBounds(int x, int y){
-    Location* newLoc = newLocation(x,y);
-    char piece =  isLocationOutOfBounds(newLoc);
-    free(newLoc);
-    return piece;
-}
 
 bool isLegalDesPiece(char** board, char orgPiece, char desPiece, bool currentPlayerColor){
     if (((getPieceColor(orgPiece) == WHITE) && (currentPlayerColor == BLACK)) || ((getPieceColor(orgPiece) == BLACK) && (currentPlayerColor == WHITE))) //if origion piece does not belong to user
@@ -178,20 +96,6 @@ bool isLegalDesPiece(char** board, char orgPiece, char desPiece, bool currentPla
     return 1;
 }
 
-int getPieceColor(char piece){
-    if ((piece == 'm')||(piece == 'r')||(piece == 'n')||(piece == 'b')||(piece == 'k')||(piece == 'q'))
-        return WHITE;
-    if ((piece == 'M')||(piece == 'R')||(piece == 'N')||(piece == 'B')||(piece == 'K')||(piece == 'Q'))
-        return BLACK;
-    return EMPTY_PIECE;
-}
-
-int getPieceColorInCoordinates(char** board, int x, int y){
-    Location* newLoc = newLocation(x,y);
-    char piece = getPieceColor(getPiece(board, newLoc));
-    free(newLoc);
-    return piece;
-}
 
 bool isWhitePawnMoveLegal(char** board, Location* org, Location* des) {
     char desPiece = getPiece(board,des);
@@ -299,35 +203,13 @@ bool isQueenMoveLegal(char** board, Location* org, Location* des){
     return (isBishopMoveLegal(board,org,des) || isRookMoveLegal(board,org,des));
 }
 
-
-Location* newLocation(int x, int y){
-    Location* newLocation = (Location*) malloc(2*sizeof(int));
-    newLocation->x = x;
-    newLocation->y = y;
-    return newLocation;
-}
-
-bool isCoordinatesEmpty(char** board, int x, int y){
-    Location* newLoc = newLocation(x,y);
-    bool ans = ((getPiece(board,newLoc) == EMPTY_PIECE));
-    free(newLoc);
-    return ans;
-}
-
-int addInt(int a, int b) {
-    return a+b;
-}
-int subInt(int a, int b) {
-    return a-b;
-}
-
 bool isKingThreatened(Game* game, bool currentPlayerColor){
-    Location* kingLoc = currentPlayerColor ? game->BKingLoc : game->WKingLoc;
+    Location* kingLoc = currentPlayerColor ? game->state->BKingLoc : game->state->WKingLoc;
     char currentPieceColor;
     Location* currentLoc;
     for (int i=0; i<8; i++){
         for (int j=0; j<8; j++){
-            currentPieceColor = getPieceColorInCoordinates(game->board,i,j);
+            currentPieceColor = getPieceColorInCoordinates(game->state->board,i,j);
             currentLoc = newLocation(i,j);
             if ((currentPieceColor == enemysColor(currentPlayerColor)) && (isMoveLegal(game,currentLoc,kingLoc,currentPieceColor))) //current piece is enemy's piece
                     return 1;
@@ -338,33 +220,31 @@ bool isKingThreatened(Game* game, bool currentPlayerColor){
 }
 
 bool wouldKingBeThreatened(Game* game, Location* org, Location* des, bool currentPlayerColor){
-    char orgPiece = getPiece(game->board,org);
-    char desPiece = getPiece(game->board,des);
+    char orgPiece = getPiece(game->state->board,org);
+    char desPiece = getPiece(game->state->board,des);
 
-    setPiece(game->board, org, EMPTY_PIECE);
-    setPiece(game->board, des, orgPiece);
+    setPiece(game->state->board, org, EMPTY_PIECE);
+    setPiece(game->state->board, des, orgPiece);
     if (isKingThreatened(game, currentPlayerColor)){
-        setPiece(game->board, org, orgPiece);
-        setPiece(game->board, des, desPiece);
+        setPiece(game->state->board, org, orgPiece);
+        setPiece(game->state->board, des, desPiece);
         return 1;
     }
-    setPiece(game->board, org, orgPiece);
-    setPiece(game->board, des, desPiece);
+    setPiece(game->state->board, org, orgPiece);
+    setPiece(game->state->board, des, desPiece);
     return 0;
 }
 
 bool movePiece(Game* game, Location* org, Location* des, bool currentPlayerColor){
-    char orgPiece = getPiece(game->board,org);
-    char desPiece = getPiece(game->board,des);
+    char orgPiece = getPiece(game->state->board,org);
+    char desPiece = getPiece(game->state->board,des);
     if (isMoveLegal(game, org, des, currentPlayerColor)&& !wouldKingBeThreatened(game,org,des,currentPlayerColor)){
-        //make move and update king's location if needed
+        //make move and update history and king's location if needed
         printf("\nmovePiece: moving now '%c' from (%d,%d) to (%d,%d):\n",orgPiece,org->x,org->y,des->x,des->y);
-        setPiece(game->board, org, EMPTY_PIECE);
-        setPiece(game->board, des, orgPiece);
-        if (orgPiece == 'k')
-            game->WKingLoc = des;
-        if (orgPiece == 'K')
-            game->BKingLoc = des;
+        updateHistory(game);
+        setPiece(game->state->board, org, EMPTY_PIECE);
+        setPiece(game->state->board, des, orgPiece);
+        updateKingLocation(game,orgPiece,des);
         return 1;
     }
     else{
@@ -386,13 +266,13 @@ bool isCheckmateOrTie(Game* game, bool currentPlayerColor){
     for (int i=0; i<8; i++){
         for (int j=0; j<8; j++){
             currentLoc = newLocation(i,j);
-            currentPiece = getPiece(game->board,currentLoc);
+            currentPiece = getPiece(game->state->board,currentLoc);
             if ((currentPiece != EMPTY_PIECE)&&(getPieceColor(currentPiece) != currentPlayerColor)){ //current piece is enemy's piece
                 optionalMoves = getMoves(game,currentLoc,getPieceColor(currentPiece));
                 while (!spArrayListIsEmpty(optionalMoves)){ //for all optional moves for current piece
                     isTie = 0;
                     optionalLoc = spArrayListPop(optionalMoves);
-                    if (!wouldKingBeThreatened(game,currentLoc,optionalLoc,getPieceColor(currentPiece))) //if there exists a move that does not threats king
+                    if (!wouldKingBeThreatened(game,currentLoc,optionalLoc,getPieceColor(currentPiece))) //if there exists a move that does not threats king-
                         isCheckmate = 0;
                 }
                 spArrayListDestroy(optionalMoves);
@@ -404,7 +284,7 @@ bool isCheckmateOrTie(Game* game, bool currentPlayerColor){
 }
 
 SPArrayList* getMoves(Game* game,Location* currentLoc,bool currentUserColor){
-    SPArrayList* possibleMoves = spArrayListCreate(63); //maximum number of moves for single piece is 63
+    SPArrayList* possibleMoves = spArrayListCreate(63); //maximum number of moves for single piece is 63, for getMoves list
     Location* des;
 
     for (int i=0; i<8; i++){
@@ -417,6 +297,15 @@ SPArrayList* getMoves(Game* game,Location* currentLoc,bool currentUserColor){
     return possibleMoves;
 }
 
-bool enemysColor(bool currentPlayerColor){
-    return (currentPlayerColor ? 0 : 1);
+bool undoMove(Game* game) {
+    if (game->mode == 2) {
+        printf("Undo command not available in 2 players mode\n");
+        return 0;
+    }
+    if (genericArrayListIsEmpty(game->historyStates)) {
+        printf("Empty history, move cannot be undone\n");
+        return 0;
+    }
+    game->state = genericArrayListPop(game->historyStates);
+    return 1;
 }

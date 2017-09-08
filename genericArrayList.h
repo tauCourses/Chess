@@ -1,5 +1,5 @@
-#ifndef SPARRAYLIST_H_
-#define SPARRAYLIST_H_
+#ifndef GENERICARRAYLIST_H_
+#define GENERICARRAYLIST_H_
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,7 +8,7 @@
 
 
 /**
- * SPArrayList summary:
+ * genericArrayList summary:
  *
  * A container that represents a fixed size linked list. The capcity of the list
  * is specified at the creation. The container supports typical list
@@ -17,30 +17,31 @@
  * returned and the list is not affected. A summary of the supported functions
  * is given below:
  *
- * spArrayListCreate       - Creates an empty array list with a specified
+ * genericArrayListCreate       - Creates an empty array list with a specified
  *                           max capacity.
- * spArrayListCopy         - Creates an exact copy of a specified array list.
- * spArrayListDestroy      - Frees all memory resources associated with an array
+ * genericArrayListCopy         - Creates an exact copy of a specified array list.
+ * genericArrayListDestroy      - Frees all memory resources associated with an array
  *                           list.
- * spArrayListClear        - Clears all elements from a specified array list.
- * spArrayListAddAt        - Inserts an element at a specified index, elements
+ * genericArrayListClear        - Clears all elements from a specified array list.
+ * genericArrayListAddAt        - Inserts an element at a specified index, elements
  *                           will be shifted to make place.
- * spArrayListAddFirst     - Inserts an element at the beginning of the array
+ * genericArrayListAddFirst     - Inserts an element at the beginning of the array
  *                           list, elements will be shifted to make place.
- * spArrayListAddLast      - Inserts an element at the end of the array list.
- * spArrayListRemoveAt     - Removes an element at the specified index, elements
+ * genericArrayListAddLast      - Inserts an element at the end of the array list.
+ * genericArrayListRemoveAt     - Removes an element at the specified index, elements
  *                           elements will be shifted as a result.
- * spArrayListRemoveFirst  - Removes an element from the beginning of the array
+ * genericArrayListRemoveFirst  - Removes an element from the beginning of the array
  *                           list, elements will be shifted as a result.
- * spArrayListRemoveLast   - Removes an element from the end of the array list
- * spArrayListGetAt        - Accesses the element at the specified index.
- * spArrayListGetFirst     - Accesses the first element of the array list.
- * spArrayListGetLast      - Accesses the last element of the array list.
- * spArrayListMaxCapcity   - Returns the maximum capcity of the array list.
- * spArrayListSize         - Returns the number of elements in that array list.
- * spArrayListIsFull       - Returns if the array list reached its max capacity.
- * spArrayListIsEmpty      - Returns true if the array list contains no elements.
+ * genericArrayListRemoveLast   - Removes an element from the end of the array list
+ * genericArrayListGetAt        - Accesses the element at the specified index.
+ * genericArrayListGetFirst     - Accesses the first element of the array list.
+ * genericArrayListGetLast      - Accesses the last element of the array list.
+ * genericArrayListMaxCapcity   - Returns the maximum capcity of the array list.
+ * genericArrayListSize         - Returns the number of elements in that array list.
+ * genericArrayListIsFull       - Returns if the array list reached its max capacity.
+ * genericArrayListIsEmpty      - Returns true if the array list contains no elements.
  */
+
 
 
 /**
@@ -50,7 +51,7 @@
  *  NULL, if an allocation error occurred or maxSize  <= 0.
  *  An instant of an array list otherwise.
  */
-SPArrayList* spArrayListCreate(int maxSize);
+genericArrayList* genericArrayListCreate(int maxSize, size_t elementSize, void (*destroyElement)(void *));
 
 /**
  *	Creates an exact copy of the src array list. Elements in the new copy will
@@ -60,14 +61,14 @@ SPArrayList* spArrayListCreate(int maxSize);
  *	NULL if either an allocation error occurs or src == NULL.
  *	A new copy of the source array list, otherwise.
  */
-SPArrayList* spArrayListCopy(SPArrayList* src);
+genericArrayList* genericArrayListCopy(genericArrayList* src);
 
 /**
  * Frees all memory resources associated with the source array list. If the
  * source array is NULL, then the function does nothing.
  * @param src - the source array list
  */
-void spArrayListDestroy(SPArrayList* src);
+void genericArrayListDestroy(genericArrayList* src);
 
 /**
  * Clears all elements from the source array list. After invoking this function,
@@ -78,10 +79,10 @@ void spArrayListDestroy(SPArrayList* src);
  * SP_ARRAY_LIST_INVALID_ARGUMENT if src == NULL
  * SP_ARRAY_LIST_SUCCESS otherwise
  */
-SP_ARRAY_LIST_MESSAGE spArrayListClear(SPArrayList* src);
+SP_ARRAY_LIST_MESSAGE genericArrayListClear(genericArrayList* src);
 
 /**
- * Use the arrayList as a stack. After invoking thie function,
+ * Use the arrayList as a stack. After invoking this function,
  * the elem will be the first elements, and all other elements push to right.
  * if array is full it will remove the last element
  * @param src - the source array list
@@ -90,7 +91,7 @@ SP_ARRAY_LIST_MESSAGE spArrayListClear(SPArrayList* src);
  * SP_ARRAY_LIST_INVALID_ARGUMENT if src == NULL 
  * SP_ARRAY_LIST_SUCCESS - otherwise
  */
-SP_ARRAY_LIST_MESSAGE spArrayListPush(SPArrayList* src, Location* elem);
+SP_ARRAY_LIST_MESSAGE genericArrayListPush(genericArrayList* src, void* elem);
 
 /**
  * Use the arrayList as a stack. After invoking this function,
@@ -101,7 +102,7 @@ SP_ARRAY_LIST_MESSAGE spArrayListPush(SPArrayList* src, Location* elem);
  * -1 if src == NULL or src is empty 
  * element at index 0
  */
-Location* spArrayListPop(SPArrayList* src);
+void* genericArrayListPop(genericArrayList* src);
 
 /**
  * Inserts element at a specified index. The elements residing at and after the
@@ -117,7 +118,7 @@ Location* spArrayListPop(SPArrayList* src);
  * SP_ARRAY_LIST_FULL - if the source array list reached its maximum capacity
  * SP_ARRAY_LIST_SUCCESS - otherwise
  */
-SP_ARRAY_LIST_MESSAGE spArrayListAddAt(SPArrayList* src, Location* elem, int index);
+SP_ARRAY_LIST_MESSAGE genericArrayListAddAt(genericArrayList* src, void* elem, int index);
 
 /**
  * Inserts element at a the beginning of the source element. The elements
@@ -131,7 +132,7 @@ SP_ARRAY_LIST_MESSAGE spArrayListAddAt(SPArrayList* src, Location* elem, int ind
  * SP_ARRAY_LIST_FULL - if the source array list reached its maximum capacity
  * SP_ARRAY_LIST_SUCCESS - otherwise
  */
-SP_ARRAY_LIST_MESSAGE spArrayListAddFirst(SPArrayList* src, Location* elem);
+SP_ARRAY_LIST_MESSAGE genericArrayListAddFirst(genericArrayList* src, void* elem);
 
 /**
  * Inserts element at a the end of the source element. If the array list
@@ -144,7 +145,7 @@ SP_ARRAY_LIST_MESSAGE spArrayListAddFirst(SPArrayList* src, Location* elem);
  * SP_ARRAY_LIST_FULL - if the source array list reached its maximum capacity
  * SP_ARRAY_LIST_SUCCESS - otherwise
  */
-SP_ARRAY_LIST_MESSAGE spArrayListAddLast(SPArrayList* src, Location* elem);
+SP_ARRAY_LIST_MESSAGE genericArrayListAddLast(genericArrayList* src, void* elem);
 
 /**
  * Removes an element from a specified index. The elements residing after the
@@ -159,7 +160,7 @@ SP_ARRAY_LIST_MESSAGE spArrayListAddLast(SPArrayList* src, Location* elem);
  * SP_ARRAY_LIST_EMPTY - if the source array list is empty
  * SP_ARRAY_LIST_SUCCESS - otherwise
  */
-SP_ARRAY_LIST_MESSAGE spArrayListRemoveAt(SPArrayList* src, int index);
+SP_ARRAY_LIST_MESSAGE genericArrayListRemoveAt(genericArrayList* src, int index);
 
 /**
  * Removes an element from a the beginning of the list.
@@ -173,7 +174,7 @@ SP_ARRAY_LIST_MESSAGE spArrayListRemoveAt(SPArrayList* src, int index);
  * SP_ARRAY_LIST_EMPTY - if the source array list is empty
  * SP_ARRAY_LIST_SUCCESS - otherwise
  */
-SP_ARRAY_LIST_MESSAGE spArrayListRemoveFirst(SPArrayList* src);
+SP_ARRAY_LIST_MESSAGE genericArrayListRemoveFirst(genericArrayList* src);
 
 /**
  * Removes an element from a the end of the list.
@@ -187,7 +188,7 @@ SP_ARRAY_LIST_MESSAGE spArrayListRemoveFirst(SPArrayList* src);
  * SP_ARRAY_LIST_EMPTY - if the source array list is empty
  * SP_ARRAY_LIST_SUCCESS - otherwise.
  */
-SP_ARRAY_LIST_MESSAGE spArrayListRemoveLast(SPArrayList* src);
+SP_ARRAY_LIST_MESSAGE genericArrayListRemoveLast(genericArrayList* src);
 
 /**
  * Returns the element at the specified index. The function is called
@@ -199,7 +200,7 @@ SP_ARRAY_LIST_MESSAGE spArrayListRemoveLast(SPArrayList* src);
  * Undefined value if either src == NULL or index out of bound.
  * Otherwise, the element at the specified index is returned.
  */
-Location* spArrayListGetAt(SPArrayList* src, int index);
+void* genericArrayListGetAt(genericArrayList* src, int index);
 
 /**
  * Returns the element at the beginning of the list. The function is called
@@ -210,7 +211,7 @@ Location* spArrayListGetAt(SPArrayList* src, int index);
  * Undefined value if either src == NULL or the list is empty
  * Otherwise, the element at the beginning of the list is returned.
  */
-Location* spArrayListGetFirst(SPArrayList* src);
+void* genericArrayListGetFirst(genericArrayList* src);
 
 /**
  * Returns the element at the end of the list. The function is called
@@ -221,7 +222,7 @@ Location* spArrayListGetFirst(SPArrayList* src);
  * Undefined value if either src == NULL or the list is empty
  * Otherwise, the element at the end of the list is returned.
  */
-Location* spArrayListGetLast(SPArrayList* src);
+void* genericArrayListGetLast(genericArrayList* src);
 
 /**
  * Returns the maximum capacity of the list. The function is called
@@ -232,7 +233,7 @@ Location* spArrayListGetLast(SPArrayList* src);
  * Undefined value if either src == NULL
  * Otherwise, the maximum capacity of the list is returned.
  */
-int spArrayListMaxCapacity(SPArrayList* src);
+int genericArrayListMaxCapacity(genericArrayList* src);
 
 /**
  * Returns the number of elements in the list. The function is called
@@ -243,7 +244,7 @@ int spArrayListMaxCapacity(SPArrayList* src);
  * Undefined value if either src == NULL
  * Otherwise, the number of the elements in the list is returned.
  */
-int spArrayListSize(SPArrayList* src);
+int genericArrayListSize(genericArrayList* src);
 
 /**
  * Returns true if the list is full, that is the number of elements in the list
@@ -254,7 +255,7 @@ int spArrayListSize(SPArrayList* src);
  * than its maximum capacity.
  * Otherwise, true is returned.
  */
-bool spArrayListIsFull(SPArrayList* src);
+bool genericArrayListIsFull(genericArrayList* src);
 
 /**
  * Returns true if the list is empty, that is the number of elements in the list
@@ -264,11 +265,11 @@ bool spArrayListIsFull(SPArrayList* src);
  * false if either src == NULL or the number of elements in the list is not zero.
  * Otherwise, true is returned.
  */
-bool spArrayListIsEmpty(SPArrayList* src);
+bool genericArrayListIsEmpty(genericArrayList* src);
 
 /**
  * Print the content of the array list
  * @param src - the source array list
 */
-void spArrayListPrint(SPArrayList* src);
+void genericArrayListPrint(genericArrayList* src, void (*printElement)(void*));
 #endif

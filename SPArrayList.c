@@ -152,7 +152,7 @@ Location* spArrayListGetFirst(SPArrayList* src)
 Location* spArrayListGetLast(SPArrayList* src)
 {
 	if(src == NULL)
-		return -1;
+		return NULL;
 	return spArrayListGetAt(src,src->actualSize-1);	
 
 }

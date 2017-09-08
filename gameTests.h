@@ -10,7 +10,11 @@ void runMoveTests();
 
 void runArrayListTests();
 
+void rungenericArrayListTests();
+
 void runGamePlayTests();
+
+void runUndoTest();
 
 void removePawns(Game* game);
 

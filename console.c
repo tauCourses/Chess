@@ -11,3 +11,7 @@ bool printBoard(char** board){
     printf("  -----------------\n");
     printf("   A B C D E F G H \n");
 }
+
+void printStateBoard(void* state){
+    printBoard(((State*)state)->board);
+}

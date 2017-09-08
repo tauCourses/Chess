@@ -5,4 +5,5 @@
 
 bool printBoard(char** board);
 
+void printStateBoard(void* state);
 #endif //CHESS_CONSOLE_H

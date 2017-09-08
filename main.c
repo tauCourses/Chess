@@ -6,6 +6,8 @@ int main() {
     //runLegalMovesTests();
     //runMoveTests();
     //runArrayListTests();
-    runGamePlayTests();
+   // runGamePlayTests();
+    //rungenericArrayListTests();
+   runUndoTest();
     return 0;
 }
