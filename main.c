@@ -19,16 +19,17 @@ int main() {
 #include <SDL.h>
 #include <SDL_video.h>
 #include <stdio.h>
-#include "ChessMainWindow.h"
+#include "GUIManager.h"
 
 int main(int argc, char** argv) {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) { //SDL2 INIT
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
         printf("ERROR: unable to init SDL: %s\n", SDL_GetError());
         return 1;
     }
 
-    SPWindow* window = createSimpleWindow();
-    if (window == NULL ) {
+    GUIManager* gui = managerCreate();
+    if (gui == NULL ) {
         SDL_Quit();
         return 0;
     }
@@ -36,14 +37,12 @@ int main(int argc, char** argv) {
     SDL_Event event;
     while (1) {
         SDL_WaitEvent(&event);
-        if(event.type == SDL_QUIT){
+        if(managerHandleEvent(gui,&event) == MANAGER_QUIT)
             break;
-        }
-        window->handleEventWindow(window,&event);
-       // In this example we draw the window every time... in many case we shouldn't
-        window->drawWindow(window);
+
+        managerDraw(gui);
     }
-    destroyWindow(window);
+    managerDestroy(gui);
     SDL_Quit();
     return 0;
 }
