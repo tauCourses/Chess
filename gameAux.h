@@ -4,6 +4,7 @@
 #include "Infrastructure.h"
 #include "SPArrayList.h"
 #include "genericArrayList.h"
+#include "StatesStack.h"
 
 
 State* createNewState();

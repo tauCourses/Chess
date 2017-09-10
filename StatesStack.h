@@ -3,8 +3,6 @@
 #define CHESS_STATESSTACK_H
 
 #include "infrastructure.h"
-#include "gameAux.h"
-#include "game.h"
 
 typedef struct state_array_list_t {
     State** elements;
