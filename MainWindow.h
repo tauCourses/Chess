@@ -10,7 +10,6 @@ typedef enum {
 } MAIN_WINDOW_EVENTS;
 
 typedef struct  {
-    SDL_Window* window;
     SDL_Renderer* renderer;
 
     Button* newGame;
@@ -18,11 +17,10 @@ typedef struct  {
     Button* exit;
 } MainWindow;
 
-MainWindow* createMainWindow();
+MainWindow* createMainWindow(SDL_Renderer* renderer);
 void createMainButtons(MainWindow* window);
 void destroyMainWindow(MainWindow *window);
 void drawMainWindow(MainWindow *window);
-void hideMainWindow(MainWindow* window);
-void showMainWindow(MainWindow *window);
+
 MAIN_WINDOW_EVENTS handleEventMainWindow(MainWindow *window, SDL_Event *event);
 #endif

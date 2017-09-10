@@ -1,25 +1,14 @@
 #include "DifficultyWindow.h"
 
-DifficultyWindow* createDifficultyWindow() {
+DifficultyWindow* createDifficultyWindow(SDL_Renderer* renderer)
+{
     DifficultyWindow *window = NULL;
 
     window = calloc(sizeof(DifficultyWindow), sizeof(char));
     if (window == NULL)
         return NULL;
 
-    window->window = SDL_CreateWindow("SP Chess - Choose mode", SDL_WINDOWPOS_CENTERED,
-                                      SDL_WINDOWPOS_CENTERED, 1000, 1000, SDL_WINDOW_OPENGL);
-
-    if (window->window == NULL) {
-        destroyDifficultyWindow(window);
-        return NULL;
-    }
-
-    window->renderer = SDL_CreateRenderer(window->window, -1, SDL_RENDERER_ACCELERATED);
-    if (window->renderer == NULL) {
-        destroyDifficultyWindow(window);
-        return NULL;
-    }
+    window->renderer = renderer;
 
     createDifficultyButtons(window);
     if (window->title == NULL || window->back == NULL || window->next == NULL || window->noob == NULL ||
@@ -40,26 +29,26 @@ void createDifficultyButtons(DifficultyWindow* window)
         return;
 
     //BUTTONS LOCATIONS
-    SDL_Rect titleR = { .x = 350, .y = 50, .h = 50, .w = 300 };
-    SDL_Rect noobR = { .x = 450, .y = 100, .h = 50, .w = 250 };
-    SDL_Rect easyR = { .x = 450, .y = 170, .h = 50, .w = 250 };
-    SDL_Rect moderateR = { .x = 450, .y = 240, .h = 50, .w = 250 };
-    SDL_Rect hardR = { .x = 450, .y = 310, .h = 50, .w = 250 };
-    SDL_Rect expertR = { .x = 450, .y = 380, .h = 50, .w = 250 };
-    SDL_Rect nextR = { .x = 200, .y = 900, .h = 100, .w = 250 };
-    SDL_Rect backR = { .x = 550, .y = 900, .h = 100, .w = 250 };
+    SDL_Rect titleR = { .x = 365, .y = 50, .h = 70, .w = 270 };
+    SDL_Rect noobR = { .x = 400, .y = 130, .h = BUTTON_DEFAULT_HEIGHT, .w = BUTTON_DEFAULT_WIDTH };
+    SDL_Rect easyR = { .x = 400, .y = 200, .h = BUTTON_DEFAULT_HEIGHT, .w = BUTTON_DEFAULT_WIDTH };
+    SDL_Rect moderateR = { .x = 400, .y = 270, .h = BUTTON_DEFAULT_HEIGHT, .w = BUTTON_DEFAULT_WIDTH };
+    SDL_Rect hardR = { .x = 400, .y = 340, .h = BUTTON_DEFAULT_HEIGHT, .w = BUTTON_DEFAULT_WIDTH };
+    SDL_Rect expertR = { .x = 400, .y = 410, .h = BUTTON_DEFAULT_HEIGHT, .w = BUTTON_DEFAULT_WIDTH };
+    SDL_Rect nextR = { .x = 250, .y = 600, .h = BUTTON_DEFAULT_HEIGHT, .w = BUTTON_DEFAULT_WIDTH };
+    SDL_Rect backR = { .x = 550, .y = 600, .h = BUTTON_DEFAULT_HEIGHT, .w = BUTTON_DEFAULT_WIDTH };
 
     //SETUP BUTTONS:
-    window->title = createButton(window->renderer, titleR, "newGame.bmp", "", BUTTON_TYPE_DEGENERATED);
+    window->title = createButton(window->renderer, titleR, SELECT_DIFFICULTY_TITLE, "", BUTTON_TYPE_DEGENERATED);
 
-    window->noob = createButton(window->renderer, noobR, "start.bmp", "exit.bmp", BUTTON_TYPE_CHOICE);
-    window->easy = createButton(window->renderer, easyR, "start.bmp", "exit.bmp", BUTTON_TYPE_CHOICE);
-    window->moderate = createButton(window->renderer, moderateR, "start.bmp", "exit.bmp", BUTTON_TYPE_CHOICE);
-    window->hard = createButton(window->renderer, hardR, "start.bmp", "exit.bmp", BUTTON_TYPE_CHOICE);
-    window->expert = createButton(window->renderer, expertR, "start.bmp", "exit.bmp", BUTTON_TYPE_CHOICE);
+    window->noob = createButton(window->renderer, noobR, NOOB_ACTIVE_BUTTON, NOOB_NOT_ACTIVE_BUTTON, BUTTON_TYPE_CHOICE);
+    window->easy = createButton(window->renderer, easyR, EASY_ACTIVE_BUTTON, EASY_NOT_ACTIVE_BUTTON, BUTTON_TYPE_CHOICE);
+    window->moderate = createButton(window->renderer, moderateR, MODERATE_ACTIVE_BUTTON, MODERATE_NOT_ACTIVE_BUTTON, BUTTON_TYPE_CHOICE);
+    window->hard = createButton(window->renderer, hardR, HARD_ACTIVE_BUTTON, HARD_NOT_ACTIVE_BUTTON, BUTTON_TYPE_CHOICE);
+    window->expert = createButton(window->renderer, expertR, EXPERT_ACTIVE_BUTTON, EXPERT_NOT_ACTIVE_BUTTON, BUTTON_TYPE_CHOICE);
 
-    window->next = createButton(window->renderer, nextR, "start.bmp", "exit.bmp", BUTTON_TYPE_ONE_OPTION);
-    window->back = createButton(window->renderer, backR, "back.bmp", "", BUTTON_TYPE_ONE_OPTION);
+    window->next = createButton(window->renderer, nextR, NEXT_ACTIVE_BUTTON, "", BUTTON_TYPE_ONE_OPTION);
+    window->back = createButton(window->renderer, backR, BACK_ACTIVE_BUTTON, "", BUTTON_TYPE_ONE_OPTION);
 }
 
 void destroyDifficultyWindow(DifficultyWindow *window)
@@ -67,23 +56,24 @@ void destroyDifficultyWindow(DifficultyWindow *window)
     if (window == NULL)
         return;
     //buttons:
-    destroyButton(window->title);
+    if(window->title != NULL)
+        destroyButton(window->title);
+    if(window->noob != NULL)
+        destroyButton(window->noob);
+    if(window->easy != NULL)
+        destroyButton(window->easy);
+    if(window->moderate != NULL)
+        destroyButton(window->moderate);
+    if(window->hard != NULL)
+        destroyButton(window->hard);
+    if(window->expert != NULL)
+        destroyButton(window->expert);
 
-    destroyButton(window->noob);
-    destroyButton(window->easy);
-    destroyButton(window->moderate);
-    destroyButton(window->hard);
-    destroyButton(window->expert);
+    if(window->next != NULL)
+        destroyButton(window->next);
+    if(window->back != NULL)
+        destroyButton(window->back);
 
-    destroyButton(window->next);
-    destroyButton(window->back);
-
-    //renderer destroy:
-    if (window->renderer != NULL )
-        SDL_DestroyRenderer(window->renderer);
-    //window destroy:
-    if (window->window != NULL)
-        SDL_DestroyWindow(window->window);
 
     free(window);
 }
@@ -107,18 +97,6 @@ void drawDifficultyWindow(DifficultyWindow *window)
 
     drawButton(window->next);
     drawButton(window->back);
-
-    SDL_RenderPresent(window->renderer);
-}
-
-void hideDifficultyWindow(DifficultyWindow* window)
-{
-    SDL_HideWindow(window->window);
-}
-
-void showDifficultyWindow(DifficultyWindow* window)
-{
-    SDL_ShowWindow(window->window);
 }
 
 DIFFICULTY_WINDOW_EVENTS handleEventDifficultyWindow(DifficultyWindow *window, SDL_Event *event)
@@ -183,7 +161,7 @@ void changeChoiceDifficultyWindow(DifficultyWindow* window, int i)
             window->expert->state.choosen = BUTTON_CHOSEN;
             break;
         default:
-            printf("BUG!!!");
+            printf("BUG!!!1");
             window->easy->state.choosen = BUTTON_CHOSEN;
     }
     window->configurationChosen = i;

@@ -6,12 +6,13 @@
 #include <stdbool.h>
 #include "Button.h"
 
+#define SELECT_DIFFICULTY_TITLE "images/titles/Difficulty.bmp"
+
 typedef enum {
     DIFFICULTY_NEXT, DIFFICULTY_BACK, DIFFICULTY_EXIT,  DIFFICULTY_INVALID_ARGUMENT, DIFFICULTY_NONE
 } DIFFICULTY_WINDOW_EVENTS;
 
 typedef struct  {
-    SDL_Window* window;
     SDL_Renderer* renderer;
 
     Button* title; //not really a button. click on not changing it
@@ -25,14 +26,11 @@ typedef struct  {
     int configurationChosen;
 } DifficultyWindow;
 
-DifficultyWindow* createDifficultyWindow();
+DifficultyWindow* createDifficultyWindow(SDL_Renderer* renderer);
 void createDifficultyButtons(DifficultyWindow* window);
 void destroyDifficultyWindow(DifficultyWindow *window);
 void drawDifficultyWindow(DifficultyWindow *window);
 DIFFICULTY_WINDOW_EVENTS handleEventDifficultyWindow(DifficultyWindow *window, SDL_Event *event);
-
-void hideDifficultyWindow(DifficultyWindow* window);
-void showDifficultyWindow(DifficultyWindow* window);
 
 void changeChoiceDifficultyWindow(DifficultyWindow* window, int i);
 

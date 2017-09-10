@@ -1,25 +1,14 @@
 #include "LoadGameWindow.h"
 
-LoadWindow* createLoadWindow() {
+LoadWindow* createLoadWindow(SDL_Renderer* renderer)
+{
     LoadWindow *window = NULL;
 
     window = calloc(sizeof(LoadWindow), sizeof(char));
     if (window == NULL)
         return NULL;
 
-    window->window = SDL_CreateWindow("SP Chess - load", SDL_WINDOWPOS_CENTERED,
-                                      SDL_WINDOWPOS_CENTERED, 1000, 1000, SDL_WINDOW_OPENGL);
-
-    if (window->window == NULL) {
-        destroyLoadWindow(window);
-        return NULL;
-    }
-
-    window->renderer = SDL_CreateRenderer(window->window, -1, SDL_RENDERER_ACCELERATED);
-    if (window->renderer == NULL) {
-        destroyLoadWindow(window);
-        return NULL;
-    }
+    window->renderer = renderer;
 
     window->numOfSlots = 3; // TODO - should get from chess infra!!! don't leave me like that!
     createLoadButtons(window);
@@ -46,17 +35,36 @@ void createLoadButtons(LoadWindow* window)
     if(window == NULL || window->renderer == NULL)
         return;
 
-    SDL_Rect backR = { .x = 300, .y = 900, .h = 100, .w = 250 };
-    SDL_Rect loadR = { .x = 600, .y = 900, .h = 100, .w = 250 };
-    SDL_Rect slotR = { .x = 450, .y = 50, .h = 100, .w = 250 };
-    window->back = createButton(window->renderer, backR, "back.bmp", "", BUTTON_TYPE_ONE_OPTION);
-    window->load = createButton(window->renderer, loadR, "load.bmp", "load.bmp", BUTTON_TYPE_VALIDATE);
+    SDL_Rect backR = { .x = 250, .y = 650, .h = BUTTON_DEFAULT_HEIGHT, .w = BUTTON_DEFAULT_WIDTH };
+    SDL_Rect loadR = { .x = 550, .y = 650, .h = BUTTON_DEFAULT_HEIGHT, .w = BUTTON_DEFAULT_WIDTH };
+    SDL_Rect slotR = { .x = 400, .y = 50, .h = BUTTON_DEFAULT_HEIGHT, .w = BUTTON_DEFAULT_WIDTH };
+    window->back = createButton(window->renderer, backR, BACK_ACTIVE_BUTTON, "", BUTTON_TYPE_ONE_OPTION);
+    window->load = createButton(window->renderer, loadR, LOAD_ACTIVE_BUTTON, LOAD_NOT_ACTIVE_BUTTON, BUTTON_TYPE_VALIDATE);
     if(window->load != NULL)
         window->load->state.valid = BUTTON_INVALID;
     for (int i = 0; i < window->numOfSlots; i++)
     {
-        window->slots[i] = createButton(window->renderer, slotR, "exit.bmp", "start.bmp", BUTTON_TYPE_CHOICE);
-        slotR.y += 120;
+        switch(i)
+        {
+            case 0:
+                window->slots[i] = createButton(window->renderer, slotR, GAME_SLOT_1_ACTIVE_BUTTON, GAME_SLOT_1_NOT_ACTIVE_BUTTON, BUTTON_TYPE_CHOICE);
+                break;
+            case 1:
+                window->slots[i] = createButton(window->renderer, slotR, GAME_SLOT_2_ACTIVE_BUTTON, GAME_SLOT_2_NOT_ACTIVE_BUTTON, BUTTON_TYPE_CHOICE);
+                break;
+            case 2:
+                window->slots[i] = createButton(window->renderer, slotR, GAME_SLOT_3_ACTIVE_BUTTON, GAME_SLOT_3_NOT_ACTIVE_BUTTON, BUTTON_TYPE_CHOICE);
+                break;
+            case 3:
+                window->slots[i] = createButton(window->renderer, slotR, GAME_SLOT_4_ACTIVE_BUTTON, GAME_SLOT_4_NOT_ACTIVE_BUTTON, BUTTON_TYPE_CHOICE);
+                break;
+            case 4:
+                window->slots[i] = createButton(window->renderer, slotR, GAME_SLOT_5_ACTIVE_BUTTON, GAME_SLOT_5_NOT_ACTIVE_BUTTON, BUTTON_TYPE_CHOICE);
+                break;
+            default:
+                printf("not supported more than 5 slots"); //TODO - > BUG!
+        }
+        slotR.y += 90;
     }
 }
 
@@ -65,16 +73,13 @@ void destroyLoadWindow(LoadWindow *window)
     if (window == NULL)
         return;
     //buttons:
-    destroyButton(window->back);
-    destroyButton(window->load);
+    if(window->back!= NULL)
+        destroyButton(window->back);
+    if(window->load!= NULL)
+        destroyButton(window->load);
     for (int i = 0; i < window->numOfSlots; i++)
-        destroyButton(window->slots[i]);
-    //renderer destroy:
-    if (window->renderer != NULL )
-        SDL_DestroyRenderer(window->renderer);
-    //window destroy:
-    if (window->window != NULL)
-        SDL_DestroyWindow(window->window);
+        if(window->slots[i] != NULL)
+            destroyButton(window->slots[i]);
 
     free(window);
 }
@@ -93,17 +98,6 @@ void drawLoadWindow(LoadWindow *window)
     for (int i = 0; i < window->numOfSlots; i++)
         drawButton(window->slots[i]);
 
-    SDL_RenderPresent(window->renderer);
-}
-
-void hideLoadWindow(LoadWindow* window)
-{
-    SDL_HideWindow(window->window);
-}
-
-void showLoadWindow(LoadWindow* window)
-{
-    SDL_ShowWindow(window->window);
 }
 
 LOAD_WINDOW_EVENTS handleEventLoadWindow(LoadWindow *window, SDL_Event *event)
@@ -124,7 +118,7 @@ LOAD_WINDOW_EVENTS handleEventLoadWindow(LoadWindow *window, SDL_Event *event)
             if(clickOnButton(window->load, event->button.x, event->button.y))
             {
                 if(window->slotChosed != -1)
-                    return LOAD_CONITNUE;
+                    return LOAD_START;
                 return LOAD_NONE;
             }
             for (int i = 0; i < window->numOfSlots; i++)

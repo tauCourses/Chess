@@ -1,93 +1,190 @@
 #include "GUIManager.h"
+#include "ModeWindow.h"
+#include "MainWindow.h"
 
 GUIManager* managerCreate()
 {
-    GUIManager* res = calloc(sizeof(GUIManager), sizeof(char));
-    if (res == NULL )
+    GUIManager* gui = calloc(sizeof(GUIManager), sizeof(char));
+    if (gui == NULL )
         return NULL;
 
-    res->mainWindow = createMainWindow();
-    if (res->mainWindow == NULL )
+    gui->window = SDL_CreateWindow("SP Chess", SDL_WINDOWPOS_CENTERED,
+                                      SDL_WINDOWPOS_CENTERED, 1000, 750, SDL_WINDOW_OPENGL);
+    if (gui->window == NULL)
     {
-        free(res);
+        managerDestroy(gui);
+        return NULL;
+    }
+
+    gui->renderer = SDL_CreateRenderer(gui->window, -1, SDL_RENDERER_ACCELERATED);
+    if (gui->renderer == NULL)
+    {
+        managerDestroy(gui);
+        return NULL;
+    }
+
+    createSidesBoards(gui);
+    if(gui->leftBoard == NULL || gui->rightBoard == NULL)
+    {
+        managerDestroy(gui);
         return NULL ;
     }
-    res->activeWin = MAIN_WINDOW_ACTIVE;
-    return res;
+
+    if(createWindows(gui) == false)
+    {
+        managerDestroy(gui);
+        return NULL ;
+    }
+
+    gui->activeWindow = MAIN_WINDOW_ACTIVE;
+    gui->lastWindow = MAIN_WINDOW_ACTIVE;
+    managerDraw(gui);
+    return gui;
 }
 
-void managerDestroy(GUIManager* src)
+bool createWindows(GUIManager* gui)
 {
-    if (!src) {
-        return;
-    }
-    if(src->mainWindow != NULL)
-        destroyMainWindow(src->mainWindow);
-    if(src->loadWindow != NULL)
-        destroyLoadWindow(src->loadWindow);
-    if(src->modeWindow != NULL)
-        destroyModeWindow(src->modeWindow);
-    if(src->difficultyWindow != NULL)
-        destroyDifficultyWindow(src->difficultyWindow);
-    if(src->colorWindow != NULL)
-        destroyColorWindow(src->colorWindow);
+    gui->mainWindow = createMainWindow(gui->renderer);
+    if (gui->mainWindow == NULL )
+        return false;
 
-    free(src);
+    gui->loadWindow = createLoadWindow(gui->renderer);
+    if (gui->loadWindow == NULL )
+        return false;
+
+    gui->modeWindow = createModeWindow(gui->renderer);
+    if (gui->modeWindow == NULL )
+        return false;
+
+    gui->difficultyWindow = createDifficultyWindow(gui->renderer);
+    if (gui->difficultyWindow == NULL )
+        return false;
+
+    gui->colorWindow = createColorWindow(gui->renderer);
+    if (gui->colorWindow == NULL )
+        return false;
+
+    return true;
+}
+void createSidesBoards(GUIManager* gui)
+{
+    gui->leftBoard = createBoardLayout((SDL_Point){.x=0,.y=0}, 3, 10);
+    gui->rightBoard = createBoardLayout((SDL_Point){.x=760,.y=0}, 3, 10);
 }
 
-void managerDraw(GUIManager* src)
+void managerDestroy(GUIManager* gui)
 {
-    if (!src) {
+    if (gui == NULL)
+        return;
+
+    if(gui->mainWindow != NULL)
+        destroyMainWindow(gui->mainWindow);
+    if(gui->loadWindow != NULL)
+        destroyLoadWindow(gui->loadWindow);
+    if(gui->modeWindow != NULL)
+        destroyModeWindow(gui->modeWindow);
+    if(gui->difficultyWindow != NULL)
+        destroyDifficultyWindow(gui->difficultyWindow);
+    if(gui->colorWindow != NULL)
+        destroyColorWindow(gui->colorWindow);
+    if(gui->gameWindow != NULL)
+        destroyGameWindow(gui->gameWindow);
+
+    if (gui->leftBoard != NULL )
+        destroyBoardLayout(gui->leftBoard);
+    if (gui->rightBoard != NULL )
+        destroyBoardLayout(gui->rightBoard);
+
+    //renderer destroy:
+    if (gui->renderer != NULL )
+        SDL_DestroyRenderer(gui->renderer);
+
+    if (gui->window != NULL)
+        SDL_DestroyWindow(gui->window);
+
+
+    free(gui);
+}
+
+void managerDraw(GUIManager* gui)
+{
+    if (gui == NULL)
+    {
+        printf("null draw");
         return;
     }
-    switch(src->activeWin)
+
+    switch(gui->activeWindow)
     {
         case MAIN_WINDOW_ACTIVE:
-            drawMainWindow(src->mainWindow);
+            drawMainWindow(gui->mainWindow);
+            drawBoardLayout(gui->renderer, gui->leftBoard);
+            drawBoardLayout(gui->renderer, gui->rightBoard);
             break;
         case LOAD_WINDOW_ACTIVE:
-            drawLoadWindow(src->loadWindow);
+            drawLoadWindow(gui->loadWindow);
+            drawBoardLayout(gui->renderer, gui->leftBoard);
+            drawBoardLayout(gui->renderer, gui->rightBoard);
             break;
         case MODE_WINDOW_ACTIVE:
-            drawModeWindow(src->modeWindow);
+            drawModeWindow(gui->modeWindow);
+            drawBoardLayout(gui->renderer, gui->leftBoard);
+            drawBoardLayout(gui->renderer, gui->rightBoard);
             break;
         case DIFFICULTY_WINDOW_ACTIVE:
-            drawDifficultyWindow(src->difficultyWindow);
+            drawDifficultyWindow(gui->difficultyWindow);
+            drawBoardLayout(gui->renderer, gui->leftBoard);
+            drawBoardLayout(gui->renderer, gui->rightBoard);
             break;
         case COLOR_WINDOW_ACTIVE:
-            drawColorWindow(src->colorWindow);
+            drawColorWindow(gui->colorWindow);
+            drawBoardLayout(gui->renderer, gui->leftBoard);
+            drawBoardLayout(gui->renderer, gui->rightBoard);
+            break;
+        case GAME_WINDOW_ACTIVE:
+            drawGameWindow(gui->gameWindow);
             break;
         default:
-            printf("unknown window to draw %d\n", src->activeWin);
+            printf("unknown window to draw %d\n", gui->activeWindow); //TODO -> WHAT WE SHOULD DO IN BUGS?
     }
+    SDL_RenderPresent(gui->renderer);
+
 }
 
-MANAGER_EVENT managerHandleEvent(GUIManager* src, SDL_Event* event) {
-    if (src == NULL || event == NULL )
+void switchWindow(GUIManager* gui, ACTIVE_WINDOW next)
+{
+    gui->lastWindow = gui->activeWindow;
+    gui->activeWindow = next;
+}
+
+MANAGER_EVENT managerHandleEvent(GUIManager* gui, SDL_Event* event) {
+    if (gui == NULL || event == NULL )
         return MANAGER_NONE;
 
-    switch(src->activeWin)
+    switch(gui->activeWindow)
     {
         case MAIN_WINDOW_ACTIVE:
-            return handleManagerDueToMainEvent(src, handleEventMainWindow(src->mainWindow, event));
+            return handleManagerDueToMainEvent(gui, handleEventMainWindow(gui->mainWindow, event));
         case LOAD_WINDOW_ACTIVE:
-            return handleManagerDueToLoadEvent(src, handleEventLoadWindow(src->loadWindow, event));
+            return handleManagerDueToLoadEvent(gui, handleEventLoadWindow(gui->loadWindow, event));
         case MODE_WINDOW_ACTIVE:
-            return handleManagerDueToModeEvent(src, handleEventModeWindow(src->modeWindow, event));
+            return handleManagerDueToModeEvent(gui, handleEventModeWindow(gui->modeWindow, event));
         case DIFFICULTY_WINDOW_ACTIVE:
-            return handleManagerDueToDifficultyEvent(src, handleEventDifficultyWindow(src->difficultyWindow, event));
+            return handleManagerDueToDifficultyEvent(gui, handleEventDifficultyWindow(gui->difficultyWindow, event));
         case COLOR_WINDOW_ACTIVE:
-            return handleManagerDueToColorEvent(src, handleEventColorWindow(src->colorWindow, event));
+            return handleManagerDueToColorEvent(gui, handleEventColorWindow(gui->colorWindow, event));
+        case GAME_WINDOW_ACTIVE:
+            return handleManagerDueToGameEvent(gui, handleEventGameWindow(gui->gameWindow, event));
         default:
-            printf("unkonwn event\n");
+            printf("unkonwn event\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
     }
 
-    return MANAGER_NONE;
+    return MANAGER_NONE; //TODO -> WHAT WE SHOULD DO IN BUGS?
 }
 
-MANAGER_EVENT handleManagerDueToMainEvent(GUIManager* src, MAIN_WINDOW_EVENTS event)
+MANAGER_EVENT handleManagerDueToMainEvent(GUIManager* gui, MAIN_WINDOW_EVENTS event)
 {
-    if (src == NULL )
+    if (gui == NULL )
         return MANAGER_NONE;
 
     switch (event)
@@ -96,41 +193,30 @@ MANAGER_EVENT handleManagerDueToMainEvent(GUIManager* src, MAIN_WINDOW_EVENTS ev
             return MANAGER_QUIT;
             break;
         case MAIN_START:
-            hideMainWindow(src->mainWindow);
-            if(src->modeWindow == NULL)
-                src->modeWindow = createModeWindow();
-            else
-                showModeWindow(src->modeWindow);
-            src->activeWin = MODE_WINDOW_ACTIVE;
+            switchWindow(gui, MODE_WINDOW_ACTIVE);
             return MANAGER_NONE;
             break;
         case MAIN_LOAD:
-            hideMainWindow(src->mainWindow);
-            if(src->loadWindow == NULL)
-                src->loadWindow = createLoadWindow();
-            else
-                showLoadWindow(src->loadWindow);
-            src->activeWin = LOAD_WINDOW_ACTIVE;
+            switchWindow(gui, LOAD_WINDOW_ACTIVE);
             return MANAGER_NONE;
             break;
         case MAIN_INVALID_ARGUMENT:
-            printf("INVALID, BUG1?!\n");
+            printf("INVALID, BUG1?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
             return MANAGER_NONE;
             break;
         case MAIN_NONE:
-            // printf("TODO BOOM\n");
             return MANAGER_NONE;
             break;
         default:
-            return MANAGER_NONE;
+            return MANAGER_NONE; //TODO -> WHAT WE SHOULD DO IN BUGS?
     }
 
     return MANAGER_NONE;
 }
 
-MANAGER_EVENT handleManagerDueToLoadEvent(GUIManager* src, LOAD_WINDOW_EVENTS event)
+MANAGER_EVENT handleManagerDueToLoadEvent(GUIManager* gui, LOAD_WINDOW_EVENTS event)
 {
-    if (src == NULL )
+    if (gui == NULL )
         return MANAGER_NONE;
 
     switch (event)
@@ -139,21 +225,21 @@ MANAGER_EVENT handleManagerDueToLoadEvent(GUIManager* src, LOAD_WINDOW_EVENTS ev
             return MANAGER_QUIT;
             break;
         case LOAD_BACK:
-            hideLoadWindow(src->loadWindow);
-            if(src->mainWindow == NULL)
-                src->mainWindow = createMainWindow();
-            else
-                showMainWindow(src->mainWindow);
-            src->activeWin = MAIN_WINDOW_ACTIVE;
+            switchWindow(gui, gui->lastWindow);
             return MANAGER_NONE;
             break;
 
-        case LOAD_CONITNUE:
-            printf("NOT SUPPORTED YET\n");
+        case LOAD_START:
+            if(gui->gameWindow != NULL)
+                destroyGameWindow(gui->gameWindow);
+            gui->gameWindow = createGameWindow(gui->renderer); //TODO -> CHANGE IT TO TAKE THE LOAD GAME
+            gui->lastWindow = gui->activeWindow;
+            gui->activeWindow = GAME_WINDOW_ACTIVE;
+
             return MANAGER_NONE;
             break;
         case LOAD_INVALID_ARGUMENT:
-            printf("INVALID, BUG2?!\n");
+            printf("INVALID, BUG2?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
             return MANAGER_NONE;
             break;
         case LOAD_NONE:
@@ -161,16 +247,16 @@ MANAGER_EVENT handleManagerDueToLoadEvent(GUIManager* src, LOAD_WINDOW_EVENTS ev
             return MANAGER_NONE;
             break;
         default:
-            printf("INVALID, BUG3?!\n");
+            printf("INVALID, BUG3?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
             return MANAGER_NONE;
     }
 
     return MANAGER_NONE;
 }
 
-MANAGER_EVENT handleManagerDueToModeEvent(GUIManager* src, MODE_WINDOW_EVENTS event)
+MANAGER_EVENT handleManagerDueToModeEvent(GUIManager* gui, MODE_WINDOW_EVENTS event)
 {
-    if (src == NULL )
+    if (gui == NULL )
         return MANAGER_NONE;
 
     switch (event)
@@ -179,45 +265,40 @@ MANAGER_EVENT handleManagerDueToModeEvent(GUIManager* src, MODE_WINDOW_EVENTS ev
             return MANAGER_QUIT;
             break;
         case MODE_BACK:
-            hideLoadWindow(src->modeWindow);
-            if(src->mainWindow == NULL)
-                src->mainWindow = createMainWindow();
-            else
-                showMainWindow(src->mainWindow);
-            src->activeWin = MAIN_WINDOW_ACTIVE;
+            switchWindow(gui, MAIN_WINDOW_ACTIVE);
             return MANAGER_NONE;
             break;
         case MODE_START:
-            printf("NOT SUPPORTED YET\n");
+            if(gui->gameWindow != NULL)
+                destroyGameWindow(gui->gameWindow);
+            gui->gameWindow = createGameWindow(gui->renderer); //TODO -> CHANGE IT TO two player chess
+            gui->lastWindow = gui->activeWindow;
+            gui->activeWindow = GAME_WINDOW_ACTIVE;
+
             return MANAGER_NONE;
             break;
         case MODE_NEXT:
-            hideLoadWindow(src->modeWindow);
-            if(src->difficultyWindow == NULL)
-                src->difficultyWindow = createDifficultyWindow();
-            else
-                showDifficultyWindow(src->difficultyWindow);
-            src->activeWin = DIFFICULTY_WINDOW_ACTIVE;
+            switchWindow(gui, DIFFICULTY_WINDOW_ACTIVE);
             return MANAGER_NONE;
             break;
         case MODE_INVALID_ARGUMENT:
-            printf("INVALID, BUG4?!\n");
+            printf("INVALID, BUG4?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
             return MANAGER_NONE;
             break;
         case MODE_NONE:
             return MANAGER_NONE;
             break;
         default:
-            printf("INVALID, BUG5?!\n");
+            printf("INVALID, BUG5?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
             return MANAGER_NONE;
     }
 
     return MANAGER_NONE;
 }
 
-MANAGER_EVENT handleManagerDueToDifficultyEvent(GUIManager* src, DIFFICULTY_WINDOW_EVENTS event)
+MANAGER_EVENT handleManagerDueToDifficultyEvent(GUIManager* gui, DIFFICULTY_WINDOW_EVENTS event)
 {
-    if (src == NULL )
+    if (gui == NULL )
         return MANAGER_NONE;
 
     switch (event)
@@ -226,40 +307,31 @@ MANAGER_EVENT handleManagerDueToDifficultyEvent(GUIManager* src, DIFFICULTY_WIND
             return MANAGER_QUIT;
             break;
         case DIFFICULTY_BACK:
-            hideDifficultyWindow(src->difficultyWindow);
-            if(src->modeWindow == NULL)
-                src->modeWindow = createModeWindow();
-            else
-                showModeWindow(src->modeWindow);
-            src->activeWin = MODE_WINDOW_ACTIVE;
+            switchWindow(gui, MODE_WINDOW_ACTIVE);
             return MANAGER_NONE;
             break;
         case DIFFICULTY_NEXT:
-            hideDifficultyWindow(src->difficultyWindow);
-            if(src->colorWindow == NULL)
-                src->colorWindow = createColorWindow();
-            else
-                showColorWindow(src->colorWindow);
-            src->activeWin = COLOR_WINDOW_ACTIVE;
+            switchWindow(gui, COLOR_WINDOW_ACTIVE);
             return MANAGER_NONE;
             break;
         case DIFFICULTY_NONE:
             return MANAGER_NONE;
             break;
         case DIFFICULTY_INVALID_ARGUMENT:
-            printf("INVALID, BUG4?!\n");
+            printf("INVALID, BUG4?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
             return MANAGER_NONE;
             break;
 
         default:
-            printf("INVALID, BUG5?!\n");
+            printf("INVALID, BUG5?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
             return MANAGER_NONE;
     }
+    return MANAGER_NONE;
 }
 
-MANAGER_EVENT handleManagerDueToColorEvent(GUIManager* src, COLOR_WINDOW_EVENTS event)
+MANAGER_EVENT handleManagerDueToColorEvent(GUIManager* gui, COLOR_WINDOW_EVENTS event)
 {
-    if (src == NULL )
+    if (gui == NULL )
         return MANAGER_NONE;
 
     switch (event)
@@ -268,28 +340,62 @@ MANAGER_EVENT handleManagerDueToColorEvent(GUIManager* src, COLOR_WINDOW_EVENTS 
             return MANAGER_QUIT;
             break;
         case COLOR_BACK:
-            hideColorWindow(src->colorWindow);
-            if(src->difficultyWindow == NULL)
-                src->difficultyWindow = createDifficultyWindow();
-            else
-                showDifficultyWindow(src->difficultyWindow);
-            src->activeWin = DIFFICULTY_WINDOW_ACTIVE;
+            switchWindow(gui, DIFFICULTY_WINDOW_ACTIVE);
             return MANAGER_NONE;
             break;
         case COLOR_START:
-            printf("NOT SUPPORTED YET\n");
+            if(gui->gameWindow != NULL)
+                destroyGameWindow(gui->gameWindow);
+            gui->gameWindow = createGameWindow(gui->renderer); //TODO -> CHANGE IT TO one player chess
+            gui->lastWindow = gui->activeWindow;
+            gui->activeWindow = GAME_WINDOW_ACTIVE;
+
             return MANAGER_NONE;
             break;
         case COLOR_NONE:
             return MANAGER_NONE;
             break;
         case COLOR_INVALID_ARGUMENT:
-            printf("INVALID, BUG4?!\n");
+            printf("INVALID, BUG4?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
             return MANAGER_NONE;
             break;
 
         default:
-            printf("INVALID, BUG5?!\n");
+            printf("INVALID, BUG5?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
             return MANAGER_NONE;
     }
+    return MANAGER_NONE;
+}
+
+MANAGER_EVENT handleManagerDueToGameEvent(GUIManager* gui, GAME_WINDOW_EVENTS event)
+{
+    if (gui == NULL )
+        return MANAGER_NONE;
+
+    switch (event)
+    {
+        case GAME_EXIT:
+            return MANAGER_QUIT;
+            break;
+        case GAME_MAIN:
+            switchWindow(gui, MAIN_WINDOW_ACTIVE);
+            return MANAGER_NONE;
+            break;
+        case GAME_LOAD:
+            switchWindow(gui, LOAD_WINDOW_ACTIVE);
+            return MANAGER_NONE;
+            break;
+        case GAME_NONE:
+            return MANAGER_NONE;
+            break;
+        case GAME_INVALID_ARGUMENT:
+            printf("INVALID, BUG4?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
+            return MANAGER_NONE;
+            break;
+
+        default:
+            printf("INVALID, BUG5?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
+            return MANAGER_NONE;
+    }
+    return MANAGER_NONE;
 }
