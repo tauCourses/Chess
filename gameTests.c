@@ -161,7 +161,6 @@ void runGamePlayTests() {
     Game *game = createNewGame(1, 1, 0);
     printBoard(game->state->board);
     bool userColor = WHITE;
-    bool x;
 
     removePawns(game);
 
@@ -210,7 +209,6 @@ void runUndoTest() {
     Game *game = createNewGame(1, 1, 0);
    // printBoard(game->state->board);
     bool userColor = WHITE;
-    bool x;
 
     Location *org = newLocation(1,0);
     Location *des = newLocation(2,0);
@@ -241,4 +239,112 @@ void runUndoTest() {
     undoMove(game);
 
     printBoard(game->state->board);
+}
+
+void runCompareLocationTest(){
+    Location* loc1 = newLocation(0,2);
+    Location* loc2 = newLocation(0,1);
+    printf("This is the compare:%d\n", compareLocations(loc1,loc2));
+}
+
+void runGetMovesStatesTest(){
+    Game *game = createNewGame(1, 1, 0);
+    bool userColor = WHITE;
+//    printf("\nThis is print of org loc:\n");
+//    printLocation(game->state->WKingLoc);
+//    printf(" adress:%d",game->state->WKingLoc);
+//    printf("\n");
+//    game->state = duplicateState(game->state);
+//    printf("\nThis is print of dup loc:\n");
+//    printLocation(game->state->WKingLoc);
+//    printf(" adress:%d",game->state->WKingLoc);
+//    printf("\n");
+
+    removePawns(game);
+
+    Location *org = newLocation(0, 0);
+    genericArrayListPrint(getMoves(game,org,WHITE), &printLocation);
+   // printLocation(genericArrayListPop(getMoves(game,org,WHITE)));
+    printf("\nThis is the list of possible state:\n");
+    genericArrayListPrint(getMovesStates(game,org,WHITE),&printStateBoard);
+   // printf("This is current game state");
+    //printStateBoard(game->state);
+
+
+}
+
+void runShitPointersTest(){
+//    int* a = (int*) calloc(3,sizeof(int));
+//    int* b = (int*) calloc(3,sizeof(int));
+//    a[0] = 7;
+//    b[0] = 8;
+//    free(a);
+//    a = b;
+//    printf("%d\n",a[0]);
+//
+//    Location* loc = newLocation(0,0);
+//    destroyLocation(loc);
+//    loc = newLocation(1,1);
+//    printLocation(loc);
+
+//    State* state2 = createNewState();
+//    State* newCopy = createNewState();
+//    printf("\nduplicateState: after destroy board\n");
+//    memcpy(newCopy->board, state2->board, sizeof(char*) * 8 );
+//    printf("\nduplicateState: before creating new location\n");
+//    Location* newWloc2 = newLocation(state2->WKingLoc->x,state2->WKingLoc->y);
+//
+//    printf("\n------------1--------------\n");
+//
+//    State* state1 = createNewState();
+//    printLocation(state1->WKingLoc);
+//    Location* newLoc = newLocation(state1->WKingLoc->x,state1->WKingLoc->y);
+//    destroyLocation(state1->WKingLoc);
+//    state1->WKingLoc = newLoc;
+//    printLocation(state1->WKingLoc);
+//
+//    printf("\n-------------2-------------\n");
+//
+//    State* state = duplicateState(createNewState());
+//    printLocation(state->WKingLoc);
+//    Location* newLoc2 = newLocation(state->WKingLoc->x,state->WKingLoc->y);
+//    destroyLocation(state->WKingLoc);
+//    state->WKingLoc = newLoc2;
+//    printLocation(state->WKingLoc);
+
+    printf("\n----- Location List push when full------\n");
+    genericArrayList* list1 = genericArrayListCreate(1, sizeof(Location*), &destroyLocation);
+    printf("\nTests: created list\n");
+    genericArrayListPush(list1,newLocation(2,2));
+    printf("\nTests: pushed first\n");
+    Location* locOutOfTheList = (Location*)genericArrayListPop(list1);
+    printf("\nTests: about to print poped location:\n");
+    printLocation(locOutOfTheList);
+    genericArrayListPush(list1,newLocation(3,3));
+    printf("\nTests: pushed second\n");
+
+    printf("\n----- Destroy State test ------\n");
+    destroyState(createNewState());
+
+
+    printf("\n----- State List push when full------\n");
+    genericArrayList* list = genericArrayListCreate(1, sizeof(State*), &destroyState);
+    printf("\nTests: created list\n");
+    State* stateToPush = createNewState();
+    genericArrayListPush(list,stateToPush);
+    printf("\nTests: pushed first\n");
+
+    printf("\nTests: printing pop\n");
+    State* outOfListState = (State*)genericArrayListPop(list);
+    printf("\ncheck1\n");
+    printStateBoard(outOfListState);
+    printf("\ncheck2\n");
+    printf("%d\n",(outOfListState)->hasBKingMoved);
+    printf("\ncheck3\n");
+    printLocation(outOfListState->WKingLoc);
+    printf("\ncheck4\n");
+
+    printf("\nTests: about to push second\n");
+    genericArrayListPush(list,createNewState());
+    printf("\nTests: pushed second\n");
 }

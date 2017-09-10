@@ -1,5 +1,19 @@
-#ifndef GENERICARRAYLIST_H_
-#define GENERICARRAYLIST_H_
+
+#ifndef CHESS_STATESSTACK_H
+#define CHESS_STATESSTACK_H
+
+#include "infrastructure.h"
+#include "gameAux.h"
+#include "game.h"
+
+typedef struct state_array_list_t {
+    State** elements;
+    int actualSize;
+    int maxSize;
+    size_t elementSize;
+    State (*destroyElement)(State *);
+} StateArrayList;
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,7 +23,7 @@
 
 
 /**
- * genericArrayList summary:
+ * StateArrayList summary:
  *
  * A container that represents a fixed size linked list. The capcity of the list
  * is specified at the creation. The container supports typical list
@@ -18,29 +32,29 @@
  * returned and the list is not affected. A summary of the supported functions
  * is given below:
  *
- * genericArrayListCreate       - Creates an empty array list with a specified
+ * StateArrayListCreate       - Creates an empty array list with a specified
  *                           max capacity.
- * genericArrayListCopy         - Creates an exact copy of a specified array list.
- * genericArrayListDestroy      - Frees all memory resources associated with an array
+ * StateArrayListCopy         - Creates an exact copy of a specified array list.
+ * StateArrayListDestroy      - Frees all memory resources associated with an array
  *                           list.
- * genericArrayListClear        - Clears all elements from a specified array list.
- * genericArrayListAddAt        - Inserts an element at a specified index, elements
+ * StateArrayListClear        - Clears all elements from a specified array list.
+ * StateArrayListAddAt        - Inserts an element at a specified index, elements
  *                           will be shifted to make place.
- * genericArrayListAddFirst     - Inserts an element at the beginning of the array
+ * StateArrayListAddFirst     - Inserts an element at the beginning of the array
  *                           list, elements will be shifted to make place.
- * genericArrayListAddLast      - Inserts an element at the end of the array list.
- * genericArrayListRemoveAt     - Removes an element at the specified index, elements
+ * StateArrayListAddLast      - Inserts an element at the end of the array list.
+ * StateArrayListRemoveAt     - Removes an element at the specified index, elements
  *                           elements will be shifted as a result.
- * genericArrayListRemoveFirst  - Removes an element from the beginning of the array
+ * StateArrayListRemoveFirst  - Removes an element from the beginning of the array
  *                           list, elements will be shifted as a result.
- * genericArrayListRemoveLast   - Removes an element from the end of the array list
- * genericArrayListGetAt        - Accesses the element at the specified index.
- * genericArrayListGetFirst     - Accesses the first element of the array list.
- * genericArrayListGetLast      - Accesses the last element of the array list.
- * genericArrayListMaxCapcity   - Returns the maximum capcity of the array list.
- * genericArrayListSize         - Returns the number of elements in that array list.
- * genericArrayListIsFull       - Returns if the array list reached its max capacity.
- * genericArrayListIsEmpty      - Returns true if the array list contains no elements.
+ * StateArrayListRemoveLast   - Removes an element from the end of the array list
+ * StateArrayListGetAt        - Accesses the element at the specified index.
+ * StateArrayListGetFirst     - Accesses the first element of the array list.
+ * StateArrayListGetLast      - Accesses the last element of the array list.
+ * StateArrayListMaxCapcity   - Returns the maximum capcity of the array list.
+ * StateArrayListSize         - Returns the number of elements in that array list.
+ * StateArrayListIsFull       - Returns if the array list reached its max capacity.
+ * StateArrayListIsEmpty      - Returns true if the array list contains no elements.
  */
 
 
@@ -52,7 +66,7 @@
  *  NULL, if an allocation error occurred or maxSize  <= 0.
  *  An instant of an array list otherwise.
  */
-genericArrayList* genericArrayListCreate(int maxSize, size_t elementSize, void (*destroyElement)(void *));
+StateArrayList* StateArrayListCreate(int maxSize, size_t elementSize, State (*destroyElement)(State *));
 
 /**
  *	Creates an exact copy of the src array list. Elements in the new copy will
@@ -62,14 +76,14 @@ genericArrayList* genericArrayListCreate(int maxSize, size_t elementSize, void (
  *	NULL if either an allocation error occurs or src == NULL.
  *	A new copy of the source array list, otherwise.
  */
-genericArrayList* genericArrayListCopy(genericArrayList* src);
+StateArrayList* StateArrayListCopy(StateArrayList* src);
 
 /**
  * Frees all memory resources associated with the source array list. If the
  * source array is NULL, then the function does nothing.
  * @param src - the source array list
  */
-void genericArrayListDestroy(genericArrayList* src);
+void StateArrayListDestroy(StateArrayList* src);
 
 /**
  * Clears all elements from the source array list. After invoking this function,
@@ -80,7 +94,7 @@ void genericArrayListDestroy(genericArrayList* src);
  * SP_ARRAY_LIST_INVALID_ARGUMENT if src == NULL
  * SP_ARRAY_LIST_SUCCESS otherwise
  */
-SP_ARRAY_LIST_MESSAGE genericArrayListClear(genericArrayList* src);
+SP_ARRAY_LIST_MESSAGE StateArrayListClear(StateArrayList* src);
 
 /**
  * Use the arrayList as a stack. After invoking this function,
@@ -92,7 +106,7 @@ SP_ARRAY_LIST_MESSAGE genericArrayListClear(genericArrayList* src);
  * SP_ARRAY_LIST_INVALID_ARGUMENT if src == NULL 
  * SP_ARRAY_LIST_SUCCESS - otherwise
  */
-SP_ARRAY_LIST_MESSAGE genericArrayListPush(genericArrayList* src, void* elem);
+SP_ARRAY_LIST_MESSAGE StateArrayListPush(StateArrayList* src, State* elem);
 
 /**
  * Use the arrayList as a stack. After invoking this function,
@@ -103,7 +117,7 @@ SP_ARRAY_LIST_MESSAGE genericArrayListPush(genericArrayList* src, void* elem);
  * -1 if src == NULL or src is empty 
  * element at index 0
  */
-void* genericArrayListPop(genericArrayList* src);
+State* StateArrayListPop(StateArrayList* src);
 
 /**
  * Inserts element at a specified index. The elements residing at and after the
@@ -119,7 +133,7 @@ void* genericArrayListPop(genericArrayList* src);
  * SP_ARRAY_LIST_FULL - if the source array list reached its maximum capacity
  * SP_ARRAY_LIST_SUCCESS - otherwise
  */
-SP_ARRAY_LIST_MESSAGE genericArrayListAddAt(genericArrayList* src, void* elem, int index);
+SP_ARRAY_LIST_MESSAGE StateArrayListAddAt(StateArrayList* src, State* elem, int index);
 
 /**
  * Inserts element at a the beginning of the source element. The elements
@@ -133,7 +147,7 @@ SP_ARRAY_LIST_MESSAGE genericArrayListAddAt(genericArrayList* src, void* elem, i
  * SP_ARRAY_LIST_FULL - if the source array list reached its maximum capacity
  * SP_ARRAY_LIST_SUCCESS - otherwise
  */
-SP_ARRAY_LIST_MESSAGE genericArrayListAddFirst(genericArrayList* src, void* elem);
+SP_ARRAY_LIST_MESSAGE StateArrayListAddFirst(StateArrayList* src, State* elem);
 
 /**
  * Inserts element at a the end of the source element. If the array list
@@ -146,7 +160,7 @@ SP_ARRAY_LIST_MESSAGE genericArrayListAddFirst(genericArrayList* src, void* elem
  * SP_ARRAY_LIST_FULL - if the source array list reached its maximum capacity
  * SP_ARRAY_LIST_SUCCESS - otherwise
  */
-SP_ARRAY_LIST_MESSAGE genericArrayListAddLast(genericArrayList* src, void* elem);
+SP_ARRAY_LIST_MESSAGE StateArrayListAddLast(StateArrayList* src, State* elem);
 
 /**
  * Removes an element from a specified index. The elements residing after the
@@ -161,7 +175,7 @@ SP_ARRAY_LIST_MESSAGE genericArrayListAddLast(genericArrayList* src, void* elem)
  * SP_ARRAY_LIST_EMPTY - if the source array list is empty
  * SP_ARRAY_LIST_SUCCESS - otherwise
  */
-SP_ARRAY_LIST_MESSAGE genericArrayListRemoveAt(genericArrayList* src, int index);
+SP_ARRAY_LIST_MESSAGE StateArrayListRemoveAt(StateArrayList* src, int index);
 
 /**
  * Removes an element from a the beginning of the list.
@@ -175,7 +189,7 @@ SP_ARRAY_LIST_MESSAGE genericArrayListRemoveAt(genericArrayList* src, int index)
  * SP_ARRAY_LIST_EMPTY - if the source array list is empty
  * SP_ARRAY_LIST_SUCCESS - otherwise
  */
-SP_ARRAY_LIST_MESSAGE genericArrayListRemoveFirst(genericArrayList* src);
+SP_ARRAY_LIST_MESSAGE StateArrayListRemoveFirst(StateArrayList* src);
 
 /**
  * Removes an element from a the end of the list.
@@ -189,7 +203,7 @@ SP_ARRAY_LIST_MESSAGE genericArrayListRemoveFirst(genericArrayList* src);
  * SP_ARRAY_LIST_EMPTY - if the source array list is empty
  * SP_ARRAY_LIST_SUCCESS - otherwise.
  */
-SP_ARRAY_LIST_MESSAGE genericArrayListRemoveLast(genericArrayList* src);
+SP_ARRAY_LIST_MESSAGE StateArrayListRemoveLast(StateArrayList* src);
 
 /**
  * Returns the element at the specified index. The function is called
@@ -201,7 +215,7 @@ SP_ARRAY_LIST_MESSAGE genericArrayListRemoveLast(genericArrayList* src);
  * Undefined value if either src == NULL or index out of bound.
  * Otherwise, the element at the specified index is returned.
  */
-void* genericArrayListGetAt(genericArrayList* src, int index);
+State* StateArrayListGetAt(StateArrayList* src, int index);
 
 /**
  * Returns the element at the beginning of the list. The function is called
@@ -212,7 +226,7 @@ void* genericArrayListGetAt(genericArrayList* src, int index);
  * Undefined value if either src == NULL or the list is empty
  * Otherwise, the element at the beginning of the list is returned.
  */
-void* genericArrayListGetFirst(genericArrayList* src);
+State* StateArrayListGetFirst(StateArrayList* src);
 
 /**
  * Returns the element at the end of the list. The function is called
@@ -223,7 +237,7 @@ void* genericArrayListGetFirst(genericArrayList* src);
  * Undefined value if either src == NULL or the list is empty
  * Otherwise, the element at the end of the list is returned.
  */
-void* genericArrayListGetLast(genericArrayList* src);
+State* StateArrayListGetLast(StateArrayList* src);
 
 /**
  * Returns the maximum capacity of the list. The function is called
@@ -234,7 +248,7 @@ void* genericArrayListGetLast(genericArrayList* src);
  * Undefined value if either src == NULL
  * Otherwise, the maximum capacity of the list is returned.
  */
-int genericArrayListMaxCapacity(genericArrayList* src);
+int StateArrayListMaxCapacity(StateArrayList* src);
 
 /**
  * Returns the number of elements in the list. The function is called
@@ -245,7 +259,7 @@ int genericArrayListMaxCapacity(genericArrayList* src);
  * Undefined value if either src == NULL
  * Otherwise, the number of the elements in the list is returned.
  */
-int genericArrayListSize(genericArrayList* src);
+int StateArrayListSize(StateArrayList* src);
 
 /**
  * Returns true if the list is full, that is the number of elements in the list
@@ -256,7 +270,7 @@ int genericArrayListSize(genericArrayList* src);
  * than its maximum capacity.
  * Otherwise, true is returned.
  */
-bool genericArrayListIsFull(genericArrayList* src);
+bool StateArrayListIsFull(StateArrayList* src);
 
 /**
  * Returns true if the list is empty, that is the number of elements in the list
@@ -266,11 +280,13 @@ bool genericArrayListIsFull(genericArrayList* src);
  * false if either src == NULL or the number of elements in the list is not zero.
  * Otherwise, true is returned.
  */
-bool genericArrayListIsEmpty(genericArrayList* src);
+bool StateArrayListIsEmpty(StateArrayList* src);
 
 /**
  * Print the content of the array list
  * @param src - the source array list
 */
-void genericArrayListPrint(genericArrayList* src, void (*printElement)(void*));
-#endif
+void StateArrayListPrint(StateArrayList* src, State (*printElement)(State*));
+
+
+#endif //CHESS_STATESSTACK_H

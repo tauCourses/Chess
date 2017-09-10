@@ -8,15 +8,35 @@ Location* newLocation(int x, int y){
 }
 
 void destroyLocation(void* loc){
+    printf("DESTROY LOCATION\n");
+    printf("destroy Location: destroying: <%d,%d>\n",(((Location*)loc))->x,(((Location*)loc))->y );
     free((Location*)loc);
 }
 
+void destroyLocationPointer(void** loc){
+    free(*((Location**)loc));
+}
+
 void printLocation(void* loc){
-    printf("<%d,%c> ",((Location*)loc)->x,((Location*)loc)->y+'A');
+    printf("<%d,%c> ",(((Location*)loc)->x+1),((Location*)loc)->y+'A');
+}
+
+int compareLocations(const void * item1, const void* item2){
+    Location* loc1 = *((Location**)item1);
+    Location* loc2 = *((Location**)item2);
+    if (loc1->x > loc2->x)
+        return 1;
+    if (loc1->x == loc2->x){
+        if (loc1->y == loc2->y)
+            return 0;
+        if (loc1->y > loc2->y)
+            return 1;
+    }
+    return -1;
 }
 
 State* createNewState(){
-    State* state = malloc(sizeof(*state));
+    State* state = malloc(sizeof(State));
     state->board = createNewBoard();
     state->WKingLoc = newLocation(0,3);
     state->BKingLoc = newLocation(7,3);
@@ -27,10 +47,22 @@ State* createNewState(){
 
 State* duplicateState(State* state){
     State* newCopy = createNewState();
-
+    printf("\nduplicateState: after destroy board\n");
     memcpy(newCopy->board[0], state->board[0], sizeof(char) * 8 * 8);
-    newCopy->WKingLoc = newLocation(state->WKingLoc->x,state->WKingLoc->y);
-    newCopy->BKingLoc = newLocation(state->BKingLoc->x,state->BKingLoc->y);
+    printf("\nduplicateState: before creating new location\n");
+    Location* newWloc = newLocation(state->WKingLoc->x,state->WKingLoc->y);
+    Location* newBloc = newLocation(state->BKingLoc->x,state->BKingLoc->y);
+    printf("\nduplicateState: after creating new location\n");
+    destroyLocation(newCopy->WKingLoc);
+    destroyLocation(newCopy->BKingLoc);
+    printf("\nduplicateState: after destroy location\n");
+    newCopy->WKingLoc = newWloc;
+    printf("\nduplicateState: after assigning WkingLoc\n");
+    newCopy->BKingLoc = newBloc;
+    printf("im in duplicate state, this is location org and dup:\n");
+    printf("%d ",state->WKingLoc);
+    printf("%d",newCopy->WKingLoc);
+    printf("\n");
     newCopy->hasBKingMoved = state->hasBKingMoved;
     newCopy->hasWKingMoved = state->hasWKingMoved;
     newCopy->currentPlayer = state->currentPlayer;
@@ -43,6 +75,13 @@ void destroyState(void* state) {
     destroyLocation(((State *) state)->BKingLoc);
     destroyLocation(((State *) state)->WKingLoc);
     free(((State *) state));
+}
+
+void destroyStatePointer(void** state) {
+    destroyBoard(    (*((State**)state))  ->board);
+    destroyLocation((*((State**)state))->BKingLoc);
+    destroyLocation((*((State**)state))->WKingLoc);
+    free((*((State**)state)));
 }
 
 char** createNewBoard(){
@@ -178,6 +217,7 @@ bool enemysColor(bool currentPlayerColor){
 
 void updateHistory(Game* game){
     //should enter current state to history list, and move on. copy is done inside list and also free memory.
+    printf("-- in update history -- \n");
     genericArrayListPush(game->historyStates,duplicateState(game->state));
 }
 

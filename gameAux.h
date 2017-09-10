@@ -14,6 +14,8 @@ void destroyBoard(char** board);
 
 void destroyState(void* state);
 
+void destroyStatePointer(void** state);
+
 char getPiece(char** board, Location* loc);
 
 void setPiece(char** board, Location* loc, char newPiece);
@@ -27,6 +29,12 @@ bool isCoordinatesOutOfBounds(int x, int y);
 int getPieceColor(char piece);
 
 Location* newLocation(int x, int y);
+
+void destroyLocation(void* loc);
+
+void destroyLocationPointer(void** loc);
+
+int compareLocations(const void * item1, const void* item2);
 
 void printLocation(void* loc);
 

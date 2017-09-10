@@ -70,8 +70,18 @@ SP_ARRAY_LIST_MESSAGE genericArrayListPush(genericArrayList* src, void* elem)
     if(src == NULL)
 		return SP_ARRAY_LIST_INVALID_ARGUMENT;
 	if(src->actualSize == src->maxSize){
-		src->destroyElement(genericArrayListGetLast(src));
-		genericArrayListRemoveLast(src);
+		printf("Push when full: About to destroy the last one\n");
+		printf("this is list max size:%d and this actual size:%d\n", src->maxSize,src->actualSize);
+        void* toRemove = genericArrayListGetLast(src);
+        printf("%d\n",((State*)toRemove)->hasBKingMoved);
+
+//        printStateBoard(((State*)toRemove));
+//        printLocation(((State*)toRemove)->WKingLoc);
+
+
+        src->destroyElement(toRemove);
+        genericArrayListRemoveLast(src);
+		printf("just destroyed the last one\n");
 	}
 
 	return genericArrayListAddFirst(src, elem);
@@ -155,6 +165,7 @@ void* genericArrayListGetAt(genericArrayList* src, int index)
 		return NULL;
 	if(index < 0 || index >= src->actualSize)
 		return NULL;
+	printf("im in getAt, this is the get at index %d: %d\n",index,((State*)(src->elements[index]))->hasBKingMoved);
 	return (src->elements[index]);
 }
 

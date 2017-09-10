@@ -41,7 +41,9 @@ bool movePiece(Game* game, Location* org, Location* des, bool currentPlayerColor
 
 bool isCheckmateOrTie(Game* game, bool currentPlayerColor);
 
-SPArrayList* getMoves(Game* game,Location* currentLoc,bool currentUserColor);
+genericArrayList* getMoves(Game* game,Location* currentLoc,bool currentUserColor);
+
+genericArrayList* getMovesStates(Game* game,Location* currentLoc,bool currentUserColor);
 
 bool undoMove(Game* game);
 

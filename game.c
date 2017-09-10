@@ -242,6 +242,8 @@ bool movePiece(Game* game, Location* org, Location* des, bool currentPlayerColor
         //make move and update history and king's location if needed
         printf("\nmovePiece: moving now '%c' from (%d,%d) to (%d,%d):\n",orgPiece,org->x,org->y,des->x,des->y);
         updateHistory(game);
+        if (des->x == 4)
+            printf("about to stuck");
         setPiece(game->state->board, org, EMPTY_PIECE);
         setPiece(game->state->board, des, orgPiece);
         updateKingLocation(game,orgPiece,des);
@@ -259,7 +261,7 @@ bool isCheckmateOrTie(Game* game, bool currentPlayerColor){
     char currentPiece;
     Location* currentLoc;
     Location* optionalLoc;
-    SPArrayList* optionalMoves;
+    genericArrayList* optionalMoves;
     bool isCheckmate = 1;
     bool isTie = 1;
 
@@ -269,13 +271,14 @@ bool isCheckmateOrTie(Game* game, bool currentPlayerColor){
             currentPiece = getPiece(game->state->board,currentLoc);
             if ((currentPiece != EMPTY_PIECE)&&(getPieceColor(currentPiece) != currentPlayerColor)){ //current piece is enemy's piece
                 optionalMoves = getMoves(game,currentLoc,getPieceColor(currentPiece));
-                while (!spArrayListIsEmpty(optionalMoves)){ //for all optional moves for current piece
+                while (!genericArrayListIsEmpty(optionalMoves)){ //for all optional moves for current piece
                     isTie = 0;
-                    optionalLoc = spArrayListPop(optionalMoves);
+                    optionalLoc = genericArrayListPop(optionalMoves);
                     if (!wouldKingBeThreatened(game,currentLoc,optionalLoc,getPieceColor(currentPiece))) //if there exists a move that does not threats king-
                         isCheckmate = 0;
                 }
-                spArrayListDestroy(optionalMoves);
+
+                genericArrayListDestroy(optionalMoves);
             }
             free(currentLoc);
         }
@@ -283,18 +286,46 @@ bool isCheckmateOrTie(Game* game, bool currentPlayerColor){
     return (isCheckmate|isTie);
 }
 
-SPArrayList* getMoves(Game* game,Location* currentLoc,bool currentUserColor){
-    SPArrayList* possibleMoves = spArrayListCreate(63); //maximum number of moves for single piece is 63, for getMoves list
+genericArrayList* getMoves(Game* game,Location* currentLoc,bool currentUserColor){
+    genericArrayList* possibleMoves = genericArrayListCreate(63,sizeof(Location*),&destroyLocation); //maximum number of moves for single piece is 63, for getMoves list
     Location* des;
 
     for (int i=0; i<8; i++){
         for (int j=0; j<8; j++){
             des = newLocation(i,j);
             if (isMoveLegal(game,currentLoc, des, currentUserColor))
-                spArrayListPush(possibleMoves,des);
+                genericArrayListPush(possibleMoves,des);
         }
     }
+    qsort(possibleMoves->elements, (size_t)possibleMoves->actualSize, sizeof(Location*), &compareLocations);
     return possibleMoves;
+}
+
+genericArrayList* getMovesStates(Game* game,Location* currentLoc,bool currentUserColor){
+    genericArrayList* possibleMovesStates = genericArrayListCreate(64,sizeof(State*),&destroyState); //maximum number of moves for single piece is 63, for getMoves list
+    genericArrayList* possibleMoves = getMoves(game,currentLoc,currentUserColor);
+    Location* possibleLoc;
+    State* orgState = duplicateState(game->state);
+    State* afterMoveState;
+
+    while (!genericArrayListIsEmpty(possibleMoves)){
+        printf("start\n");
+        possibleLoc = genericArrayListPop(possibleMoves);
+        printLocation(possibleLoc);
+        movePiece(game,currentLoc,possibleLoc,currentUserColor);
+
+        afterMoveState = duplicateState(game->state);
+        genericArrayListPush(possibleMovesStates,afterMoveState);
+        destroyState(game->state);
+        printf("before free\n");
+        free(possibleLoc);
+        printf("after free\n");
+        game->state = duplicateState(orgState);
+    }
+    genericArrayListDestroy(possibleMoves);
+    destroyState(orgState);
+
+    return possibleMovesStates;
 }
 
 bool undoMove(Game* game) {

@@ -193,6 +193,6 @@ void spArrayListPrint(SPArrayList* src)
 		return;
 	}
 	for(int i=0; i<src->actualSize; i++)
-		printf("<%d,%c> ",src->elements[i].x,src->elements[i].y+'A');
+		printf("<%d,%c> ",src->elements[i].x+1,src->elements[i].y+'A');
 	printf("\n");
 }

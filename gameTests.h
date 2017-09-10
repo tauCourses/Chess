@@ -16,6 +16,12 @@ void runGamePlayTests();
 
 void runUndoTest();
 
+void runCompareLocationTest();
+
+void runGetMovesStatesTest();
+
+void runShitPointersTest();
+
 void removePawns(Game* game);
 
 

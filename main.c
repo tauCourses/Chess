@@ -6,8 +6,12 @@ int main() {
     //runLegalMovesTests();
     //runMoveTests();
     //runArrayListTests();
-   // runGamePlayTests();
+    //runGamePlayTests();
     //rungenericArrayListTests();
-   runUndoTest();
+   //runUndoTest();
+    //runCompareLocationTest();
+    runShitPointersTest();
+    //runGetMovesStatesTest();
+
     return 0;
 }
