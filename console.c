@@ -1,5 +1,11 @@
 #include "console.h"
 
+int mainConsole()
+{
+    printf("console\n");
+    return 0;
+}
+
 bool printBoard(char** board){
     for (int i=7; i>-1; i--){
         printf("%d| ",i+1);

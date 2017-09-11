@@ -16,33 +16,30 @@ int main() {
 
     return 0;
 }*/
-#include <SDL.h>
-#include <SDL_video.h>
 #include <stdio.h>
 #include "GUIManager.h"
+#include "console.h"
+#include "Infrastructure.h"
 
-int main(int argc, char** argv) {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+int main(int argc, char** argv)
+{
+    if(argc == 1)
+        return mainConsole();
+    if(argc == 2)
     {
-        printf("ERROR: unable to init SDL: %s\n", SDL_GetError());
-        return 1;
+        if(strncmp(argv[1], "-c", 2) == 0)
+            return mainConsole();
+        else if(strncmp(argv[1], "-g", 2) == 0)
+            return  mainGUI();
+        else
+        {
+            printf("Unkown argument %s\n", argv[1]);
+            return 1;
+        }
     }
-
-    GUIManager* gui = managerCreate();
-    if (gui == NULL ) {
-        SDL_Quit();
-        return 0;
-    }
-
-    SDL_Event event;
-    while (1) {
-        SDL_WaitEvent(&event);
-        if(managerHandleEvent(gui,&event) == MANAGER_QUIT)
-            break;
-
-        managerDraw(gui);
-    }
-    managerDestroy(gui);
-    SDL_Quit();
-    return 0;
+    printf("invalid number of arguments");
+    return 1;
 }
+
+
+

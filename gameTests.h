@@ -16,6 +16,7 @@ void runGamePlayTests();
 
 void runUndoTest();
 
+
 void runCompareLocationTest();
 
 void runGetMovesStatesTest();
@@ -23,6 +24,7 @@ void runGetMovesStatesTest();
 void runShitPointersTest();
 
 void removePawns(Game* game);
+
 
 
 #endif //CHESS_GAMETESTS_H

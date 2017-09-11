@@ -1,18 +1,21 @@
 #include "GameWindow.h"
+#include "Infrastructure.h"
+#include "GameLayout.h"
 
-GameWindow* createGameWindow(SDL_Renderer* renderer)
+GameWindow* createGameWindow(SDL_Renderer* renderer, Game* game)
 {
     GameWindow *window = NULL;
+    if(game == NULL)
+        return NULL;
+    if (renderer == NULL)
+        return NULL;
 
     window = calloc(sizeof(GameWindow), sizeof(char));
     if (window == NULL)
         return NULL;
 
     window->renderer = renderer;
-    if (window->renderer == NULL) {
-        destroyGameWindow(window);
-        return NULL;
-    }
+    window->game = game;
 
     createGameButtons(window);
     if (window->restart == NULL || window->save == NULL || window->load == NULL || window->undo == NULL ||
@@ -22,13 +25,14 @@ GameWindow* createGameWindow(SDL_Renderer* renderer)
         return NULL;
     }
 
-    SDL_Point startBoardPoint = {.x=300,.y=50};
-    window->board = createBoardLayout(startBoardPoint,8,8);
+    SDL_Point startBoardPoint = {.x=300,.y=40};
+    window->board = createGameLayout(startBoardPoint, window->renderer);
     if(window->board == NULL)
     {
         destroyGameWindow(window);
         return NULL;
     }
+
     return window;
 }
 
@@ -78,7 +82,10 @@ void destroyGameWindow(GameWindow *window)
         destroyButton(window->exit);
 
     if(window->board != NULL)
-        destroyBoardLayout(window->board);
+        destroyGameLayout(window->board);
+
+    if(window->game != NULL)
+        destroyGame(window->game);
 
     free(window);
 }
@@ -99,7 +106,52 @@ void drawGameWindow(GameWindow *window)
     drawButton(window->main);
     drawButton(window->exit);
 
-    drawBoardLayout(window->renderer, window->board);
+    drawGameLayout(window->board, window->game->state->board);
+}
+void checkMoveGameWindow(Game *game, SDL_Point start, SDL_Point end)
+{
+
+}
+
+GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
+{
+    if(isPointOnGameLayout(window->board,event->button.x, event->button.y))
+    {
+        Location square = getSquare(window->board, event->button.x, event->button.y);
+        printf("move from (%d, %d) to (%d,%d)\n",window->board->draged->location.x,window->board->draged->location.y,square.x,square.y);
+        if(isMoveLegal(window->game,&window->board->draged->location,&square,window->game->state->currentPlayer))
+            movePiece(window->game,&window->board->draged->location,&square,window->game->state->currentPlayer);
+        destroyDragPiece(window->board);
+        //check if it is the end of the game //TODO
+        //check if pawn need to became something wlse //TODO
+        return GAME_NONE;
+    }
+    if(clickOnButton(window->restart, event->button.x, event->button.y))
+    {
+        Game *newGame = createNewGame(window->game->mode,window->game->difficulty,window->game->userColor);
+        if(newGame == NULL)
+            return GAME_NONE; //TODO -> WHAT TO DO?
+        destroyGame(window->game);
+        window->game = newGame;
+
+        return GAME_NONE;
+    }
+    else if(clickOnButton(window->save, event->button.x, event->button.y))
+    {
+        printf("not supported yet");
+        return GAME_NONE;
+    }
+    else if(clickOnButton(window->load, event->button.x, event->button.y))
+        return GAME_LOAD;
+    else if(clickOnButton(window->undo, event->button.x, event->button.y))
+    {
+        printf("not supported yet");
+        return GAME_NONE;
+    }
+    else if(clickOnButton(window->main, event->button.x, event->button.y))
+        return GAME_MAIN;
+    else if(clickOnButton(window->exit, event->button.x, event->button.y))
+        return GAME_EXIT;
 }
 
 GAME_WINDOW_EVENTS handleEventGameWindow(GameWindow *window, SDL_Event *event)
@@ -114,29 +166,16 @@ GAME_WINDOW_EVENTS handleEventGameWindow(GameWindow *window, SDL_Event *event)
                 return GAME_EXIT;
             break;
         case SDL_MOUSEBUTTONUP:
-            if(clickOnButton(window->restart, event->button.x, event->button.y))
-            {
-                printf("not supported yet");
-                return GAME_NONE;
-            }
-            else if(clickOnButton(window->save, event->button.x, event->button.y))
-            {
-                printf("not supported yet");
-                return GAME_NONE;
-            }
-            else if(clickOnButton(window->load, event->button.x, event->button.y))
-                return GAME_LOAD;
-            else if(clickOnButton(window->undo, event->button.x, event->button.y))
-            {
-                printf("not supported yet");
-                return GAME_NONE;
-            }
-            else if(clickOnButton(window->main, event->button.x, event->button.y))
-                return GAME_MAIN;
-            else if(clickOnButton(window->exit, event->button.x, event->button.y))
-                return GAME_EXIT;
-
+            return handleMouseUpGameWindow(window,event);
             break;
+        case SDL_MOUSEBUTTONDOWN:
+            if(isPointOnGameLayout(window->board,event->button.x, event->button.y))
+            {
+                Location square = getSquare(window->board, event->button.x, event->button.y);
+                if(window->game->state->board[square.x][square.y] != EMPTY_PIECE)
+                    setDragedPiece(window->board, square.x, square.y, window->game->state->board[square.x][square.y]);
+
+            }
         default:
             return GAME_NONE;
 

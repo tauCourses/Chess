@@ -9,7 +9,7 @@
 #include "gameAux.h"
 #include "console.h"
 
-Game* createNewGame(int mode, int difficulty, bool userColor);
+Game* createNewGame(CHESS_GAME_TYPES mode, int difficulty, CHESS_GAME_PLAYER_COLOR userColor);
 
 void destroyGame(Game* game);
 

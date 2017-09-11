@@ -12,6 +12,15 @@
 #define WHITE 0
 #define BLACK 1
 #define MAX_LINE_LENGTH 1024
+#define CHESS_BOARD_SIZE 8
+
+typedef enum {
+    CHESS_GAME_ONE_PLAYER, CHESS_GAME_TWO_PLAYERS
+} CHESS_GAME_TYPES;
+
+typedef enum {
+    CHESS_GAME_PLAYER_COLOR_BLACK, CHESS_GAME_PLAYER_COLOR_WHITE, CHESS_GAME_PLAYER_COLOR_NONE
+} CHESS_GAME_PLAYER_COLOR;
 
 typedef struct Location{
     int x,y;
@@ -46,20 +55,20 @@ typedef enum sp_array_list_message_t {
 //    char* pieces;
 //} History;
 
-typedef struct State{
+typedef struct{
     char** board;
-    bool currentPlayer;
+    CHESS_GAME_PLAYER_COLOR currentPlayer;
     bool hasWKingMoved;
     bool hasBKingMoved;
     Location* WKingLoc;
     Location* BKingLoc;
 } State;
 
-typedef struct Game{
+typedef struct{
     State* state;
-    int mode;
+    CHESS_GAME_TYPES mode;
     int difficulty;
-    bool userColor;
+    CHESS_GAME_PLAYER_COLOR userColor;
     genericArrayList* historyStates ;
 } Game;
 
@@ -82,7 +91,7 @@ typedef struct Command{
 } Command;
 
 
-//define messages and errors to print
+//define messages and errors to print TODO -> SHOULD NOT BE HERE! FOR SURE!
 #define MSG_SETTING_BEGIN "Specify game setting or type 'start' to begin a game with the current setting:\n"
 #define MSG_GAME_MODE_1 "Game mode is set to 1 player\n"
 #define MSG_GAME_MODE_2 "Game mode is set to 2 players\n"

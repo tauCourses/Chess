@@ -174,12 +174,12 @@ void runGamePlayTests() {
    // printf("is checkOrTie for black? - %d\n",isCheckmateOrTie(game,BLACK));
     org = newLocation(7,7);
     des = newLocation(6,7);
-    movePiece(game,org,des,enemysColor(userColor));
+    movePiece(game,org,des, oppositeColor(userColor));
     printBoard(game->state->board);
 
     org = newLocation(6,7);
     des = newLocation(6,3);
-    movePiece(game,org,des,enemysColor(userColor));
+    movePiece(game,org,des, oppositeColor(userColor));
     printBoard(game->state->board);
     printf("is Check for black? - %d\n",isKingThreatened(game,BLACK));
     printf("is checkOrTie for black? - %d\n",isCheckmateOrTie(game,BLACK));

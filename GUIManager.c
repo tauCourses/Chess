@@ -1,6 +1,34 @@
 #include "GUIManager.h"
 #include "ModeWindow.h"
 #include "MainWindow.h"
+#include "DifficultyWindow.h"
+
+int mainGUI()
+{
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
+        printf("ERROR: unable to init SDL: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    GUIManager* gui = managerCreate();
+    if (gui == NULL ) {
+        SDL_Quit();
+        return 1;
+    }
+
+    SDL_Event event;
+    while (1) {
+        SDL_WaitEvent(&event);
+        if(managerHandleEvent(gui,&event) == MANAGER_QUIT)
+            break;
+
+        managerDraw(gui);
+    }
+    managerDestroy(gui);
+    SDL_Quit();
+    return 0;
+}
 
 GUIManager* managerCreate()
 {
@@ -9,7 +37,7 @@ GUIManager* managerCreate()
         return NULL;
 
     gui->window = SDL_CreateWindow("SP Chess", SDL_WINDOWPOS_CENTERED,
-                                      SDL_WINDOWPOS_CENTERED, 1000, 750, SDL_WINDOW_OPENGL);
+                                      SDL_WINDOWPOS_CENTERED, 1000, 730, SDL_WINDOW_OPENGL);
     if (gui->window == NULL)
     {
         managerDestroy(gui);
@@ -230,11 +258,13 @@ MANAGER_EVENT handleManagerDueToLoadEvent(GUIManager* gui, LOAD_WINDOW_EVENTS ev
             break;
 
         case LOAD_START:
-            if(gui->gameWindow != NULL)
+            printf("not supported yet\n");
+            break;
+            /*if(gui->gameWindow != NULL) //TODO!!
                 destroyGameWindow(gui->gameWindow);
             gui->gameWindow = createGameWindow(gui->renderer); //TODO -> CHANGE IT TO TAKE THE LOAD GAME
             gui->lastWindow = gui->activeWindow;
-            gui->activeWindow = GAME_WINDOW_ACTIVE;
+            gui->activeWindow = GAME_WINDOW_ACTIVE;*/
 
             return MANAGER_NONE;
             break;
@@ -271,7 +301,17 @@ MANAGER_EVENT handleManagerDueToModeEvent(GUIManager* gui, MODE_WINDOW_EVENTS ev
         case MODE_START:
             if(gui->gameWindow != NULL)
                 destroyGameWindow(gui->gameWindow);
-            gui->gameWindow = createGameWindow(gui->renderer); //TODO -> CHANGE IT TO two player chess
+            Game* game = createNewGame(CHESS_GAME_TWO_PLAYERS,0, CHESS_GAME_PLAYER_COLOR_BLACK);
+            if(game == NULL) {
+                printf("null\n");
+                return MANAGER_NONE;
+            }
+            gui->gameWindow = createGameWindow(gui->renderer, game); //TODO -> CHANGE IT TO two player chess
+            if(gui->gameWindow == NULL)
+            {
+                printf("null game\n");
+                return MANAGER_NONE;
+            }
             gui->lastWindow = gui->activeWindow;
             gui->activeWindow = GAME_WINDOW_ACTIVE;
 
@@ -346,7 +386,10 @@ MANAGER_EVENT handleManagerDueToColorEvent(GUIManager* gui, COLOR_WINDOW_EVENTS 
         case COLOR_START:
             if(gui->gameWindow != NULL)
                 destroyGameWindow(gui->gameWindow);
-            gui->gameWindow = createGameWindow(gui->renderer); //TODO -> CHANGE IT TO one player chess
+
+            Game* game = createNewGame(CHESS_GAME_ONE_PLAYER, gui->difficultyWindow->configurationChosen,
+                                            getColorFromColorWindow(gui->colorWindow));
+            gui->gameWindow = createGameWindow(gui->renderer, game); //TODO -> CHANGE IT TO two player chess
             gui->lastWindow = gui->activeWindow;
             gui->activeWindow = GAME_WINDOW_ACTIVE;
 

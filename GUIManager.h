@@ -9,6 +9,8 @@
 #include "DifficultyWindow.h"
 #include "ColorWindow.h"
 #include "GameWindow.h"
+#include "Infrastructure.h"
+#include "game.h"
 
 typedef enum{
     MAIN_WINDOW_ACTIVE,
@@ -40,6 +42,7 @@ typedef struct {
     BoardLayout* rightBoard;
 } GUIManager;
 
+int mainGUI();
 GUIManager* managerCreate();
 void createSidesBoards(GUIManager* src);
 bool createWindows(GUIManager* gui);

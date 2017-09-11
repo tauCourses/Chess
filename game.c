@@ -1,7 +1,10 @@
 #include "game.h"
+#include "Infrastructure.h"
 
-typedef struct Game Game;
-Game* createNewGame(int mode, int difficulty, bool userColor){
+//typedef struct Game Game;
+
+Game* createNewGame(CHESS_GAME_TYPES mode, int difficulty, CHESS_GAME_PLAYER_COLOR userColor)
+{
     Game* game = (Game*) malloc(sizeof(Game));
     if(game == NULL)
     {
@@ -10,17 +13,19 @@ Game* createNewGame(int mode, int difficulty, bool userColor){
     }
 
     game->state = createNewState();
-    if (mode==1){
+    if (mode==CHESS_GAME_ONE_PLAYER)
+    {
         game->historyStates = genericArrayListCreate(historySize,sizeof(State*),&destroyState);
         if(game->historyStates == NULL)
         {
             free(game);
             return NULL;
         }
-        game->mode = 1;
+        game->mode = CHESS_GAME_ONE_PLAYER;
     }
-    else{
-        game->mode = 2;
+    else
+    {
+        game->mode = CHESS_GAME_TWO_PLAYERS;
     }
     game->difficulty = difficulty;
     game->userColor = userColor;
@@ -28,13 +33,16 @@ Game* createNewGame(int mode, int difficulty, bool userColor){
 }
 
 
-void destroyGame(Game* game){
+void destroyGame(Game* game)
+{
     if (game == NULL)
         return;
     if (game->state != NULL)
         destroyState(game->state);
-    if (game->historyStates != NULL)
-        genericArrayListDestroy(game->historyStates);
+
+//if (game->historyStates != NULL) //TODO -> NOT WORKING MAKE THE SYSTEM FALL     /
+// //genericArrayListDestroy(game->historyStates);
+
     free(game);
 }
 
@@ -45,7 +53,7 @@ bool isMoveLegal(Game* game, Location* org, Location* des, bool currentPlayerCol
     char orgPiece = getPiece(game->state->board,org);
     char desPiece = getPiece(game->state->board,des);
     //printf("isMoveLegal: move of '%c' from (%d,%d) to (%d,%d):\n",orgPiece,org->x,org->y,des->x,des->y);
-    if (!(isLegalDesPiece(game->state->board, orgPiece, desPiece,currentPlayerColor)))
+    if (!(isLegalDesPiece(game->state->board, orgPiece, desPiece,game->state->currentPlayer)))
         return 0;
     switch(orgPiece) {
         case 'm':
@@ -86,7 +94,8 @@ bool isMoveLegal(Game* game, Location* org, Location* des, bool currentPlayerCol
 }
 
 
-bool isLegalDesPiece(char** board, char orgPiece, char desPiece, bool currentPlayerColor){
+bool isLegalDesPiece(char** board, char orgPiece, char desPiece, bool currentPlayerColor)
+{
     if (((getPieceColor(orgPiece) == WHITE) && (currentPlayerColor == BLACK)) || ((getPieceColor(orgPiece) == BLACK) && (currentPlayerColor == WHITE))) //if origion piece does not belong to user
         return 0;
     if (((getPieceColor(desPiece) == WHITE) && (currentPlayerColor == WHITE)) || ((getPieceColor(desPiece) == BLACK) && (currentPlayerColor == BLACK))) //if destenation piece belongs to user
@@ -100,9 +109,9 @@ bool isLegalDesPiece(char** board, char orgPiece, char desPiece, bool currentPla
 bool isWhitePawnMoveLegal(char** board, Location* org, Location* des) {
     char desPiece = getPiece(board,des);
     if ((desPiece == EMPTY_PIECE) && (org->y == des->y)) { //move forward to an empty piece
-        if ((org->x == 1) && (des->x == 3)) { //first move of pawn can be a double move
+        if ((org->x == 1) && (des->x == 3) && getPieceColor(desPiece) > CHESS_GAME_PLAYER_COLOR_WHITE)  //first move of pawn can be a double move
             return 1;
-        }
+
         if (org->x+1 == des->x)
             return 1;
     }
@@ -115,9 +124,9 @@ bool isWhitePawnMoveLegal(char** board, Location* org, Location* des) {
 bool isBlackPawnMoveLegal(char** board, Location* org, Location* des){
     char desPiece = getPiece(board,des);
     if (desPiece == EMPTY_PIECE && org->y == des->y) { //move forward to an empty piece
-        if ((org->x == 6) && (des->x == 5)) { //first move of pawn can be a double move
+        if ((org->x == 6) && (des->x == 4 && getPieceColor(desPiece) > CHESS_GAME_PLAYER_COLOR_BLACK))  //first move of pawn can be a double move
             return 1;
-        }
+
         if (org->x-1 == des->x)
             return 1;
     }
@@ -126,16 +135,28 @@ bool isBlackPawnMoveLegal(char** board, Location* org, Location* des){
     return 0;
 
 }
+int SP_MAX(int x, int y)
+{
+    if(x>y)
+        return x;
+    return y;
+}
+int SP_MIN(int x, int y)
+{
+    if(x<y)
+        return x;
+    return y;
+}
 bool isRookMoveLegal(char** board, Location* org, Location* des){
     if (org->x == des->x){
-        for (int j = fmin(org->y,des->y)+1; j< fmax(org->y,des->y); j++) {
+        for (int j = (int)SP_MIN(org->y,des->y)+1; j< SP_MAX(org->y,des->y); j++) {
             if (!isCoordinatesEmpty(board, org->x, j))
                 return 0;
         }
         return 1;
     }
     if (org->y == des->y) {
-        for (int i = fmin(org->x, des->x) + 1; i < fmax(org->x, des->x); i++) {
+        for (int i = (int)SP_MIN(org->x, des->x) + 1; i < SP_MAX(org->x, des->x); i++) {
             if (!isCoordinatesEmpty(board, i, org->y))
                 return 0;
         }
@@ -211,7 +232,7 @@ bool isKingThreatened(Game* game, bool currentPlayerColor){
         for (int j=0; j<8; j++){
             currentPieceColor = getPieceColorInCoordinates(game->state->board,i,j);
             currentLoc = newLocation(i,j);
-            if ((currentPieceColor == enemysColor(currentPlayerColor)) && (isMoveLegal(game,currentLoc,kingLoc,currentPieceColor))) //current piece is enemy's piece
+            if ((currentPieceColor == oppositeColor(currentPlayerColor)) && (isMoveLegal(game,currentLoc,kingLoc,currentPieceColor))) //current piece is enemy's piece
                     return 1;
             free(currentLoc);
         }
@@ -241,12 +262,15 @@ bool movePiece(Game* game, Location* org, Location* des, bool currentPlayerColor
     if (isMoveLegal(game, org, des, currentPlayerColor)&& !wouldKingBeThreatened(game,org,des,currentPlayerColor)){
         //make move and update history and king's location if needed
         printf("\nmovePiece: moving now '%c' from (%d,%d) to (%d,%d):\n",orgPiece,org->x,org->y,des->x,des->y);
-        updateHistory(game);
+
+       // updateHistory(game);
         if (des->x == 4)
             printf("about to stuck");
+
         setPiece(game->state->board, org, EMPTY_PIECE);
         setPiece(game->state->board, des, orgPiece);
         updateKingLocation(game,orgPiece,des);
+        game->state->currentPlayer = oppositeColor(game->state->currentPlayer);
         return 1;
     }
     else{
@@ -272,6 +296,7 @@ bool isCheckmateOrTie(Game* game, bool currentPlayerColor){
             if ((currentPiece != EMPTY_PIECE)&&(getPieceColor(currentPiece) != currentPlayerColor)){ //current piece is enemy's piece
                 optionalMoves = getMoves(game,currentLoc,getPieceColor(currentPiece));
                 while (!genericArrayListIsEmpty(optionalMoves)){ //for all optional moves for current piece
+
                     isTie = 0;
                     optionalLoc = genericArrayListPop(optionalMoves);
                     if (!wouldKingBeThreatened(game,currentLoc,optionalLoc,getPieceColor(currentPiece))) //if there exists a move that does not threats king-
@@ -286,7 +311,9 @@ bool isCheckmateOrTie(Game* game, bool currentPlayerColor){
     return (isCheckmate|isTie);
 }
 
-genericArrayList* getMoves(Game* game,Location* currentLoc,bool currentUserColor){
+
+genericArrayList* getMoves(Game* game,Location* currentLoc,bool currentUserColor)
+{
     genericArrayList* possibleMoves = genericArrayListCreate(63,sizeof(Location*),&destroyLocation); //maximum number of moves for single piece is 63, for getMoves list
     Location* des;
 
@@ -327,6 +354,7 @@ genericArrayList* getMovesStates(Game* game,Location* currentLoc,bool currentUse
 
     return possibleMovesStates;
 }
+
 
 bool undoMove(Game* game) {
     if (game->mode == 2) {

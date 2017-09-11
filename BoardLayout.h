@@ -1,7 +1,3 @@
-//
-// Created by private on 09/09/17.
-//
-
 #ifndef CHESS_BOARDLAYOUT_H
 #define CHESS_BOARDLAYOUT_H
 
@@ -17,6 +13,7 @@ typedef enum { //validation options
     BOARD_SQUARE_BLACK, BOARD_SQUARE_WHITE
 } Board_Square_Type;
 
+
 typedef struct{
     SDL_Point startingPoint;
     int numInX, numInY; //number of squeres in each direction
@@ -27,7 +24,7 @@ void destroyBoardLayout(BoardLayout* board);
 
 void drawBoardLayout(SDL_Renderer* renderer, BoardLayout* board);
 
-bool clickOnBoardLayout(BoardLayout* button, int x, int y);
+bool isPointOnBoardLayout(BoardLayout *button, int x, int y);
 
 
 #endif //CHESS_BOARDLAYOUT_H

@@ -2,7 +2,7 @@
 #ifndef CHESS_STATESSTACK_H
 #define CHESS_STATESSTACK_H
 
-#include "infrastructure.h"
+#include "Infrastructure.h"
 
 typedef struct state_array_list_t {
     State** elements;

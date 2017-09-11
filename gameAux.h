@@ -51,7 +51,7 @@ int subInt(int a, int b);
 
 int getPieceColorInCoordinates(char** board, int x, int y);
 
-bool enemysColor(bool currentPlayerColor);
+CHESS_GAME_PLAYER_COLOR oppositeColor(CHESS_GAME_PLAYER_COLOR currentPlayerColor);
 
 void updateHistory(Game* game);
 

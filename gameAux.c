@@ -35,8 +35,10 @@ int compareLocations(const void * item1, const void* item2){
     return -1;
 }
 
+
 State* createNewState(){
-    State* state = malloc(sizeof(State));
+    State* state = malloc(sizeof(*state));
+
     state->board = createNewBoard();
     state->WKingLoc = newLocation(0,3);
     state->BKingLoc = newLocation(7,3);
@@ -44,6 +46,7 @@ State* createNewState(){
     state->hasWKingMoved = 0;
     state->hasBKingMoved = 0;
 }
+
 
 State* duplicateState(State* state){
     State* newCopy = createNewState();
@@ -211,8 +214,9 @@ int subInt(int a, int b) {
     return a-b;
 }
 
-bool enemysColor(bool currentPlayerColor){
-    return (currentPlayerColor ? 0 : 1);
+CHESS_GAME_PLAYER_COLOR oppositeColor(CHESS_GAME_PLAYER_COLOR currentPlayerColor)
+{
+    return (currentPlayerColor == CHESS_GAME_PLAYER_COLOR_BLACK ? CHESS_GAME_PLAYER_COLOR_WHITE : CHESS_GAME_PLAYER_COLOR_BLACK);
 }
 
 void updateHistory(Game* game){
