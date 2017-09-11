@@ -127,6 +127,8 @@ GameLayout.h
 /home/private/CLionProjects/Chess/GameLayout.h
 Infrastructure.h
 /home/private/CLionProjects/Chess/Infrastructure.h
+Storage.h
+/home/private/CLionProjects/Chess/Storage.h
 game.h
 /home/private/CLionProjects/Chess/game.h
 
@@ -216,6 +218,20 @@ Infrastructure.h
 console.h
 /home/private/CLionProjects/Chess/console.h
 
+/home/private/CLionProjects/Chess/Storage.c
+Storage.h
+/home/private/CLionProjects/Chess/Storage.h
+Infrastructure.h
+/home/private/CLionProjects/Chess/Infrastructure.h
+
+/home/private/CLionProjects/Chess/Storage.h
+Infrastructure.h
+/home/private/CLionProjects/Chess/Infrastructure.h
+stdio.h
+-
+string.h
+-
+
 /home/private/CLionProjects/Chess/console.c
 console.h
 /home/private/CLionProjects/Chess/console.h
@@ -287,10 +303,6 @@ console.h
 /home/private/CLionProjects/Chess/console.h
 
 /home/private/CLionProjects/Chess/main.c
-game.h
-/home/private/CLionProjects/Chess/game.h
-gameTests.h
-/home/private/CLionProjects/Chess/gameTests.h
 stdio.h
 -
 GUIManager.h

@@ -7,6 +7,7 @@
 #include "Button.h"
 #include "GameLayout.h"
 #include "Infrastructure.h"
+#include "Storage.h"
 #include "game.h"
 
 typedef enum {

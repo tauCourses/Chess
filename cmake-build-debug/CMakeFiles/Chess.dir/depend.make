@@ -202,6 +202,7 @@ CMakeFiles/Chess.dir/GUIManager.c.o: ../MainWindow.h
 CMakeFiles/Chess.dir/GUIManager.c.o: ../ModeWindow.h
 CMakeFiles/Chess.dir/GUIManager.c.o: ../SPArrayList.h
 CMakeFiles/Chess.dir/GUIManager.c.o: ../StatesStack.h
+CMakeFiles/Chess.dir/GUIManager.c.o: ../Storage.h
 CMakeFiles/Chess.dir/GUIManager.c.o: ../console.h
 CMakeFiles/Chess.dir/GUIManager.c.o: ../game.h
 CMakeFiles/Chess.dir/GUIManager.c.o: ../gameAux.h
@@ -306,6 +307,7 @@ CMakeFiles/Chess.dir/GameWindow.c.o: ../GameWindow.h
 CMakeFiles/Chess.dir/GameWindow.c.o: ../Infrastructure.h
 CMakeFiles/Chess.dir/GameWindow.c.o: ../SPArrayList.h
 CMakeFiles/Chess.dir/GameWindow.c.o: ../StatesStack.h
+CMakeFiles/Chess.dir/GameWindow.c.o: ../Storage.h
 CMakeFiles/Chess.dir/GameWindow.c.o: ../console.h
 CMakeFiles/Chess.dir/GameWindow.c.o: ../game.h
 CMakeFiles/Chess.dir/GameWindow.c.o: ../gameAux.h
@@ -508,6 +510,10 @@ CMakeFiles/Chess.dir/StatesStack.c.o: ../game.h
 CMakeFiles/Chess.dir/StatesStack.c.o: ../gameAux.h
 CMakeFiles/Chess.dir/StatesStack.c.o: ../genericArrayList.h
 
+CMakeFiles/Chess.dir/Storage.c.o: ../Infrastructure.h
+CMakeFiles/Chess.dir/Storage.c.o: ../Storage.c
+CMakeFiles/Chess.dir/Storage.c.o: ../Storage.h
+
 CMakeFiles/Chess.dir/console.c.o: ../Infrastructure.h
 CMakeFiles/Chess.dir/console.c.o: ../SPArrayList.h
 CMakeFiles/Chess.dir/console.c.o: ../StatesStack.h
@@ -567,10 +573,10 @@ CMakeFiles/Chess.dir/main.c.o: ../MainWindow.h
 CMakeFiles/Chess.dir/main.c.o: ../ModeWindow.h
 CMakeFiles/Chess.dir/main.c.o: ../SPArrayList.h
 CMakeFiles/Chess.dir/main.c.o: ../StatesStack.h
+CMakeFiles/Chess.dir/main.c.o: ../Storage.h
 CMakeFiles/Chess.dir/main.c.o: ../console.h
 CMakeFiles/Chess.dir/main.c.o: ../game.h
 CMakeFiles/Chess.dir/main.c.o: ../gameAux.h
-CMakeFiles/Chess.dir/main.c.o: ../gameTests.h
 CMakeFiles/Chess.dir/main.c.o: ../genericArrayList.h
 CMakeFiles/Chess.dir/main.c.o: ../main.c
 CMakeFiles/Chess.dir/main.c.o: /usr/include/SDL2/SDL.h

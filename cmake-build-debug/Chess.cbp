@@ -161,6 +161,12 @@
 		<Unit filename="/home/private/CLionProjects/Chess/StatesStack.h">
 			<Option target="Chess"/>
 		</Unit>
+		<Unit filename="/home/private/CLionProjects/Chess/Storage.c">
+			<Option target="Chess"/>
+		</Unit>
+		<Unit filename="/home/private/CLionProjects/Chess/Storage.h">
+			<Option target="Chess"/>
+		</Unit>
 		<Unit filename="/home/private/CLionProjects/Chess/console.c">
 			<Option target="Chess"/>
 		</Unit>

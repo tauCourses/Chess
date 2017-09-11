@@ -203,6 +203,7 @@ CMakeFiles/Chess.dir/GUIManager.c.o
  /home/private/CLionProjects/Chess/ModeWindow.h
  /home/private/CLionProjects/Chess/SPArrayList.h
  /home/private/CLionProjects/Chess/StatesStack.h
+ /home/private/CLionProjects/Chess/Storage.h
  /home/private/CLionProjects/Chess/console.h
  /home/private/CLionProjects/Chess/game.h
  /home/private/CLionProjects/Chess/gameAux.h
@@ -307,6 +308,7 @@ CMakeFiles/Chess.dir/GameWindow.c.o
  /home/private/CLionProjects/Chess/Infrastructure.h
  /home/private/CLionProjects/Chess/SPArrayList.h
  /home/private/CLionProjects/Chess/StatesStack.h
+ /home/private/CLionProjects/Chess/Storage.h
  /home/private/CLionProjects/Chess/console.h
  /home/private/CLionProjects/Chess/game.h
  /home/private/CLionProjects/Chess/gameAux.h
@@ -508,6 +510,10 @@ CMakeFiles/Chess.dir/StatesStack.c.o
  /home/private/CLionProjects/Chess/game.h
  /home/private/CLionProjects/Chess/gameAux.h
  /home/private/CLionProjects/Chess/genericArrayList.h
+CMakeFiles/Chess.dir/Storage.c.o
+ /home/private/CLionProjects/Chess/Infrastructure.h
+ /home/private/CLionProjects/Chess/Storage.c
+ /home/private/CLionProjects/Chess/Storage.h
 CMakeFiles/Chess.dir/console.c.o
  /home/private/CLionProjects/Chess/Infrastructure.h
  /home/private/CLionProjects/Chess/SPArrayList.h
@@ -568,10 +574,10 @@ CMakeFiles/Chess.dir/main.c.o
  /home/private/CLionProjects/Chess/ModeWindow.h
  /home/private/CLionProjects/Chess/SPArrayList.h
  /home/private/CLionProjects/Chess/StatesStack.h
+ /home/private/CLionProjects/Chess/Storage.h
  /home/private/CLionProjects/Chess/console.h
  /home/private/CLionProjects/Chess/game.h
  /home/private/CLionProjects/Chess/gameAux.h
- /home/private/CLionProjects/Chess/gameTests.h
  /home/private/CLionProjects/Chess/genericArrayList.h
  /home/private/CLionProjects/Chess/main.c
  /usr/include/SDL2/SDL.h

@@ -447,6 +447,33 @@ StatesStack.c.s:
 	$(MAKE) -f CMakeFiles/Chess.dir/build.make CMakeFiles/Chess.dir/StatesStack.c.s
 .PHONY : StatesStack.c.s
 
+Storage.o: Storage.c.o
+
+.PHONY : Storage.o
+
+# target to build an object file
+Storage.c.o:
+	$(MAKE) -f CMakeFiles/Chess.dir/build.make CMakeFiles/Chess.dir/Storage.c.o
+.PHONY : Storage.c.o
+
+Storage.i: Storage.c.i
+
+.PHONY : Storage.i
+
+# target to preprocess a source file
+Storage.c.i:
+	$(MAKE) -f CMakeFiles/Chess.dir/build.make CMakeFiles/Chess.dir/Storage.c.i
+.PHONY : Storage.c.i
+
+Storage.s: Storage.c.s
+
+.PHONY : Storage.s
+
+# target to generate assembly for a file
+Storage.c.s:
+	$(MAKE) -f CMakeFiles/Chess.dir/build.make CMakeFiles/Chess.dir/Storage.c.s
+.PHONY : Storage.c.s
+
 console.o: console.c.o
 
 .PHONY : console.o
@@ -654,6 +681,9 @@ help:
 	@echo "... StatesStack.o"
 	@echo "... StatesStack.i"
 	@echo "... StatesStack.s"
+	@echo "... Storage.o"
+	@echo "... Storage.i"
+	@echo "... Storage.s"
 	@echo "... console.o"
 	@echo "... console.i"
 	@echo "... console.s"

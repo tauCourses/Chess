@@ -17,6 +17,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/Chess.dir/gameTests.c.o"
   "CMakeFiles/Chess.dir/GameLayout.c.o"
   "CMakeFiles/Chess.dir/StatesStack.c.o"
+  "CMakeFiles/Chess.dir/Storage.c.o"
   "Chess.pdb"
   "Chess"
 )

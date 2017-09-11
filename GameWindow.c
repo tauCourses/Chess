@@ -138,7 +138,7 @@ GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
     }
     else if(clickOnButton(window->save, event->button.x, event->button.y))
     {
-        printf("not supported yet");
+        saveGame(window->game, "abc.xml");
         return GAME_NONE;
     }
     else if(clickOnButton(window->load, event->button.x, event->button.y))

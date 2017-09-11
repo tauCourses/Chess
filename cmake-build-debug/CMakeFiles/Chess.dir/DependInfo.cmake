@@ -16,6 +16,7 @@ set(CMAKE_DEPENDS_CHECK_C
   "/home/private/CLionProjects/Chess/ModeWindow.c" "/home/private/CLionProjects/Chess/cmake-build-debug/CMakeFiles/Chess.dir/ModeWindow.c.o"
   "/home/private/CLionProjects/Chess/SPArrayList.c" "/home/private/CLionProjects/Chess/cmake-build-debug/CMakeFiles/Chess.dir/SPArrayList.c.o"
   "/home/private/CLionProjects/Chess/StatesStack.c" "/home/private/CLionProjects/Chess/cmake-build-debug/CMakeFiles/Chess.dir/StatesStack.c.o"
+  "/home/private/CLionProjects/Chess/Storage.c" "/home/private/CLionProjects/Chess/cmake-build-debug/CMakeFiles/Chess.dir/Storage.c.o"
   "/home/private/CLionProjects/Chess/console.c" "/home/private/CLionProjects/Chess/cmake-build-debug/CMakeFiles/Chess.dir/console.c.o"
   "/home/private/CLionProjects/Chess/game.c" "/home/private/CLionProjects/Chess/cmake-build-debug/CMakeFiles/Chess.dir/game.c.o"
   "/home/private/CLionProjects/Chess/gameAux.c" "/home/private/CLionProjects/Chess/cmake-build-debug/CMakeFiles/Chess.dir/gameAux.c.o"

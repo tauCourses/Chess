@@ -10,7 +10,7 @@ set(SOURCE_FILES main.c MainWindow.h MainWindow.c GUIManager.h GUIManager.c Butt
         ColorWindow.h ColorWindow.c GameWindow.h GameWindow.c BoardLayout.h BoardLayout.c
         console.h console.c game.h game.c gameAux.h gameAux.c genericArrayList.h genericArrayList.c
         Infrastructure.h SPArrayList.h SPArrayList.c gameTests.h gameTests.c GameLayout.c GameLayout.h
-        StatesStack.h StatesStack.c)
+        StatesStack.h StatesStack.c Storage.h Storage.c)
 add_executable(Chess ${SOURCE_FILES})
 
 
