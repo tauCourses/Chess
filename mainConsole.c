@@ -13,7 +13,7 @@ int runConsoleGame()
         {
             case settingState:
                 while (command.type != start){
-                    executeSettingCommand(game,command);
+                    //executeSettingCommand(game,command);
                     command = getCommand();
                 }
                 inputState = gameState;
@@ -40,15 +40,15 @@ Command getCommand()
 
 Command getCommandFromUser()
 {
-    char input[MAX_LINE_LENGTH];
-    fgets(input,MAX_LINE_LENGTH,stdin);
-    if (input == NULL)//error in fgets
-    {
-        printf(ERR_FUNC_FAIL, "fgets");
-        SPCommand errorCommand;
-        errorCommand.cmd = SP_QUIT;
-        errorCommand.validArg = true; // marks command as an error
-        return errorCommand;
-    }
-    return spParserPraseLine(input);
+//    char input[MAX_LINE_LENGTH];
+//    fgets(input,MAX_LINE_LENGTH,stdin);
+//    if (input == NULL)//error in fgets
+//    {
+//        printf(ERR_FUNC_FAIL, "fgets");
+//        SPCommand errorCommand;
+//        errorCommand.cmd = SP_QUIT;
+//        errorCommand.validArg = true; // marks command as an error
+//        return errorCommand;
+//    }
+//    return spParserPraseLine(input);
 }

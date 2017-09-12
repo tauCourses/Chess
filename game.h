@@ -7,13 +7,19 @@
 #include "math.h"
 #include "Infrastructure.h"
 #include "gameAux.h"
-#include "console.h"
+//#include "console.h"
+
+typedef enum {
+    MOVE_DONE, MOVE_ILLEGAL_INVALID_POSITION, MOVE_ILLEGAL_NOT_USER_PIECE, MOVE_ILLEGAL_BY_RULES, MOVE_LEGAL, MOVE_CHECK, MOVE_TIE, MOVE_CHECKMATE
+} MOVE_MESSAGE;
 
 Game* createNewGame(CHESS_GAME_TYPES mode, int difficulty, CHESS_GAME_PLAYER_COLOR userColor);
 
 void destroyGame(Game* game);
 
-bool isMoveLegal(Game* game, Location* org, Location* des, bool currentPlayerColor);
+MOVE_MESSAGE isMoveLegal(Game* game, Location* org, Location* des, bool currentPlayerColor);
+
+bool isLegalOrgPiece(char** board, char orgPiece, char desPiece, bool currentPlayerColor);
 
 bool isLegalDesPiece(char** board, char orgPiece, char desPiece, bool currentPlayerColor);
 
@@ -37,9 +43,9 @@ bool wouldKingBeThreatened(Game* game, Location* org, Location* des, bool curren
 
 bool isBishopLegalDirection(char** board, Location* org, Location* des, int (*addOrSubX)(int,int), int (*addOrSubY)(int,int));
 
-bool movePiece(Game* game, Location* org, Location* des, bool currentPlayerColor);
+MOVE_MESSAGE movePiece(Game* game, Location* org, Location* des);
 
-bool isCheckmateOrTie(Game* game, bool currentPlayerColor);
+MOVE_MESSAGE isCheckmateOrTie(Game* game, bool currentPlayerColor);
 
 genericArrayList* getMoves(Game* game,Location* currentLoc,bool currentUserColor);
 

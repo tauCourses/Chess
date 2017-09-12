@@ -3,7 +3,8 @@
 Button* createButton(SDL_Renderer* renderer, SDL_Rect location, const char* mainPath,
                      const char* secondaryPath, ButtonType type)
 {
-    if (renderer == NULL)
+
+	if (renderer == NULL)
         return NULL;
 
     Button* button = (Button*) malloc(sizeof(Button));
@@ -21,6 +22,8 @@ Button* createButton(SDL_Renderer* renderer, SDL_Rect location, const char* main
         button->state.option = BUTTON_FIRST_OPTION;
 
     setTextures(button, mainPath, secondaryPath);
+    if ((strcmp(mainPath,BACK_ACTIVE_BUTTON)  == 0) && (button->mainTexture == NULL))//delete this print tests
+        	    	printf("\n main texture of back button is null\n");//delete this print tests
 
     if(button->mainTexture == NULL ||
             (button->type != BUTTON_TYPE_DEGENERATED && button->type != BUTTON_TYPE_ONE_OPTION &&
@@ -35,7 +38,7 @@ Button* createButton(SDL_Renderer* renderer, SDL_Rect location, const char* main
 
 void setTextures(Button* button, const char* mainPath, const char* secondaryPath)
 {
-    SDL_Surface* loadingSurface = SDL_LoadBMP(mainPath);
+	SDL_Surface* loadingSurface = SDL_LoadBMP(mainPath);
     if (loadingSurface == NULL )
         return;
 
@@ -51,6 +54,8 @@ void setTextures(Button* button, const char* mainPath, const char* secondaryPath
         SDL_FreeSurface(loadingSurface);
         return;
     }
+
+
 
     loadingSurface = SDL_LoadBMP(secondaryPath);
     if (loadingSurface == NULL )

@@ -17,7 +17,7 @@ typedef struct state_array_list_t {
 #include <string.h>
 #include <stdio.h>
 #include "Infrastructure.h"
-#include "console.h"
+//#include "console.h"
 
 
 /**

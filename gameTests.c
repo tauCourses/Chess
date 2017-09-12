@@ -87,7 +87,8 @@ void runMoveTests() {
     printBoard(game->state->board);
     movePiece(game,org,des,userColor);
     printBoard(game->state->board);
-    printf("is king threatend? - %d\n",isKingThreatened(game,BLACK));
+    printf("is Black king threatend? - %d\n",isKingThreatened(game,BLACK));
+    printf("is White king threatend? - %d\n",isKingThreatened(game,WHITE));
     org = newLocation(4,6);
     des = newLocation(7,3);
     movePiece(game,org,des,userColor);

@@ -1,7 +1,7 @@
 #include "gameAux.h"
 
 Location* newLocation(int x, int y){
-    Location* newLocation = (Location*) malloc(2*sizeof(int));
+    Location* newLocation = (Location*) malloc(sizeof(Location));
     newLocation->x = x;
     newLocation->y = y;
     return newLocation;
@@ -37,7 +37,7 @@ int compareLocations(const void * item1, const void* item2){
 
 
 State* createNewState(){
-    State* state = malloc(sizeof(*state));
+    State* state = malloc(sizeof(State));
 
     state->board = createNewBoard();
     state->WKingLoc = newLocation(0,3);
@@ -166,7 +166,7 @@ bool isLocationOutOfBounds(Location* des){
 
 bool isCoordinatesOutOfBounds(int x, int y){
     Location* newLoc = newLocation(x,y);
-    char piece =  isLocationOutOfBounds(newLoc);
+    bool piece =  isLocationOutOfBounds(newLoc);
     free(newLoc);
     return piece;
 }
@@ -181,7 +181,7 @@ int getPieceColor(char piece){
 
 int getPieceColorInCoordinates(char** board, int x, int y){
     Location* newLoc = newLocation(x,y);
-    char piece = getPieceColor(getPiece(board, newLoc));
+    int piece = getPieceColor(getPiece(board, newLoc));
     free(newLoc);
     return piece;
 }
@@ -227,9 +227,9 @@ void updateHistory(Game* game){
 
 void updateKingLocation(Game* game, char orgPiece, Location* des){
     if (orgPiece == 'k')
-        game->state->WKingLoc = des;
+        game->state->WKingLoc = newLocation(des->x,des->y);
     if (orgPiece == 'K')
-        game->state->BKingLoc = des;
+        game->state->BKingLoc = newLocation(des->x,des->y);
 }
 
 //in destroy game should destory each state in history. should destory state on every pop.

@@ -5,7 +5,7 @@
 
 int mainGUI()
 {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
         printf("ERROR: unable to init SDL: %s\n", SDL_GetError());
         return 1;
@@ -13,7 +13,7 @@ int mainGUI()
 
     GUIManager* gui = managerCreate();
     if (gui == NULL ) {
-        SDL_Quit();
+    	SDL_Quit();
         return 1;
     }
 
@@ -22,7 +22,6 @@ int mainGUI()
         SDL_WaitEvent(&event);
         if(managerHandleEvent(gui,&event) == MANAGER_QUIT)
             break;
-
         managerDraw(gui);
     }
     managerDestroy(gui);
@@ -57,6 +56,8 @@ GUIManager* managerCreate()
         managerDestroy(gui);
         return NULL ;
     }
+
+
 
     if(createWindows(gui) == false)
     {
