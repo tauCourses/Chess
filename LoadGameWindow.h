@@ -7,8 +7,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "Button.h"
-
-#define MAX_NUMBER_OF_LOAD_GAMES 5
+#include "Storage.h"
 
 typedef enum {
     LOAD_BACK, LOAD_EXIT, LOAD_START, LOAD_INVALID_ARGUMENT, LOAD_NONE
@@ -21,7 +20,6 @@ typedef struct  {
     Button* back;
     Button* load;
     int slotChosed;
-    int numOfSlots;
 } LoadWindow;
 
 LoadWindow* createLoadWindow(SDL_Renderer* renderer);
