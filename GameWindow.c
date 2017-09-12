@@ -108,14 +108,11 @@ void drawGameWindow(GameWindow *window)
 
     drawGameLayout(window->board, window->game->state->board);
 }
-void checkMoveGameWindow(Game *game, SDL_Point start, SDL_Point end)
-{
 
-}
 
 GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
 {
-    if(isPointOnGameLayout(window->board,event->button.x, event->button.y))
+    if(window->board->draged != NULL && isPointOnGameLayout(window->board,event->button.x, event->button.y))
     {
         Location square = getSquare(window->board, event->button.x, event->button.y);
         printf("move from (%d, %d) to (%d,%d)\n",window->board->draged->location.x,window->board->draged->location.y,square.x,square.y);
@@ -138,7 +135,7 @@ GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
     }
     else if(clickOnButton(window->save, event->button.x, event->button.y))
     {
-        saveGame(window->game, "abc.xml");
+        addGameToGameSlots(window->game);
         return GAME_NONE;
     }
     else if(clickOnButton(window->load, event->button.x, event->button.y))
@@ -152,6 +149,7 @@ GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
         return GAME_MAIN;
     else if(clickOnButton(window->exit, event->button.x, event->button.y))
         return GAME_EXIT;
+    return GAME_NONE;
 }
 
 GAME_WINDOW_EVENTS handleEventGameWindow(GameWindow *window, SDL_Event *event)
@@ -176,6 +174,8 @@ GAME_WINDOW_EVENTS handleEventGameWindow(GameWindow *window, SDL_Event *event)
                     setDragedPiece(window->board, square.x, square.y, window->game->state->board[square.x][square.y]);
 
             }
+            return GAME_NONE;
+            break;
         default:
             return GAME_NONE;
 

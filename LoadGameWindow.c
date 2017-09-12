@@ -10,14 +10,13 @@ LoadWindow* createLoadWindow(SDL_Renderer* renderer)
 
     window->renderer = renderer;
 
-    window->numOfSlots = 3; // TODO - should get from chess infra!!! don't leave me like that!
     createLoadButtons(window);
     if (window->back == NULL || window->load == NULL)
     {
         destroyLoadWindow(window);
         return NULL;
     }
-    for (int i = 0; i < window->numOfSlots; i++)
+    for (int i = 0; i < MAX_NUMBER_OF_LOAD_GAMES; i++)
     {
         if (window->slots[i] == NULL)
         {
@@ -42,7 +41,7 @@ void createLoadButtons(LoadWindow* window)
     window->load = createButton(window->renderer, loadR, LOAD_ACTIVE_BUTTON, LOAD_NOT_ACTIVE_BUTTON, BUTTON_TYPE_VALIDATE);
     if(window->load != NULL)
         window->load->state.valid = BUTTON_INVALID;
-    for (int i = 0; i < window->numOfSlots; i++)
+    for (int i = 0; i < MAX_NUMBER_OF_LOAD_GAMES; i++)
     {
         switch(i)
         {
@@ -62,7 +61,7 @@ void createLoadButtons(LoadWindow* window)
                 window->slots[i] = createButton(window->renderer, slotR, GAME_SLOT_5_ACTIVE_BUTTON, GAME_SLOT_5_NOT_ACTIVE_BUTTON, BUTTON_TYPE_CHOICE);
                 break;
             default:
-                printf("not supported more than 5 slots"); //TODO - > BUG!
+                window->slots[i] = createButton(window->renderer, slotR, GAME_SLOT_5_ACTIVE_BUTTON, GAME_SLOT_5_NOT_ACTIVE_BUTTON, BUTTON_TYPE_CHOICE);
         }
         slotR.y += 90;
     }
@@ -77,7 +76,7 @@ void destroyLoadWindow(LoadWindow *window)
         destroyButton(window->back);
     if(window->load!= NULL)
         destroyButton(window->load);
-    for (int i = 0; i < window->numOfSlots; i++)
+    for (int i = 0; i < MAX_NUMBER_OF_LOAD_GAMES; i++)
         if(window->slots[i] != NULL)
             destroyButton(window->slots[i]);
 
@@ -95,7 +94,7 @@ void drawLoadWindow(LoadWindow *window)
 
     drawButton(window->back);
     drawButton(window->load);
-    for (int i = 0; i < window->numOfSlots; i++)
+    for (int i = 0; i < numberOfGameSlots(); i++)
         drawButton(window->slots[i]);
 
 }
@@ -121,7 +120,7 @@ LOAD_WINDOW_EVENTS handleEventLoadWindow(LoadWindow *window, SDL_Event *event)
                     return LOAD_START;
                 return LOAD_NONE;
             }
-            for (int i = 0; i < window->numOfSlots; i++)
+            for (int i = 0; i < numberOfGameSlots(); i++)
             {
                 if (clickOnButton(window->slots[i], event->button.x, event->button.y))
                 {

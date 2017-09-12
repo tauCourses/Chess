@@ -47,7 +47,8 @@ void destroyGame(Game* game)
 }
 
 
-bool isMoveLegal(Game* game, Location* org, Location* des, bool currentPlayerColor){
+bool isMoveLegal(Game* game, Location* org, Location* des, bool currentPlayerColor)
+{
     if (isLocationOutOfBounds(org) || isLocationOutOfBounds(des))
         return 0;
     char orgPiece = getPiece(game->state->board,org);
@@ -226,7 +227,7 @@ bool isQueenMoveLegal(char** board, Location* org, Location* des){
 
 bool isKingThreatened(Game* game, bool currentPlayerColor){
     Location* kingLoc = currentPlayerColor ? game->state->BKingLoc : game->state->WKingLoc;
-    char currentPieceColor;
+    bool currentPieceColor;
     Location* currentLoc;
     for (int i=0; i<8; i++){
         for (int j=0; j<8; j++){
@@ -314,7 +315,7 @@ bool isCheckmateOrTie(Game* game, bool currentPlayerColor){
 
 genericArrayList* getMoves(Game* game,Location* currentLoc,bool currentUserColor)
 {
-    genericArrayList* possibleMoves = genericArrayListCreate(63,sizeof(Location*),&destroyLocation); //maximum number of moves for single piece is 63, for getMoves list
+   /* genericArrayList* possibleMoves = genericArrayListCreate(63,sizeof(Location*),&destroyLocation); //maximum number of moves for single piece is 63, for getMoves list
     Location* des;
 
     for (int i=0; i<8; i++){
@@ -325,7 +326,7 @@ genericArrayList* getMoves(Game* game,Location* currentLoc,bool currentUserColor
         }
     }
     qsort(possibleMoves->elements, (size_t)possibleMoves->actualSize, sizeof(Location*), &compareLocations);
-    return possibleMoves;
+    return possibleMoves;*/
 }
 
 genericArrayList* getMovesStates(Game* game,Location* currentLoc,bool currentUserColor){

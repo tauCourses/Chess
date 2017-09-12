@@ -13,9 +13,7 @@ char** createNewBoard();
 
 void destroyBoard(char** board);
 
-void destroyState(void* state);
-
-void destroyStatePointer(void** state);
+void destroyState(State* state);
 
 char getPiece(char** board, Location* loc);
 
@@ -31,9 +29,7 @@ int getPieceColor(char piece);
 
 Location* newLocation(int x, int y);
 
-void destroyLocation(void* loc);
-
-void destroyLocationPointer(void** loc);
+void destroyLocation(Location* loc);
 
 int compareLocations(const void * item1, const void* item2);
 

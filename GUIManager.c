@@ -258,13 +258,11 @@ MANAGER_EVENT handleManagerDueToLoadEvent(GUIManager* gui, LOAD_WINDOW_EVENTS ev
             break;
 
         case LOAD_START:
-            printf("not supported yet\n");
-            break;
-            /*if(gui->gameWindow != NULL) //TODO!!
+            if(gui->gameWindow != NULL)
                 destroyGameWindow(gui->gameWindow);
-            gui->gameWindow = createGameWindow(gui->renderer); //TODO -> CHANGE IT TO TAKE THE LOAD GAME
+            gui->gameWindow = createGameWindow(gui->renderer,loadGameFromSlots(gui->loadWindow->slotChosed+1));
             gui->lastWindow = gui->activeWindow;
-            gui->activeWindow = GAME_WINDOW_ACTIVE;*/
+            gui->activeWindow = GAME_WINDOW_ACTIVE;
 
             return MANAGER_NONE;
             break;

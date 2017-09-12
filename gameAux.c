@@ -1,20 +1,15 @@
 #include "gameAux.h"
 
 Location* newLocation(int x, int y){
-    Location* newLocation = (Location*) malloc(2*sizeof(int));
+    Location* newLocation = (Location*) malloc(sizeof(Location));
     newLocation->x = x;
     newLocation->y = y;
     return newLocation;
 }
 
-void destroyLocation(void* loc){
-    printf("DESTROY LOCATION\n");
-    printf("destroy Location: destroying: <%d,%d>\n",(((Location*)loc))->x,(((Location*)loc))->y );
-    free((Location*)loc);
-}
-
-void destroyLocationPointer(void** loc){
-    free(*((Location**)loc));
+void destroyLocation(Location* loc)
+{
+    free(loc);
 }
 
 void printLocation(void* loc){
@@ -37,7 +32,7 @@ int compareLocations(const void * item1, const void* item2){
 
 
 State* createNewState(){
-    State* state = malloc(sizeof(*state));
+    State* state = (State*) malloc(sizeof(State));
 
     state->board = createNewBoard();
     state->WKingLoc = newLocation(0,3);
@@ -73,25 +68,19 @@ State* duplicateState(State* state){
     return newCopy;
 }
 
-void destroyState(void* state) {
-    destroyBoard(((State *) state)->board);
-    destroyLocation(((State *) state)->BKingLoc);
-    destroyLocation(((State *) state)->WKingLoc);
-    free(((State *) state));
+void destroyState(State* state) {
+    destroyBoard(state->board);
+    destroyLocation(state->BKingLoc);
+    destroyLocation(state->WKingLoc);
+    free(state);
 }
 
-void destroyStatePointer(void** state) {
-    destroyBoard(    (*((State**)state))  ->board);
-    destroyLocation((*((State**)state))->BKingLoc);
-    destroyLocation((*((State**)state))->WKingLoc);
-    free((*((State**)state)));
-}
-
-char** createNewBoard(){
+char** createNewBoard()
+{
     char** board = (char **)malloc(sizeof(char *) * 8);
     board[0] = (char *)malloc(sizeof(char) * 8 * 8);
     for(int i = 0; i < 8; i++)
-        board[i] = (*board + 8 * i);
+        board[i] = (board[0] + 8 * i);
 
     for (int i=0; i<8; i++){
         for (int j=0; j<8; j++){
@@ -144,18 +133,21 @@ void destroyBoard(char** board){
     }
 }
 
-char getPiece(char** board, Location* loc){
+char getPiece(char** board, Location* loc)
+{
     return (*(*(board +loc->x)+loc->y));
 }
 
-void setPiece(char** board, Location* loc, char newPiece){
+void setPiece(char** board, Location* loc, char newPiece)
+{
     (*(*(board +loc->x)+loc->y)) = newPiece;
 }
 
-char getPieceInCoordinates(char** board, int x, int y){
-    Location* newLoc = newLocation(x,y);
-    char piece = (getPiece(board,newLoc));
-    free(newLoc);
+char getPieceInCoordinates(char** board, int x, int y)
+{
+    Location newLoc = {.x=x,.y=y};
+    char piece = (getPiece(board,&newLoc));
+
     return piece;
 }
 
@@ -165,9 +157,8 @@ bool isLocationOutOfBounds(Location* des){
 }
 
 bool isCoordinatesOutOfBounds(int x, int y){
-    Location* newLoc = newLocation(x,y);
-    char piece =  isLocationOutOfBounds(newLoc);
-    free(newLoc);
+    Location newLoc = {.x=x,.y=y};
+    char piece =  isLocationOutOfBounds(&newLoc);
     return piece;
 }
 
@@ -180,10 +171,9 @@ int getPieceColor(char piece){
 }
 
 int getPieceColorInCoordinates(char** board, int x, int y){
-    Location* newLoc = newLocation(x,y);
-    char piece = getPieceColor(getPiece(board, newLoc));
-    free(newLoc);
-    return piece;
+    Location loc = {.x=x,.y=y};
+
+    return getPieceColor(getPiece(board, &loc));
 }
 
 
@@ -207,7 +197,7 @@ bool isCoordinatesEmpty(char** board, int x, int y){
     return ans;
 }
 
-int addInt(int a, int b) {
+int addInt(int a, int b) { //for knight moves with function pointers.
     return a+b;
 }
 int subInt(int a, int b) {
@@ -227,9 +217,9 @@ void updateHistory(Game* game){
 
 void updateKingLocation(Game* game, char orgPiece, Location* des){
     if (orgPiece == 'k')
-        game->state->WKingLoc = des;
+        game->state->WKingLoc = newLocation(des->x,des->y);
     if (orgPiece == 'K')
-        game->state->BKingLoc = des;
+        game->state->BKingLoc = newLocation(des->x,des->y);
 }
 
 //in destroy game should destory each state in history. should destory state on every pop.
