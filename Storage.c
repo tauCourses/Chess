@@ -1,36 +1,36 @@
 #include "Storage.h"
-#include "Infrastructure.h"
+#include "GameManager.h"
+#include "GameState.h"
 
-
-bool saveGame(Game* game, char* filename)
+bool saveGame(GameManager* game, char* filename)
 {
     FILE * file = fopen(filename, "w");
     if(file == NULL)
         return false;
     fprintf(file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     fprintf(file, "<game>\n");
-    fprintf(file, "<current_turn>%d</current_turn>\n",game->state->currentPlayer == CHESS_GAME_PLAYER_COLOR_BLACK ? 0 : 1);
-    fprintf(file, "<game_mode>%d</game_mode>\n",game->mode==CHESS_GAME_ONE_PLAYER?1:2);
+    fprintf(file, "<current_turn>%d</current_turn>\n",game->state->currentPlayer == BLACK_PLAYER ? 0 : 1);
+    fprintf(file, "<game_mode>%d</game_mode>\n",game->mode==ONE_PLAYER_GAME_MODE?1:2);
     if(game->mode == 1)
     {
         fprintf(file, "<difficulty>%d</difficulty>\n",2);
         fprintf(file, "<user_color>%d</user_color>\n",1);
     }
-    saveBoard(file, game->state->board);
+    saveBoard(file, game->state);
     fprintf(file, "</game>\n");
     fclose(file);
     return true;
 
 }
 
-void saveBoard(FILE* file, char** board)
+void saveBoard(FILE* file, GameState* state)
 {
     fprintf(file, "<board>\n");
     for(int i=CHESS_BOARD_SIZE-1;i>=0;i--)
     {
         fprintf(file, "<row_%d>",i+1);
         for(int j=0; j<CHESS_BOARD_SIZE;j++)
-            fprintf(file,"%c",board[i][j]);
+            fprintf(file,"%c",state->board[i][j]);
         fprintf(file, "</row_%d>\n",i+1);
     }
     fprintf(file, "</board>\n");
@@ -46,21 +46,43 @@ bool isFileExist(char* filename)
     }
     return false;
 }
-Game* loadGame(char* filename)
+
+GameManager* loadGame(char* filename)
 {
-    char line[256];
+    GameManager* game = createEmptyGame();
+    if(game == NULL)
+        return NULL;
+
     FILE * file = fopen(filename, "r");
     if(file == NULL)
+    {
+        destroyGame(game);
         return NULL;
+    }
+    updateGameParams(game,file);
+    updateBoardFromFile(game->state, file);
+
+    game->state->blackCastle = createCastleState(true,true,true);
+    game->state->whiteCastle = createCastleState(true,true,true);
+    fclose(file);
+
+    return game;
+}
+
+
+void updateGameParams(GameManager* game, FILE* file)
+{
+    char line[256];
     fgets ( line, sizeof(line), file );
     fgets ( line, sizeof(line), file );
     fgets ( line, sizeof(line), file );
     int currentTurn, gameMode,difficulty,userColor;
     sscanf(line, "<current_turn>%d</current_turn>", &currentTurn);
-    currentTurn = currentTurn == 0 ? CHESS_GAME_PLAYER_COLOR_BLACK : CHESS_GAME_PLAYER_COLOR_WHITE;
+    game->state->currentPlayer = currentTurn == 0 ? BLACK_PLAYER : WHITE_PLAYER;
     fgets ( line, sizeof(line), file );
     sscanf(line, "<game_mode>%d</game_mode>", &gameMode);
-    if(gameMode==2)
+    game->mode = (gameMode == 2) ? TWO_PLAYERS_GAME_MODE : ONE_PLAYER_GAME_MODE;
+    if(game->mode==TWO_PLAYERS_GAME_MODE)
     {
         fgets(line, sizeof(line), file );
         while(strncmp(line, "<board>", 7))
@@ -70,56 +92,39 @@ Game* loadGame(char* filename)
     {
         fgets(line, sizeof(line), file );
         sscanf(line, "<difficulty>%d</difficulty>", &difficulty);
+        game->difficulty = difficulty;
         fgets(line, sizeof(line), file );
         sscanf(line, "<user_color>%d</user_color>", &userColor);
+        game->userColor = userColor == 0 ? BLACK_PLAYER : WHITE_PLAYER;
         fgets(line, sizeof(line), file ); //read the board line
     }
-    char** board = loadBoard(file);
-    if(board == NULL)
-    {
-        return NULL;
-        fclose(file);
-    }
-    fclose(file);
-    Game* game = createNewGame(gameMode, difficulty, userColor);
-    if(game == NULL)
-        return NULL;
-    destroyBoard(game->state->board);
-    game->state->board = board;
-    game->state->currentPlayer = currentTurn;
-    return game;
-
 }
 
 void waitForChar(FILE* file, char c)
 {
     while((char)fgetc(file) != c);
 }
-char** loadBoard(FILE* file)
-{
+
+void updateBoardFromFile(GameState* state, FILE* file) {
     char line[256];
-    char** board = createNewBoard();
-    if(board == NULL)
-        return NULL;
-    for(int i=CHESS_BOARD_SIZE-1;i>=0;i--)
-    {
+    for (int i = CHESS_BOARD_SIZE - 1; i >= 0; i--) {
         waitForChar(file, '>');
 
-        for(int j=0;j<CHESS_BOARD_SIZE;j++)
-            board[i][j] = (char)fgetc(file);
+        for (int j = 0; j < CHESS_BOARD_SIZE; j++)
+            state->board[i][j] = (char) fgetc(file);
 
         waitForChar(file, '\n');
     }
-    return board;
 }
 
-void addGameToGameSlots(Game* game)
+void addGameToGameSlots(GameManager* game)
 {
     char filename[25];
     sprintf(filename,SlotBasicName,1);
     moveSlots();
     saveGame(game,filename);
 }
+
 void moveSlots()
 {
     char oldFileName[25], newFileName[25];
@@ -147,7 +152,7 @@ int numberOfGameSlots()
     return 0;
 }
 
-Game* loadGameFromSlots(int num)
+GameManager* loadGameFromSlots(int num)
 {
     char filename[25];
     sprintf(filename, SlotBasicName, num);

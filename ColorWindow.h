@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "Button.h"
-#include "Infrastructure.h"
+#include "GameManager.h"
 
 #define SELECT_COLOR_TITLE "images/titles/selectYourColor.bmp"
 
@@ -29,6 +29,6 @@ void destroyColorWindow(ColorWindow *window);
 void drawColorWindow(ColorWindow *window);
 COLOR_WINDOW_EVENTS handleEventColorWindow(ColorWindow *window, SDL_Event *event);
 
-CHESS_GAME_PLAYER_COLOR getColorFromColorWindow(ColorWindow *window);
+PLAYER_COLOR getColorFromColorWindow(ColorWindow *window);
 
 #endif //CHESS_COLORWINDOW_H

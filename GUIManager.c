@@ -299,7 +299,7 @@ MANAGER_EVENT handleManagerDueToModeEvent(GUIManager* gui, MODE_WINDOW_EVENTS ev
         case MODE_START:
             if(gui->gameWindow != NULL)
                 destroyGameWindow(gui->gameWindow);
-            Game* game = createNewGame(CHESS_GAME_TWO_PLAYERS,0, CHESS_GAME_PLAYER_COLOR_BLACK);
+            GameManager* game = createTwoPlayersGame();
             if(game == NULL) {
                 printf("null\n");
                 return MANAGER_NONE;
@@ -385,7 +385,7 @@ MANAGER_EVENT handleManagerDueToColorEvent(GUIManager* gui, COLOR_WINDOW_EVENTS 
             if(gui->gameWindow != NULL)
                 destroyGameWindow(gui->gameWindow);
 
-            Game* game = createNewGame(CHESS_GAME_ONE_PLAYER, gui->difficultyWindow->configurationChosen,
+            GameManager* game = createOnePlayerGame(gui->difficultyWindow->configurationChosen,
                                             getColorFromColorWindow(gui->colorWindow));
             gui->gameWindow = createGameWindow(gui->renderer, game); //TODO -> CHANGE IT TO two player chess
             gui->lastWindow = gui->activeWindow;

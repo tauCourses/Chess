@@ -1,7 +1,7 @@
 
 #ifndef CHESS_GAMETESTS_H
 #define CHESS_GAMETESTS_H
-#include "game.h"
+#include "GameManager.h"
 #include "console.h"
 
 int runLegalMovesTests();
@@ -23,7 +23,7 @@ void runGetMovesStatesTest();
 
 void runShitPointersTest();
 
-void removePawns(Game* game);
+void removePawns(GameManager* game);
 
 
 

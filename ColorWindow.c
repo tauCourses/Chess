@@ -104,9 +104,9 @@ COLOR_WINDOW_EVENTS handleEventColorWindow(ColorWindow *window, SDL_Event *event
     return COLOR_NONE;
 }
 
-CHESS_GAME_PLAYER_COLOR getColorFromColorWindow(ColorWindow *window)
+PLAYER_COLOR getColorFromColorWindow(ColorWindow *window)
 {
     if(window->colorSwitch->state.option == BUTTON_FIRST_OPTION)
-        return CHESS_GAME_PLAYER_COLOR_BLACK;
-    return CHESS_GAME_PLAYER_COLOR_WHITE;
+        return BLACK_PLAYER;
+    return WHITE_PLAYER;
 }

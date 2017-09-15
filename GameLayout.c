@@ -130,14 +130,14 @@ void destroyGameLayout(GameLayout* game)
     free(game);
 }
 
-void drawGameLayout(GameLayout* game, char** board)
+void drawGameLayout(GameLayout* game, Board board)
 {
     drawBoardLayout(game->renderer, game->boardLayout);
     for(int i=0;i<CHESS_BOARD_SIZE;i++)
     {
         for(int j=0;j<CHESS_BOARD_SIZE;j++)
         {
-            if(board[7-i][j] != '_')
+            if(board[7-i][j] != EMPTY_PLACE_SYMBOL)
                 drawSquare(game, j, i, board[7-i][j]);
         }
     }

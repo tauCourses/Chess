@@ -1,10 +1,11 @@
 
 #ifndef CHESS_CONSOLE_H
 #define CHESS_CONSOLE_H
-#include "game.h"
+#include "GameManager.h"
 
 int mainConsole();
-bool printBoard(char** board);
+bool printBoard(GameState* state);
 
-void printStateBoard(void* state);
+void printStateBoard(GameState* state);
+
 #endif //CHESS_CONSOLE_H

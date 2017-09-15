@@ -6,9 +6,8 @@
 #include <stdbool.h>
 #include "Button.h"
 #include "GameLayout.h"
-#include "Infrastructure.h"
 #include "Storage.h"
-#include "game.h"
+#include "GameManager.h"
 
 typedef enum {
     GAME_LOAD, GAME_MAIN, GAME_EXIT,  GAME_INVALID_ARGUMENT, GAME_NONE
@@ -26,15 +25,17 @@ typedef struct  {
     Button* exit;
 
     GameLayout* board;
-    Game* game;
+    GameManager* game;
 } GameWindow;
 
-GameWindow* createGameWindow(SDL_Renderer* renderer, Game* game);
+GameWindow* createGameWindow(SDL_Renderer* renderer, GameManager* game);
 void createGameButtons(GameWindow* window);
 void destroyGameWindow(GameWindow *window);
 void drawGameWindow(GameWindow *window);
 
 GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event);
 GAME_WINDOW_EVENTS handleEventGameWindow(GameWindow *window, SDL_Event *event);
+
+int exitConfirmationMessageBox();
 
 #endif //CHESS_GAMEWINDOW_H

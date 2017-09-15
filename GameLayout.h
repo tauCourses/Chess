@@ -4,7 +4,7 @@
 #include <SDL.h>
 #include <stdbool.h>
 #include "BoardLayout.h"
-#include "Infrastructure.h"
+#include "GameManager.h"
 
 #define BLACK_PAWN_IMAGE "images/pieces/blackPawn.bmp"
 #define BLACK_ROOK_IMAGE "images/pieces/blackRook.bmp"
@@ -48,11 +48,11 @@ GameLayout* createGameLayout(SDL_Point startingPoint, SDL_Renderer* renderer);
 Pieces* createPieces(SDL_Renderer* renderer, char* pawn, char* rook, char* bishop, char* knight, char* queen, char* king);
 void setDragedPiece(GameLayout* game, int x, int y, char c);
 
-void destroyGameLayout(GameLayout* board);
+void destroyGameLayout(GameLayout* game);
 void destroyPieces(Pieces* pieces);
 void destroyDragPiece(GameLayout* game);
 
-void drawGameLayout(GameLayout* game, char** board);
+void drawGameLayout(GameLayout* game, Board board);
 
 SDL_Texture* charToTexture(GameLayout* game, char c);
 void drawSquare(GameLayout* game, int x, int y, char c);

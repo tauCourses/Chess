@@ -1,8 +1,7 @@
 #include "GameWindow.h"
-#include "Infrastructure.h"
-#include "GameLayout.h"
+#include "GameManager.h"
 
-GameWindow* createGameWindow(SDL_Renderer* renderer, Game* game)
+GameWindow* createGameWindow(SDL_Renderer* renderer, GameManager* game)
 {
     GameWindow *window = NULL;
     if(game == NULL)
@@ -112,20 +111,32 @@ void drawGameWindow(GameWindow *window)
 
 GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
 {
-    if(window->board->draged != NULL && isPointOnGameLayout(window->board,event->button.x, event->button.y))
+    if(isPointOnGameLayout(window->board,event->button.x, event->button.y))
     {
-        Location square = getSquare(window->board, event->button.x, event->button.y);
-        printf("move from (%d, %d) to (%d,%d)\n",window->board->draged->location.x,window->board->draged->location.y,square.x,square.y);
-        if(isMoveLegal(window->game,&window->board->draged->location,&square,window->game->state->currentPlayer))
-            movePiece(window->game,&window->board->draged->location,&square,window->game->state->currentPlayer);
+        if(window->board->draged != NULL)
+        {
+            Location square = getSquare(window->board, event->button.x, event->button.y);
+            GAME_MOVE_MESSAGE message = movePiece(window->game, &window->board->draged->location, &square);
+            //TODO->CHECK WHAT HAPPENED
+            destroyDragPiece(window->board);
+            //check if it is the end of the game //TODO
+            //check if pawn need to became something wlse //TODO
+            return GAME_NONE;
+        }
+    }
+    else if(window->board->draged != NULL)
+    {
         destroyDragPiece(window->board);
-        //check if it is the end of the game //TODO
-        //check if pawn need to became something wlse //TODO
         return GAME_NONE;
     }
+
     if(clickOnButton(window->restart, event->button.x, event->button.y))
     {
-        Game *newGame = createNewGame(window->game->mode,window->game->difficulty,window->game->userColor);
+        GameManager *newGame;
+        if(window->game->mode == TWO_PLAYERS_GAME_MODE)
+            newGame = createTwoPlayersGame();
+        else
+            newGame = createOnePlayerGame(window->game->difficulty,window->game->userColor);
         if(newGame == NULL)
             return GAME_NONE; //TODO -> WHAT TO DO?
         destroyGame(window->game);
@@ -170,7 +181,7 @@ GAME_WINDOW_EVENTS handleEventGameWindow(GameWindow *window, SDL_Event *event)
             if(isPointOnGameLayout(window->board,event->button.x, event->button.y))
             {
                 Location square = getSquare(window->board, event->button.x, event->button.y);
-                if(window->game->state->board[square.x][square.y] != EMPTY_PIECE)
+                if(window->game->state->board[square.x][square.y] != EMPTY_PLACE_SYMBOL)
                     setDragedPiece(window->board, square.x, square.y, window->game->state->board[square.x][square.y]);
 
             }
@@ -181,4 +192,51 @@ GAME_WINDOW_EVENTS handleEventGameWindow(GameWindow *window, SDL_Event *event)
 
     }
     return GAME_NONE;
+}
+
+int exitConfirmationMessageBox()
+{
+    const SDL_MessageBoxButtonData buttons[] = {
+            { /* .flags, .buttonid, .text */        0, 0, "no" },
+            { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "yes" },
+
+    };
+    const SDL_MessageBoxColorScheme colorScheme = {
+            { /* .colors (.r, .g, .b) */
+                    /* [SDL_MESSAGEBOX_COLOR_BACKGROUND] */
+                    { 255,   255,   255 },
+                    /* [SDL_MESSAGEBOX_COLOR_TEXT] */
+                    {   0, 0,   0 },
+                    /* [SDL_MESSAGEBOX_COLOR_BUTTON_BORDER] */
+                    { 255, 0,   0 },
+                    /* [SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND] */
+                    {   0,   0, 255 },
+                    /* [SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED] */
+                    { 255,   0, 255 }
+            }
+    };
+    const SDL_MessageBoxData messageboxdata = {
+            SDL_MESSAGEBOX_INFORMATION, /* .flags */
+            NULL, /* .window */
+            "example message box", /* .title */
+            "Are you sure you want to exit without saving?", /* .message */
+            SDL_arraysize(buttons), /* .numbuttons */
+            buttons, /* .buttons */
+            &colorScheme /* .colorScheme */
+    };
+    int buttonid;
+    if (SDL_ShowMessageBox(&messageboxdata, &buttonid) < 0) {
+        SDL_Log("error displaying message box");
+        return -1;
+
+    }
+    if (buttonid == -1)
+    {
+        SDL_Log("no selection");
+    }
+    else if(buttonid == 0)
+        SDL_Log("selection was %s", buttons[buttonid].text);
+
+    return 0;
+
 }
