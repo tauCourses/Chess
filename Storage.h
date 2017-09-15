@@ -14,8 +14,9 @@ bool saveGame(GameManager* game, char* filename);
 void saveBoard(FILE* file, GameState* state);
 bool isFileExist(char* filename);
 GameManager* loadGame(char* filename);
+void updateCastlesStateFromFile(GameState* state, FILE* file);
 void updateGameParams(GameManager* game, FILE* file);
-void waitForChar(FILE* file, char c);
+char waitForChar(FILE* file, char c);
 void updateBoardFromFile(GameState* state, FILE* file);
 
 void addGameToGameSlots(GameManager* game);

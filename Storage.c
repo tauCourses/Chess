@@ -17,6 +17,12 @@ bool saveGame(GameManager* game, char* filename)
         fprintf(file, "<user_color>%d</user_color>\n",1);
     }
     saveBoard(file, game->state);
+    fprintf(file, "<general>%d%d%d%d%d%d</general>\n",game->state->whiteCastle->hasLeftRookMoved,
+            game->state->whiteCastle->hasRightRookMoved,
+            game->state->whiteCastle->hasKingMoved,
+            game->state->blackCastle->hasLeftRookMoved,
+            game->state->blackCastle->hasLeftRookMoved,
+            game->state->blackCastle->hasLeftRookMoved);
     fprintf(file, "</game>\n");
     fclose(file);
     return true;
@@ -61,15 +67,31 @@ GameManager* loadGame(char* filename)
     }
     updateGameParams(game,file);
     updateBoardFromFile(game->state, file);
+    updateCastlesStateFromFile(game->state, file);
 
-    game->state->blackCastle = createCastleState(true,true,true);
-    game->state->whiteCastle = createCastleState(true,true,true);
     fclose(file);
 
     return game;
 }
 
-
+void updateCastlesStateFromFile(GameState* state, FILE* file) //please do not read it
+{
+    if(waitForChar(file, 'l') != EOF)
+    {
+        waitForChar(file, '>');
+        state->whiteCastle->hasLeftRookMoved = (fgetc(file) == '1')? true : false;
+        state->whiteCastle->hasRightRookMoved = (fgetc(file) == '1')? true : false;
+        state->whiteCastle->hasKingMoved = (fgetc(file) == '1')? true : false;
+        state->blackCastle->hasLeftRookMoved = (fgetc(file) == '1')? true : false;
+        state->blackCastle->hasRightRookMoved = (fgetc(file) == '1')? true : false;
+        state->blackCastle->hasKingMoved = (fgetc(file) == '1')? true : false;
+    }
+    else
+    {
+        state->blackCastle = createCastleState(true,true,true);
+        state->whiteCastle = createCastleState(true,true,true);
+    }
+}
 void updateGameParams(GameManager* game, FILE* file)
 {
     char line[256];
@@ -100,12 +122,16 @@ void updateGameParams(GameManager* game, FILE* file)
     }
 }
 
-void waitForChar(FILE* file, char c)
+char waitForChar(FILE* file, char c)
 {
-    while((char)fgetc(file) != c);
+    char temp;
+    while ((temp = (char)fgetc(file)) != c && temp != EOF);
+
+    return temp;
 }
 
-void updateBoardFromFile(GameState* state, FILE* file) {
+void updateBoardFromFile(GameState* state, FILE* file)
+{
     char line[256];
     for (int i = CHESS_BOARD_SIZE - 1; i >= 0; i--) {
         waitForChar(file, '>');

@@ -1,5 +1,6 @@
 #include "GameWindow.h"
 #include "GameManager.h"
+#include "GameState.h"
 
 GameWindow* createGameWindow(SDL_Renderer* renderer, GameManager* game)
 {
@@ -31,7 +32,7 @@ GameWindow* createGameWindow(SDL_Renderer* renderer, GameManager* game)
         destroyGameWindow(window);
         return NULL;
     }
-
+    window->isSaved = true;
     return window;
 }
 
@@ -117,10 +118,18 @@ GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
         {
             Location square = getSquare(window->board, event->button.x, event->button.y);
             GAME_MOVE_MESSAGE message = movePiece(window->game, &window->board->draged->location, &square);
-            //TODO->CHECK WHAT HAPPENED
             destroyDragPiece(window->board);
-            //check if it is the end of the game //TODO
             //check if pawn need to became something wlse //TODO
+            if(message == MOVE_VALID)
+            {
+                window->isSaved = false;
+                GAME_STATE state =  getGameState(window->game);
+                if(state == GAME_CHECKMATE)
+                    gameEndMessageBox(oppositeColor(window->game->state->currentPlayer));
+                else if(state == GAME_TIE)
+                    gameEndMessageBox(NONE_PLAYER_COLOR);
+            }
+
             return GAME_NONE;
         }
     }
@@ -147,19 +156,24 @@ GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
     else if(clickOnButton(window->save, event->button.x, event->button.y))
     {
         addGameToGameSlots(window->game);
+        window->isSaved = true;
         return GAME_NONE;
     }
     else if(clickOnButton(window->load, event->button.x, event->button.y))
         return GAME_LOAD;
     else if(clickOnButton(window->undo, event->button.x, event->button.y))
     {
-        printf("not supported yet");
+        if(candoundo(window->game))
+            undoMove(window->game);
         return GAME_NONE;
     }
-    else if(clickOnButton(window->main, event->button.x, event->button.y))
+    else if(clickOnButton(window->main, event->button.x, event->button.y) &&
+            (window->isSaved || exitConfirmationMessageBox() == 1))
         return GAME_MAIN;
-    else if(clickOnButton(window->exit, event->button.x, event->button.y))
+    else if(clickOnButton(window->exit, event->button.x, event->button.y) &&
+            (window->isSaved || exitConfirmationMessageBox() == 1))
         return GAME_EXIT;
+
     return GAME_NONE;
 }
 
@@ -199,26 +213,20 @@ int exitConfirmationMessageBox()
     const SDL_MessageBoxButtonData buttons[] = {
             { /* .flags, .buttonid, .text */        0, 0, "no" },
             { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "yes" },
-
     };
     const SDL_MessageBoxColorScheme colorScheme = {
             { /* .colors (.r, .g, .b) */
-                    /* [SDL_MESSAGEBOX_COLOR_BACKGROUND] */
-                    { 255,   255,   255 },
-                    /* [SDL_MESSAGEBOX_COLOR_TEXT] */
-                    {   0, 0,   0 },
-                    /* [SDL_MESSAGEBOX_COLOR_BUTTON_BORDER] */
-                    { 255, 0,   0 },
-                    /* [SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND] */
-                    {   0,   0, 255 },
-                    /* [SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED] */
-                    { 255,   0, 255 }
+                    { 255,   255,   255 }, /* [SDL_MESSAGEBOX_COLOR_BACKGROUND] */
+                    {   0, 0,   0 }, /* [SDL_MESSAGEBOX_COLOR_TEXT] */
+                    { 255, 0,   0 }, /* [SDL_MESSAGEBOX_COLOR_BUTTON_BORDER] */
+                    {   0,   0, 255 }, /* [SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND] */
+                    { 255,   0, 255 } /* [SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED] */
             }
     };
     const SDL_MessageBoxData messageboxdata = {
             SDL_MESSAGEBOX_INFORMATION, /* .flags */
             NULL, /* .window */
-            "example message box", /* .title */
+            "Exit warning", /* .title */
             "Are you sure you want to exit without saving?", /* .message */
             SDL_arraysize(buttons), /* .numbuttons */
             buttons, /* .buttons */
@@ -230,13 +238,47 @@ int exitConfirmationMessageBox()
         return -1;
 
     }
-    if (buttonid == -1)
-    {
-        SDL_Log("no selection");
+    printf("buttonid - %d\n", buttonid);
+    return buttonid;
+}
+
+int gameEndMessageBox(PLAYER_COLOR winner)
+{
+    const SDL_MessageBoxButtonData buttons[] = {
+            { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "OK" },
+    };
+    const SDL_MessageBoxColorScheme colorScheme = {
+            { /* .colors (.r, .g, .b) */
+                    { 255,   255,   255 }, /* [SDL_MESSAGEBOX_COLOR_BACKGROUND] */
+                    {   0, 0,   0 }, /* [SDL_MESSAGEBOX_COLOR_TEXT] */
+                    { 255, 0,   0 }, /* [SDL_MESSAGEBOX_COLOR_BUTTON_BORDER] */
+                    {   0,   0, 255 }, /* [SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND] */
+                    { 255,   0, 255 } /* [SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED] */
+            }
+    };
+    char* victoryMessage;
+    if(winner == WHITE_PLAYER)
+        victoryMessage = "White wins!";
+    else if(winner == BLACK_PLAYER)
+        victoryMessage = "Black wins!";
+    else
+        victoryMessage = "Tie";
+
+    const SDL_MessageBoxData messageboxdata = {
+            SDL_MESSAGEBOX_INFORMATION, /* .flags */
+            NULL, /* .window */
+            "Game End", /* .title */
+            victoryMessage, /* .message */
+            SDL_arraysize(buttons), /* .numbuttons */
+            buttons, /* .buttons */
+            &colorScheme /* .colorScheme */
+    };
+    int buttonid;
+    if (SDL_ShowMessageBox(&messageboxdata, &buttonid) < 0) {
+        SDL_Log("error displaying message box");
+        return -1;
+
     }
-    else if(buttonid == 0)
-        SDL_Log("selection was %s", buttons[buttonid].text);
-
-    return 0;
-
+    printf("buttonid - %d\n", buttonid);
+    return buttonid;
 }

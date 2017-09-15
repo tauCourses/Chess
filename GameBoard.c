@@ -104,7 +104,7 @@ bool isLegalDesPiece(Board board, char orgPiece, char desPiece)
 
 bool isWhitePawnMoveLegal(Board board, Location* org, Location* des) {
     char desPiece = board[des->x][des->y];
-    if (desPiece == EMPTY_PLACE_SYMBOL && org->y == des->y) //move forward to an empty piece
+    if (desPiece == EMPTY_PLACE_SYMBOL && org->y == des->y) //move forward to an empty beatedPiece
     {
         if (org->x == 1 && des->x == 3 &&  //first move of pawn can be a double move
             board[2][des->y] == EMPTY_PLACE_SYMBOL) //the middle square have to be empty as well)
@@ -113,7 +113,7 @@ bool isWhitePawnMoveLegal(Board board, Location* org, Location* des) {
         if (org->x+1 == des->x )
             return true;
     }
-    if (desPiece != EMPTY_PLACE_SYMBOL && org->x+1 == des->x && (org->y+1 == des->y || org->y-1 == des->y))//eating move, piece color was checked in isLegalDesPiece
+    if (desPiece != EMPTY_PLACE_SYMBOL && org->x+1 == des->x && (org->y+1 == des->y || org->y-1 == des->y))//eating move, beatedPiece color was checked in isLegalDesPiece
         return true;
     return false;
 
@@ -121,7 +121,7 @@ bool isWhitePawnMoveLegal(Board board, Location* org, Location* des) {
 
 bool isBlackPawnMoveLegal(Board board, Location* org, Location* des){
     char desPiece = board[des->x][des->y];
-    if (desPiece == EMPTY_PLACE_SYMBOL && org->y == des->y) { //move forward to an empty piece
+    if (desPiece == EMPTY_PLACE_SYMBOL && org->y == des->y) { //move forward to an empty beatedPiece
         if (org->x == 6 && des->x == 4 &&
             board[5][des->y] == EMPTY_PLACE_SYMBOL )//the middle square have to be empty as well))  //first move of pawn can be a double move
             return true;
@@ -198,12 +198,12 @@ bool isBishopLegalDirection(Board board, Location* org, Location* des, int (*add
     int i = 1;
     while (!isCoordinatesOutOfBounds(addOrSubX(org->x,i), addOrSubY(org->y,i)) &&
            (addOrSubX(org->x,i) != des->x) && (addOrSubY(org->y,i) != des->y))
-    {//while in bounds and not in destination row or column
-        if (board[addOrSubX(org->x, i)][addOrSubY(org->y, i)] != EMPTY_PLACE_SYMBOL) //if there is another piece in the way
+    {//while in bounds and not in des row or column
+        if (board[addOrSubX(org->x, i)][addOrSubY(org->y, i)] != EMPTY_PLACE_SYMBOL) //if there is another beatedPiece in the way
             return false;
         i++;
     }
-    if (addOrSubX(org->x,i) == des->x && addOrSubY(org->y,i) == des->y)//if we reached destination piece
+    if (addOrSubX(org->x,i) == des->x && addOrSubY(org->y,i) == des->y)//if we reached des beatedPiece
         return true;
     else
         return false;

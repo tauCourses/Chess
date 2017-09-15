@@ -7,27 +7,20 @@ GameState* createEmptyGameState()
     if(state == NULL)
         return NULL;
 
-    return state;
-}
-
-GameState* createInitialGameState()
-{
-    GameState* state = (GameState*) malloc(sizeof(GameState));
-    if(state == NULL)
-        return NULL;
-
-    state->currentPlayer = WHITE_PLAYER;
-
-    state->blackCastle = createCastleState(false, false, false);
-    state->whiteCastle = createCastleState(false, false, false);
+    state->blackCastle = createCastleState(false,false,false);
+    state->whiteCastle = createCastleState(false,false,false);
     if(state->blackCastle == NULL || state->whiteCastle == NULL)
     {
         destroyGameState(state);
         return NULL;
     }
-    setInitialBoard(state->board);
-
     return state;
+}
+
+void setInitialGameState(GameState* state)
+{
+    state->currentPlayer = WHITE_PLAYER;
+    setInitialBoard(state->board);
 }
 
 castleState* createCastleState(bool hasKingMoved,bool hasLeftRookMoved, bool hasRightRookMoved)
@@ -49,15 +42,13 @@ castleState* duplicateCastleState(castleState* castle)
     newCastle->hasKingMoved = castle->hasKingMoved;
     newCastle->hasRightRookMoved = castle->hasRightRookMoved;
     newCastle->hasLeftRookMoved = castle->hasLeftRookMoved;
-    return castle;
+    return newCastle;
 }
 
 void destroyCastleState(castleState* castle)
 {
     free(castle);
 }
-
-
 
 GameState* duplicateGameState(GameState* state)
 {
@@ -156,7 +147,7 @@ bool isThreatened(GameState* state, Location* loc, PLAYER_COLOR byPlayer)
     return false;
 }
 
-void applyCastleChange(GameState *state, Location *org, Location *des)
+void checkIfCastleChanged(GameState *state, Location *org)
 {
     if(org->x == 0 && org->y == 0)
         state->whiteCastle->hasLeftRookMoved = true;
@@ -170,11 +161,12 @@ void applyCastleChange(GameState *state, Location *org, Location *des)
         state->blackCastle->hasRightRookMoved = true;
     if(org->x == 7 && org->y == 4)
         state->whiteCastle->hasKingMoved = true;
-
-
+}
+void applyCastleChange(GameState *state, Location *org, Location *des)
+{
+    checkIfCastleChanged(state, org);
     if(state->board[des->x][des->y] == WHITE_KING_SYMBOL &&
-            des->x == 0 && org->x == 0 &&
-            org->y == 4)
+            des->x == 0 && org->x == 0 && org->y == 4)
     {
         if(des->y == 6)
         {
@@ -189,8 +181,7 @@ void applyCastleChange(GameState *state, Location *org, Location *des)
     }
 
     if(state->board[des->x][des->y] == BLACK_KING_SYMBOL &&
-       des->x == 7 && org->x == 7 &&
-       org->y == 4)
+       des->x == 7 && org->x == 7 && org->y == 4)
     {
         if(des->y == 6)
         {
@@ -212,8 +203,8 @@ void destroyMove(GameMove* move)
 
     if(move->origin != NULL)
         destroyLocation(move->origin);
-    if(move->destination != NULL)
-        destroyLocation(move->destination);
+    if(move->des != NULL)
+        destroyLocation(move->des);
     if(move->whiteCastle != NULL)
         destroyCastleState(move->whiteCastle);
     if(move->blackCastle != NULL)
@@ -230,8 +221,8 @@ GameMove* applyMove(GameState* state, Location* org, Location* des)
     move->blackCastle = duplicateCastleState(state->blackCastle);
     move->whiteCastle = duplicateCastleState(state->whiteCastle);
     move->origin = duplicateLocation(org);
-    move->destination = duplicateLocation(des);
-    move->piece = state->board[des->x][des->y];
+    move->des = duplicateLocation(des);
+    move->beatedPiece = state->board[des->x][des->y];
 
     if(state->board[org->x][org->y] == WHITE_PAWN_SYMBOL && org->x == 6)
         move->pawnChanged = true;
@@ -248,11 +239,51 @@ GameMove* applyMove(GameState* state, Location* org, Location* des)
     return move;
 }
 
+bool isCastleUndo(GameState *state, GameMove *move)
+{
+    char castleKing = (char)((state->currentPlayer == WHITE_PLAYER) ? BLACK_KING_SYMBOL : WHITE_KING_SYMBOL);
+    if(state->board[move->des->x][move->des->y] != castleKing)
+        return false;
+    if(abs(move->des->y - move->origin->y) > 1)
+        return true;
+    return false;
+}
+bool applyCastleUndo(GameState *state, GameMove *move)
+{
+    char castleRook = (char)((state->currentPlayer == WHITE_PLAYER) ? BLACK_ROOK_SYMBOL : WHITE_ROOK_SYMBOL);
+    if(move->des->y == 6)
+    {
+        state->board[move->des->x][7] = castleRook;
+        state->board[move->des->x][5] = EMPTY_PLACE_SYMBOL;
+    }
+    if(move->des->y == 2)
+    {
+        state->board[move->des->x][0] = castleRook;
+        state->board[move->des->x][3] = EMPTY_PLACE_SYMBOL;
+    }
+}
+void applyUndoMove(GameState *state, GameMove *move)
+{
+    if(isCastleUndo(state, move))
+        applyCastleUndo(state, move);
+
+    if(move->pawnChanged)
+        state->board[move->origin->x][move->origin->y] = EMPTY_PLACE_SYMBOL;
+    else
+        state->board[move->origin->x][move->origin->y] = state->board[move->des->x][move->des->y];
+    state->board[move->des->x][move->des->y] = move->beatedPiece;
+
+    *state->whiteCastle = *move->whiteCastle;
+    *state->blackCastle = *move->blackCastle;
+
+    state->currentPlayer = oppositeColor(state->currentPlayer);
+}
+
 bool checkCastleMove(GameState* state, Location* org, Location* des)
 {
     castleState* castleState = state->currentPlayer == WHITE_PLAYER ? state->whiteCastle : state->blackCastle;
     if(org->y == 4 && des->y == 6 && org->x == des->x
-       && castleState->hasKingMoved == false && castleState->hasLeftRookMoved == false) //right castle
+       && castleState->hasKingMoved == false && castleState->hasRightRookMoved == false) //right castle
     {
         Location first = {.x = des->x, .y=5};
         Location second = {.x = des->x, .y=6};
@@ -263,7 +294,7 @@ bool checkCastleMove(GameState* state, Location* org, Location* des)
                state->board[des->x][6] == EMPTY_PLACE_SYMBOL;
     }
     if(org->y == 4 && des->y == 2 && org->x == des->x
-       && castleState->hasKingMoved == false && castleState->hasRightRookMoved == false) //left castle
+       && castleState->hasKingMoved == false && castleState->hasLeftRookMoved == false) //left castle
     {
         Location first = {.x = des->x, .y=3};
         Location second = {.x = des->x, .y=2};

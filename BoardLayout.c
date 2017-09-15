@@ -33,7 +33,7 @@ void drawBoardLayout(SDL_Renderer* renderer, BoardLayout* board)
         {
             if(currentType == BOARD_SQUARE_WHITE)
             {
-                SDL_SetRenderDrawColor(renderer, WHITE_COLOR);
+                SDL_SetRenderDrawColor(renderer, WHITE_RGBA_COLOR);
                 SDL_Rect ract = {   .x= board->startingPoint.x + i * (SQUARE_SIZE + SQUARE_GAP),
                                     .y=board->startingPoint.y + j * (SQUARE_SIZE + SQUARE_GAP),
                                     .h=SQUARE_SIZE,
@@ -43,7 +43,7 @@ void drawBoardLayout(SDL_Renderer* renderer, BoardLayout* board)
             }
             else
             {
-                SDL_SetRenderDrawColor(renderer, BLACK_COLOR);
+                SDL_SetRenderDrawColor(renderer, BLACK_RGBA_COLOR);
                 SDL_Rect ract = {   .x= board->startingPoint.x + i * (SQUARE_SIZE + SQUARE_GAP),
                         .y=board->startingPoint.y + j * (SQUARE_SIZE + SQUARE_GAP),
                         .h=SQUARE_SIZE,

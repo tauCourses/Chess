@@ -26,6 +26,8 @@ typedef struct  {
 
     GameLayout* board;
     GameManager* game;
+
+    bool isSaved;
 } GameWindow;
 
 GameWindow* createGameWindow(SDL_Renderer* renderer, GameManager* game);
@@ -37,5 +39,6 @@ GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
 GAME_WINDOW_EVENTS handleEventGameWindow(GameWindow *window, SDL_Event *event);
 
 int exitConfirmationMessageBox();
+int gameEndMessageBox(PLAYER_COLOR winner);
 
 #endif //CHESS_GAMEWINDOW_H

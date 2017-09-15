@@ -39,35 +39,27 @@ GUIManager* managerCreate()
     gui->window = SDL_CreateWindow("SP Chess", SDL_WINDOWPOS_CENTERED,
                                       SDL_WINDOWPOS_CENTERED, 1000, 730, SDL_WINDOW_OPENGL);
     if (gui->window == NULL)
-    {
-        managerDestroy(gui);
-        return NULL;
-    }
+        goto error;
 
     gui->renderer = SDL_CreateRenderer(gui->window, -1, SDL_RENDERER_ACCELERATED);
     if (gui->renderer == NULL)
-    {
-        managerDestroy(gui);
-        return NULL;
-    }
+        goto error;
 
     createSidesBoards(gui);
     if(gui->leftBoard == NULL || gui->rightBoard == NULL)
-    {
-        managerDestroy(gui);
-        return NULL ;
-    }
+        goto error;
 
     if(createWindows(gui) == false)
-    {
-        managerDestroy(gui);
-        return NULL ;
-    }
+        goto error;
 
     gui->activeWindow = MAIN_WINDOW_ACTIVE;
     gui->lastWindow = MAIN_WINDOW_ACTIVE;
     managerDraw(gui);
     return gui;
+
+    error:
+    managerDestroy(gui);
+    return NULL ;
 }
 
 bool createWindows(GUIManager* gui)
@@ -260,7 +252,10 @@ MANAGER_EVENT handleManagerDueToLoadEvent(GUIManager* gui, LOAD_WINDOW_EVENTS ev
         case LOAD_START:
             if(gui->gameWindow != NULL)
                 destroyGameWindow(gui->gameWindow);
-            gui->gameWindow = createGameWindow(gui->renderer,loadGameFromSlots(gui->loadWindow->slotChosed+1));
+            GameManager* game = loadGameFromSlots(gui->loadWindow->slotChosed+1);
+            if(game == NULL)
+                return MANAGER_NONE;
+            gui->gameWindow = createGameWindow(gui->renderer,game);
             gui->lastWindow = gui->activeWindow;
             gui->activeWindow = GAME_WINDOW_ACTIVE;
 

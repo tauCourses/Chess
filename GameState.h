@@ -19,14 +19,14 @@ typedef struct{
 } GameState;
 
 typedef struct{
-    Location *destination, *origin;
-    char piece; //the piece in origin location before move
+    Location *des, *origin;
+    char beatedPiece; //the beatedPiece in origin location before move
     bool pawnChanged;
     castleState *whiteCastle, *blackCastle;
 }GameMove;
 
 GameState* createEmptyGameState();
-GameState* createInitialGameState();
+void setInitialGameState(GameState* state);
 GameState* duplicateGameState(GameState* state);
 void destroyGameState(GameState* state);
 
@@ -35,7 +35,7 @@ castleState* createCastleState(bool hasKingMoved,bool hasLeftRookMoved, bool has
 castleState* duplicateCastleState(castleState* castle);
 void destroyCastleState(castleState* castle);
 
-
+bool isCastleMove(Location* org, Location* des); //return true if is valid castle move, false if not and unknown result for invalid move!
 bool isMoveLegal(GameState* state, Location* org, Location* des);
 bool checkCastleMove(GameState* state, Location* org, Location* des);
 

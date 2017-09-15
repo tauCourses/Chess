@@ -5,8 +5,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "GameState.h"
+#include "History.h"
 
-#define historySize 3
+#define HISTORY_SIZE 3
 
 typedef enum  {
     ONE_PLAYER_GAME_MODE, TWO_PLAYERS_GAME_MODE
@@ -17,7 +18,7 @@ typedef enum {
 } GAME_MOVE_MESSAGE;
 
 typedef enum {
-    VALID_GAME_STATE, PAWN_REACH_END, GAME_CHECKMATE, GAME_TIE,
+    VALID_GAME_STATE, GAME_CHECKMATE, GAME_TIE,
 } GAME_STATE;
 
 typedef enum{
@@ -29,6 +30,7 @@ typedef struct{
     GAME_MODE mode;
     int difficulty;
     PLAYER_COLOR userColor;
+    GameHistory* history;
 } GameManager;
 
 GameManager* createEmptyGame();
@@ -41,7 +43,8 @@ GAME_MOVE_MESSAGE movePiece(GameManager* game, Location* org, Location* des);
 
 GAME_STATE getGameState(GameManager* game);
 
-Location* getAllAvailableMovesFromLocation(GameManager* game,Location* location);
+Location** getAllAvailableMovesFromLocation(GameManager* game,Location* location);
+void destroyLocationsList(Location** list);
 
 bool candoundo(GameManager* game); //just kidding, should be canDoUndo or isUndoAvailable
 GAME_UNDO_MOVE_MESSAGE undoMove(GameManager* game);
