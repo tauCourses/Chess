@@ -141,7 +141,6 @@ char waitForChar(FILE* file, char c)
 
 void updateBoardFromFile(GameState* state, FILE* file)
 {
-    char line[256];
     for (int i = CHESS_BOARD_SIZE - 1; i >= 0; i--) {
         waitForChar(file, '>');
 

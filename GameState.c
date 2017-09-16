@@ -306,7 +306,10 @@ void applyUndoMove(GameState *state, GameMove *move)
         applyCastleUndo(state, move);
 
     if(move->pawnChanged)
-        state->board[move->origin->x][move->origin->y] = EMPTY_PLACE_SYMBOL;
+    {
+        char pawn = (char)(state->currentPlayer == WHITE_PLAYER ? 'M' : 'm');
+        state->board[move->origin->x][move->origin->y] = pawn;
+    }
     else
         state->board[move->origin->x][move->origin->y] = state->board[move->des->x][move->des->y];
     state->board[move->des->x][move->des->y] = move->beatedPiece;

@@ -41,5 +41,6 @@ GAME_WINDOW_EVENTS handleEventGameWindow(GameWindow *window, SDL_Event *event);
 
 int exitConfirmationMessageBox();
 int gameEndMessageBox(PLAYER_COLOR winner);
+char gamePawnPromotionMessageBox(PLAYER_COLOR player);
 
 #endif //CHESS_GAMEWINDOW_H

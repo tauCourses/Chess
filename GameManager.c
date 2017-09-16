@@ -60,7 +60,6 @@ void destroyGame(GameManager* game)
 
 GAME_MOVE_MESSAGE movePiece(GameManager* game, Location* org, Location* des)
 {
-    printf("%d %d %d %d\n",org->x, org->y, des->x, des->y);
 	switch (isMoveLegal(game->state,org,des))
 	{
 		case IS_LEGAL_INVALID_POSITION:

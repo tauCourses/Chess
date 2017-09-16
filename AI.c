@@ -5,7 +5,7 @@ GameMove* applyAIMove(GameManager* game)
     MinMaxNode* bestNode = NULL;
     MIN_MAX_NODE_TYPE type = (game->state->currentPlayer == WHITE_PLAYER) ? MAX_NODE_TYPE : MIN_NODE_TYPE;
     if(game->difficulty < 5)
-        bestNode = getBestNode(game->state, type, game->difficulty+1);
+        bestNode = getBestNode(game->state, type, game->difficulty);
     else
     {
         printf("not supported yet");
@@ -14,8 +14,10 @@ GameMove* applyAIMove(GameManager* game)
     if(bestNode == NULL)
         return NULL;
     movePiece(game, duplicateLocation(bestNode->origin), duplicateLocation(bestNode->des));
+    if(bestNode->pawnPromotion != '\0')
+        game->state->board[bestNode->des->x][bestNode->des->y] = bestNode->pawnPromotion;
     destroyMinMaxNode(bestNode);
-    return (seekFirstHistory(game->history));
+    return seekFirstHistory(game->history);
 }
 
 void destroyChain(nodeChain* chain)
@@ -31,31 +33,58 @@ void destroyChain(nodeChain* chain)
     }
 }
 
+nodeChain* updateChainByPawnPromotion(MinMaxNode* node, nodeChain *chain, Location *origin, Location *dest)
+{
+    char pieces[] = {'m','b','n','r','q'};
+    nodeChain* current = chain, *next = NULL;
+    for(int i=0;i<5;i++)
+    {
+        char piece = (char)(node->state->currentPlayer == WHITE_PLAYER ?  pieces[i] : toupper(pieces[i]));
+        next = updateChainByRegularMove(node, current, origin, dest);
+        if (next == NULL)
+            return NULL;
+        current->node->state->board[dest->x][dest->y] = piece;
+        current->node->pawnPromotion = piece;
+        current = next;
+    }
+    return next;
+}
+
+nodeChain* updateChainByRegularMove(MinMaxNode* node, nodeChain *chain, Location *origin, Location *dest)
+{
+    MinMaxNode* tempNode = createMinMaxNode(node->state,oppsiteType(node->type),node->depth+1,node->maxDepth);
+    if(tempNode == NULL)
+        return NULL;
+    GameMove* move = applyMove(tempNode->state,origin,dest);
+    if(move == NULL)
+        return NULL;
+    destroyMove(move);
+    tempNode->des = duplicateLocation(dest);
+    if(tempNode->des == NULL)
+        return NULL;
+    tempNode->origin = duplicateLocation(origin);
+    if(tempNode->origin == NULL)
+        return NULL;
+    chain->node = tempNode;
+    chain->next = (nodeChain*) calloc(1,sizeof(nodeChain));
+    if(chain->next == NULL)
+        return NULL;
+    return chain->next;
+}
+
 nodeChain* updateChainByDests(MinMaxNode* node, nodeChain *chain, Location *origin, Location **dests)
 {
     int i=0;
     nodeChain* current = chain;
     while(dests[i] != NULL)
     {
-        MinMaxNode* tempNode = createMinMaxNode(node->state,oppsiteType(node->type),node->depth+1,node->maxDepth);
-        if(tempNode == NULL)
-            return NULL;
-        GameMove* move = applyMove(tempNode->state,origin,dests[i]);
-        if(move == NULL)
-            return NULL;
-        destroyMove(move);
-        tempNode->des = duplicateLocation(dests[i]);
-        if(tempNode->des == NULL)
-            return NULL;
-        tempNode->origin = duplicateLocation(origin);
-        if(tempNode->origin == NULL)
-            return NULL;
-        current->node = tempNode;
-        current->next = (nodeChain*) calloc(1,sizeof(nodeChain));
-        if(current->next == NULL)
-            return NULL;
+        if(tolower(node->state->board[origin->x][origin->y]) == 'm' && (dests[i]->x == 0 || dests[i]->x == 7))
+            current = updateChainByPawnPromotion(node, current, origin, dests[i]);
+        else
+            current = updateChainByRegularMove(node, current, origin, dests[i]);
         i++;
-        current = current->next;
+        if(current == NULL)
+            return NULL;
     }
     return current;
 }
@@ -125,6 +154,7 @@ MinMaxNode* getBestNode(GameState* state, MIN_MAX_NODE_TYPE type, int maxDepth)
     node->origin = duplicateLocation(tempNode->origin);
     node->des = duplicateLocation(tempNode->des);
     node->state = NULL;
+    node->pawnPromotion = tempNode->pawnPromotion;
 
     destroyChain(nodesChain);
 
@@ -147,6 +177,7 @@ MinMaxNode* createMinMaxNode(GameState* state, MIN_MAX_NODE_TYPE type, int depth
     node->type = type;
     node->depth = depth;
     node->maxDepth = maxDepth;
+    node->pawnPromotion = '\0';
 
     return node;
 }

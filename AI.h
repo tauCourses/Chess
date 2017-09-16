@@ -4,7 +4,6 @@
 #include <limits.h>
 #include "GameManager.h"
 
-
 typedef enum {
     MAX_NODE_TYPE, MIN_NODE_TYPE
 } MIN_MAX_NODE_TYPE;
@@ -21,6 +20,7 @@ typedef struct {
     int score;
     int depth;
     int maxDepth;
+    char pawnPromotion;
 } MinMaxNode;
 
 typedef struct _nodeChain nodeChain;
@@ -36,6 +36,7 @@ GameMove* applyAIMove(GameManager* game);
 MinMaxNode* getBestNode(GameState* state, MIN_MAX_NODE_TYPE type, int maxDepth);
 MinMaxNode* findBestNode(nodeChain* nodesChain, MIN_MAX_NODE_TYPE type);
 
+nodeChain* updateChainByRegularMove(MinMaxNode* node, nodeChain *chain, Location *origin, Location *dest);
 nodeChain* updateChainByDests(MinMaxNode* node, nodeChain *chain, Location *origin, Location **dests);
 nodeChain* getAllMinMaxNodes(MinMaxNode* node);
 

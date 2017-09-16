@@ -2,6 +2,7 @@
 #include "GameManager.h"
 #include "GameState.h"
 #include "Button.h"
+#include "Location.h"
 
 GameWindow* createGameWindow(SDL_Renderer* renderer, GameManager* game)
 {
@@ -123,8 +124,14 @@ GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
             GAME_MOVE_MESSAGE message = movePiece(window->game, &window->board->draged->location, &square);
             destroyDragPiece(window->board);
             //check if pawn need to became something wlse //TODO
-            if(message == MOVE_VALID)
+
+            if(message == MOVE_VALID || message == MOVE_PAWN_REACH_END)
             {
+                if(message == MOVE_PAWN_REACH_END)
+                {
+                    char newPiece = gamePawnPromotionMessageBox(oppositeColor(window->game->state->currentPlayer));
+                     window->game->state->board[square.x][square.y] = newPiece;
+                }
                 window->isSaved = false;
                 if(candoundo(window->game) == UNDO_POSSIBLE)
                     window->undo->state.valid = BUTTON_VALID;
@@ -144,6 +151,10 @@ GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
                 state =  getGameState(window->game);
                 if(state == GAME_CHECKMATE)
                     gameEndMessageBox(oppositeColor(window->game->state->currentPlayer));
+                if(candoundo(window->game))
+                    window->undo->state.valid = BUTTON_VALID;
+                else
+                    window->undo->state.valid = BUTTON_INVALID;
             }
 
             return GAME_NONE;
@@ -264,7 +275,6 @@ int exitConfirmationMessageBox()
         return -1;
 
     }
-    printf("buttonid - %d\n", buttonid);
     return buttonid;
 }
 
@@ -305,6 +315,43 @@ int gameEndMessageBox(PLAYER_COLOR winner)
         return -1;
 
     }
-    printf("buttonid - %d\n", buttonid);
     return buttonid;
+}
+
+char gamePawnPromotionMessageBox(PLAYER_COLOR player)
+{
+    const SDL_MessageBoxButtonData buttons[] = {
+            { /* .flags, .buttonid, .text */        0, 'm', "Pawn" },
+            { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 'n', "Knight" },
+            { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 'b', "Bishop" },
+            { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 'r', "Rook" },
+            { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 'q', "Queen" },
+    };
+    const SDL_MessageBoxColorScheme colorScheme = {
+            { /* .colors (.r, .g, .b) */
+                    { 255,   255,   255 }, /* [SDL_MESSAGEBOX_COLOR_BACKGROUND] */
+                    {   0, 0,   0 }, /* [SDL_MESSAGEBOX_COLOR_TEXT] */
+                    { 255, 0,   0 }, /* [SDL_MESSAGEBOX_COLOR_BUTTON_BORDER] */
+                    {   0,   0, 255 }, /* [SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND] */
+                    { 255,   0, 255 } /* [SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED] */
+            }
+    };
+
+    const SDL_MessageBoxData messageboxdata = {
+            SDL_MESSAGEBOX_INFORMATION, /* .flags */
+            NULL, /* .window */
+            "Pawn promotion", /* .title */
+            "Please select the piece that would replace the pawn", /* .message */
+            SDL_arraysize(buttons), /* .numbuttons */
+            buttons, /* .buttons */
+            &colorScheme /* .colorScheme */
+    };
+    int buttonid;
+    if (SDL_ShowMessageBox(&messageboxdata, &buttonid) < 0) {
+        SDL_Log("error displaying message box");
+        return -1;
+
+    }
+    char result = (char)(player == WHITE_PLAYER ? buttonid : toupper(buttonid));
+    return result;
 }
