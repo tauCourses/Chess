@@ -1,6 +1,4 @@
 #include "GameManager.h"
-#include "GameState.h"
-#include "History.h"
 
 GameManager* createEmptyGame()
 {
@@ -101,13 +99,14 @@ GAME_STATE getGameState(GameManager* game)
 
 Location** getAllAvailableMovesFromLocation(GameManager* game,Location* origin)
 {
-    Location** possibleMoves = (Location**) calloc(sizeof(Location*),CHESS_BOARD_SIZE*CHESS_BOARD_SIZE-1);
+    int maxPossibleMoves = CHESS_BOARD_SIZE*CHESS_BOARD_SIZE - 1 ;
+	Location** possibleMoves = (Location**) calloc(sizeof(Location*),maxPossibleMoves+1);
 
     int numberOfElements = 0;
     Location* destination = createLocation(0,0);
     for(int x=0; x<CHESS_BOARD_SIZE; x++)
     {
-        for(int y=0;y<CHESS_BOARD_SIZE;y++) {
+        for(int y=0;y<CHESS_BOARD_SIZE && numberOfElements <= maxPossibleMoves;y++) {
             destination->x = x;
             destination->y = y;
             if (isMoveLegal(game->state,origin, destination))
@@ -135,7 +134,7 @@ void destroyLocationsList(Location** list)
 
 bool candoundo(GameManager* game)
 {
-    if(game->history->numberOfMovesStored > 0)
+    if((game->history)->numberOfMovesStored > 0)
         return true;
     return false;
 }

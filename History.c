@@ -13,6 +13,7 @@ GameHistory* createHistory(int maxNumberOfMoves)
     }
     history->numberOfMovesStored = 0;
     history->maxNumberOfMoves = maxNumberOfMoves;
+    return history;
 }
 
 void destroyHistory(GameHistory* history)

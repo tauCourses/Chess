@@ -202,29 +202,24 @@ bool isQueenMoveLegal(Board board, Location* org, Location* des)
 
 PLAYER_COLOR getPieceColor(char piece)
 {
-    if (piece >'a' && piece<'z')
+    if (piece == WHITE_BISHOP_SYMBOL || piece == WHITE_KING_SYMBOL || piece == WHITE_KNIGHT_SYMBOL ||
+    		piece == WHITE_PAWN_SYMBOL || piece == WHITE_QUEEN_SYMBOL || piece == WHITE_ROOK_SYMBOL)
+    {
         return WHITE_PLAYER;
-    else if (piece > 'A' && piece < 'Z')
-        return BLACK_PLAYER;
-    return NONE_PLAYER_COLOR;
+    }
+    else
+    {
+        if (piece == BLACK_BISHOP_SYMBOL || piece == BLACK_KING_SYMBOL || piece == BLACK_KNIGHT_SYMBOL ||
+            piece == BLACK_PAWN_SYMBOL || piece == BLACK_QUEEN_SYMBOL || piece == BLACK_ROOK_SYMBOL)
+            return BLACK_PLAYER;
+    }
+        return NONE_PLAYER_COLOR;
 }
 
-int compareLocations(const void * item1, const void * item2)
-{
-    Location* loc1 = (Location*)item1;
-    Location* loc2 = (Location*)item2;
-    if (loc1->x > loc2->x)
-        return 1;
-
-    if (loc1->x == loc2->x)
-        return loc1->y - loc2->y;
-
-    return -1;
-}
 
 bool isCoordinatesOutOfBounds(int x, int y)
 {
-    return x<0 || y<0 || x >= CHESS_BOARD_SIZE | y >= CHESS_BOARD_SIZE;
+    return x<0 || y<0 || (x >= CHESS_BOARD_SIZE) || (y >= CHESS_BOARD_SIZE);
 }
 
 PLAYER_COLOR oppositeColor(PLAYER_COLOR currentPlayerColor)

@@ -39,13 +39,11 @@ castleState* createCastleState(bool hasKingMoved,bool hasLeftRookMoved, bool has
 castleState* duplicateCastleState(castleState* castle);
 void destroyCastleState(castleState* castle);
 
-<<<<<<< 41744466963a9e2747e939f4fa97c04a2dd123a1
+
 bool isCastleMove(Location* org, Location* des); //return true if is valid castle move, false if not and unknown result for invalid move!
-bool isMoveLegal(GameState* state, Location* org, Location* des);
-=======
 
 GAME_IS_LEGAL_MESSAGE isMoveLegal(GameState* state, Location* org, Location* des);
->>>>>>> console WIP
+
 bool checkCastleMove(GameState* state, Location* org, Location* des);
 
 GameMove* applyMove(GameState* state, Location* org, Location* des);

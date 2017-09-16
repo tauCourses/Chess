@@ -53,7 +53,6 @@ bool isKingMoveLegal(Board board, Location* org, Location* des);
 bool isQueenMoveLegal(Board board, Location* org, Location* des);
 
 bool isCoordinatesOutOfBounds(int x, int y);
-int compareLocations(const void * item1, const void * item2);
 PLAYER_COLOR getPieceColor(char piece);
 PLAYER_COLOR oppositeColor(PLAYER_COLOR currentPlayerColor);
 

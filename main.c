@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "GUIManager.h"
+
 #include "ConsoleManager.h"
 
 int main(int argc, char** argv)
@@ -11,7 +11,7 @@ int main(int argc, char** argv)
         if(strncmp(argv[1], "-c", 2) == 0)
             return mainConsole();
         else if(strncmp(argv[1], "-g", 2) == 0)
-            return  mainGUI();
+            return 0; // mainGUI();
         else
         {
             printf("Unknown argument %s\n", argv[1]);
