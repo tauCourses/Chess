@@ -5,17 +5,15 @@
 #ifndef CHESS_PARSER_H
 #define CHESS_PARSER_H
 
-#include "infrastructure.h"
 #include "string.h"
+#include "GameManager.h"
+#include "Location.h"
+#include "Storage.h"
+
+#define MAX_LINE_LENGTH 1024
 
 bool IsInt(const char* str);
 
-Command PraseLine(const char* str);
-
-CommandType commandFromStr(char* token);
-
-bool IsValidPath(char* token);
-
-Location* parseLocation(char* token);
+Location* parseLocation(const char* token);
 
 #endif //CHESS_PARSER_H

@@ -62,8 +62,18 @@ void destroyGame(GameManager* game)
 
 GAME_MOVE_MESSAGE movePiece(GameManager* game, Location* org, Location* des)
 {
-    if(!isMoveLegal(game->state,org,des))
-        return MOVE_INVALID_POSITION;
+	switch (isMoveLegal(game->state,org,des))
+	{
+		case IS_LEGAL_INVALID_POSITION:
+			return MOVE_INVALID_POSITION;
+		case IS_LEGAL_NOT_USER_PIECE:
+			return MOVE_NOT_USER_PIECE;
+		case IS_LEGAL_INVALID_DUE_TO_CHESS_RULES:
+			return MOVE_INVALID_DUE_TO_CHESS_RULES;
+		default:
+			break;
+	}
+
     GameMove* move = applyMove(game->state, org, des);
 
     pushToHistory(game->history, move);

@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include "GUIManager.h"
-#include "console.h"
+#include "ConsoleManager.h"
 
 int main(int argc, char** argv)
 {
-    if(argc == 1)
+	if(argc == 1)
         return mainConsole();
     if(argc == 2)
     {
@@ -14,7 +14,7 @@ int main(int argc, char** argv)
             return  mainGUI();
         else
         {
-            printf("Unkown argument %s\n", argv[1]);
+            printf("Unknown argument %s\n", argv[1]);
             return 1;
         }
     }

@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include "Location.h"
 
 #define EMPTY_PLACE_SYMBOL '_'
 
@@ -34,13 +35,6 @@ typedef enum {WHITE_PLAYER, BLACK_PLAYER, NONE_PLAYER_COLOR} PLAYER_COLOR;
 
 typedef char Board[CHESS_BOARD_SIZE][CHESS_BOARD_SIZE];
 
-typedef struct {
-    int x,y;
-} Location;
-
-Location* createLocation(int x, int y);
-Location* duplicateLocation(Location* location);
-void destroyLocation(Location* loc);
 
 void setInitialBoard(Board board);
 

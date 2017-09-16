@@ -75,27 +75,32 @@ void destroyGameState(GameState* state)
     free(state);
 }
 
-bool isMoveLegal(GameState* state, Location* org, Location* des)
+GAME_IS_LEGAL_MESSAGE isMoveLegal(GameState* state, Location* org, Location* des)
 {
-    if(getPieceColor(state->board[org->x][org->y]) != state->currentPlayer)
-        return false;
+	if (isLocationOutOfBounds(org) || isLocationOutOfBounds(des))
+		return IS_LEGAL_INVALID_POSITION;
+	if(getPieceColor(state->board[org->x][org->y]) != state->currentPlayer)
+        return IS_LEGAL_NOT_USER_PIECE;
     if(!isLegalDesPiece(state->board, state->board[org->x][org->y], state->board[des->x][des->y]))
-        return false;
+        return IS_LEGAL_INVALID_DUE_TO_CHESS_RULES;
     if(checkCastleMove(state,org,des))
-        return true;
+        return IS_LEGAL_VALID;
     if(!isPieceMoveLegal(state->board,org,des))
-        return false;
+        return IS_LEGAL_INVALID_DUE_TO_CHESS_RULES;
 
-    bool result = true;
+    bool isChessAgainstUser = false;
     char oldPiece = state->board[des->x][des->y];
     state->board[des->x][des->y] = state->board[org->x][org->y];
     state->board[org->x][org->y] = EMPTY_PLACE_SYMBOL;
     if(isKingThreatened(state))
-        result = false;
+    	isChessAgainstUser = true;
 
     state->board[org->x][org->y] = state->board[des->x][des->y];
     state->board[des->x][des->y] = oldPiece;
-    return result;
+    if (isChessAgainstUser)
+    	return IS_LEGAL_INVALID_DUE_TO_CHESS_RULES;
+    else
+    	return IS_LEGAL_VALID;
 }
 
 bool isKingThreatened(GameState* state)
@@ -103,7 +108,7 @@ bool isKingThreatened(GameState* state)
     Location* kingLocation = findKingLocation(state, state->currentPlayer);
     if(kingLocation == NULL)
         return false;
-    bool res = isThreatened(state, kingLocation, oppositeColor(state->currentPlayer));
+	bool res = isThreatened(state, kingLocation, oppositeColor(state->currentPlayer));
     destroyLocation(kingLocation);
     return res;
 }

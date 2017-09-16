@@ -14,7 +14,7 @@ typedef enum  {
 } GAME_MODE;
 
 typedef enum {
-    MOVE_VALID, MOVE_PAWN_REACH_END, MOVE_INVALID_POSITION, MOVE_NOT_USER_PIECE, MOVE_INVALID_DUE_TO_CHESS
+    MOVE_VALID, MOVE_PAWN_REACH_END, MOVE_INVALID_POSITION, MOVE_NOT_USER_PIECE, MOVE_INVALID_DUE_TO_CHESS_RULES
 } GAME_MOVE_MESSAGE;
 
 typedef enum {
@@ -47,6 +47,7 @@ Location** getAllAvailableMovesFromLocation(GameManager* game,Location* location
 void destroyLocationsList(Location** list);
 
 bool candoundo(GameManager* game); //just kidding, should be canDoUndo or isUndoAvailable
+
 GAME_UNDO_MOVE_MESSAGE undoMove(GameManager* game);
 
 #endif //CHESS_GAME_H

@@ -2,7 +2,7 @@
 #ifndef CHESS_GAMETESTS_H
 #define CHESS_GAMETESTS_H
 #include "GameManager.h"
-#include "console.h"
+#include "ConsoleManager.h"
 
 int runLegalMovesTests();
 

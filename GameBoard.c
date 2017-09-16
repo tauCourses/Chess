@@ -1,29 +1,5 @@
 #include "GameBoard.h"
 
-Location* createLocation(int x, int y)
-{
-    Location* loc = (Location*) malloc(sizeof(Location));
-    if(loc == NULL)
-        return NULL;
-    loc->x = x;
-    loc->y = y;
-    return loc;
-}
-
-Location* duplicateLocation(Location* location)
-{
-    Location* loc = (Location*) malloc(sizeof(Location));
-    if(loc == NULL)
-        return NULL;
-    loc->x = location->x;
-    loc->y = location->y;
-    return loc;
-}
-void destroyLocation(Location* loc)
-{
-    free(loc);
-}
-
 void setInitialBoard(Board board)
 {
     //WHITE PIECES:
