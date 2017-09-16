@@ -320,6 +320,8 @@ void applyUndoMove(GameState *state, GameMove *move)
 bool checkCastleMove(GameState* state, Location* org, Location* des)
 {
     castleState* castleState = state->currentPlayer == WHITE_PLAYER ? state->whiteCastle : state->blackCastle;
+    if(tolower(state->board[org->x][org->y]) != 'k')
+        return false;
     if(org->y == 4 && des->y == 6 && org->x == des->x
        && castleState->hasKingMoved == false && castleState->hasRightRookMoved == false) //right castle
     {
