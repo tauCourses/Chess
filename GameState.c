@@ -56,8 +56,12 @@ GameState* duplicateGameState(GameState* state)
     if(newState == NULL)
         return NULL;
 
-    newState->blackCastle = createCastleState(false, false, false);
-    newState->whiteCastle = createCastleState(false, false, false);
+    newState->blackCastle = duplicateCastleState(state->blackCastle);
+    newState->whiteCastle = duplicateCastleState(state->whiteCastle);
+    newState->currentPlayer = state->currentPlayer;
+    for(int x=0;x<CHESS_BOARD_SIZE;++x)
+        for (int y = 0; y < CHESS_BOARD_SIZE; ++y)
+            newState->board[x][y] = state->board[x][y];
 
     return newState;
 }
@@ -73,6 +77,33 @@ void destroyGameState(GameState* state)
         destroyCastleState(state->blackCastle);
 
     free(state);
+}
+
+Location** getAllAvailableMovesFromLocation(GameState* state,Location* origin)
+{
+    size_t maxPossibleMoves = CHESS_BOARD_SIZE*CHESS_BOARD_SIZE;
+    Location** possibleMoves = (Location**) calloc(sizeof(Location*),maxPossibleMoves);
+    if(possibleMoves == NULL)
+        return NULL;
+
+    int numberOfElements = 0;
+    Location destination;
+    for(int x=0; x<CHESS_BOARD_SIZE; x++)
+    {
+        for(int y=0;y<CHESS_BOARD_SIZE && numberOfElements < maxPossibleMoves-1;y++)
+        {
+            destination = (Location){.x=x,.y=y};
+            if (isMoveLegal(state,origin, &destination) == IS_LEGAL_VALID)
+            {
+                possibleMoves[numberOfElements] = duplicateLocation(&destination);
+                numberOfElements++;
+            }
+        }
+    }
+    qsort(possibleMoves, (size_t)numberOfElements, sizeof(Location), &compareLocations);
+    if(numberOfElements > 50) //TODO-> remove!
+        printf("what?");
+    return possibleMoves;
 }
 
 GAME_IS_LEGAL_MESSAGE isMoveLegal(GameState* state, Location* org, Location* des)
@@ -253,7 +284,8 @@ bool isCastleUndo(GameState *state, GameMove *move)
         return true;
     return false;
 }
-bool applyCastleUndo(GameState *state, GameMove *move)
+
+bool applyCastleUndo(GameState *state, GameMove *move) //just move the rook to the position before castle
 {
     char castleRook = (char)((state->currentPlayer == WHITE_PLAYER) ? BLACK_ROOK_SYMBOL : WHITE_ROOK_SYMBOL);
     if(move->des->y == 6)
@@ -267,6 +299,7 @@ bool applyCastleUndo(GameState *state, GameMove *move)
         state->board[move->des->x][3] = EMPTY_PLACE_SYMBOL;
     }
 }
+
 void applyUndoMove(GameState *state, GameMove *move)
 {
     if(isCastleUndo(state, move))
@@ -278,7 +311,7 @@ void applyUndoMove(GameState *state, GameMove *move)
         state->board[move->origin->x][move->origin->y] = state->board[move->des->x][move->des->y];
     state->board[move->des->x][move->des->y] = move->beatedPiece;
 
-    *state->whiteCastle = *move->whiteCastle;
+    *state->whiteCastle = *move->whiteCastle; //copy the data, works because there are no pointers in this struct
     *state->blackCastle = *move->blackCastle;
 
     state->currentPlayer = oppositeColor(state->currentPlayer);

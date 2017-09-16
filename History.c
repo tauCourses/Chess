@@ -39,7 +39,14 @@ GameMove* popFromHistory(GameHistory* history)
     return move;
 }
 
-GameMove* pushToHistory(GameHistory* history, GameMove* move)
+GameMove* seekFirstHistory(GameHistory* history)
+{
+    if(history->numberOfMovesStored == 0)
+        return NULL;
+    return history->movesList[0];
+}
+
+void pushToHistory(GameHistory* history, GameMove* move)
 {
     if(history->numberOfMovesStored == history->maxNumberOfMoves)
     {

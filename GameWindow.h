@@ -8,6 +8,7 @@
 #include "GameLayout.h"
 #include "Storage.h"
 #include "GameManager.h"
+#include "AI.h"
 
 typedef enum {
     GAME_LOAD, GAME_MAIN, GAME_EXIT,  GAME_INVALID_ARGUMENT, GAME_NONE

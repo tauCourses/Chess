@@ -60,6 +60,7 @@ void destroyGame(GameManager* game)
 
 GAME_MOVE_MESSAGE movePiece(GameManager* game, Location* org, Location* des)
 {
+    printf("%d %d %d %d\n",org->x, org->y, des->x, des->y);
 	switch (isMoveLegal(game->state,org,des))
 	{
 		case IS_LEGAL_INVALID_POSITION:
@@ -88,8 +89,16 @@ GAME_STATE getGameState(GameManager* game)
     {
         for(int y=0;y<CHESS_BOARD_SIZE;y++) {
             Location location = {.x=x,.y=y};
-            if (getAllAvailableMovesFromLocation(game, &location)[0] != NULL)
+            Location** dests = getAllAvailableMovesFromLocation(game->state, &location);
+            if(dests == NULL)
+                return GAME_ERROR;
+            else if (dests[0] != NULL)
+            {
+                destroyLocationsList(dests);
                 return VALID_GAME_STATE;
+            }
+            else
+                destroyLocationsList(dests);
         }
     }
     if(isKingThreatened(game->state))
@@ -97,46 +106,10 @@ GAME_STATE getGameState(GameManager* game)
     return GAME_TIE;
 }
 
-Location** getAllAvailableMovesFromLocation(GameManager* game,Location* origin)
-{
-    int maxPossibleMoves = CHESS_BOARD_SIZE*CHESS_BOARD_SIZE - 1 ;
-	Location** possibleMoves = (Location**) calloc(sizeof(Location*),maxPossibleMoves+1);
-
-    int numberOfElements = 0;
-    Location* destination = createLocation(0,0);
-    for(int x=0; x<CHESS_BOARD_SIZE; x++)
-    {
-        for(int y=0;y<CHESS_BOARD_SIZE && numberOfElements <= maxPossibleMoves;y++) {
-            destination->x = x;
-            destination->y = y;
-            if (isMoveLegal(game->state,origin, destination))
-            {
-                possibleMoves[numberOfElements] = duplicateLocation(destination);
-                numberOfElements++;
-            }
-        }
-    }
-    destroyLocation(destination);
-    qsort(possibleMoves, (size_t)numberOfElements, sizeof(Location), &compareLocations);
-    return possibleMoves;
-}
-
-void destroyLocationsList(Location** list)
-{
-    if(list == NULL)
-        return;
-
-    for(int i=0; i<CHESS_BOARD_SIZE*CHESS_BOARD_SIZE-1 && list[i] != NULL; ++i)
-        destroyLocation(list[i]);
-
-    free(list);
-}
 
 bool candoundo(GameManager* game)
 {
-    if((game->history)->numberOfMovesStored > 0)
-        return true;
-    return false;
+    return game->mode == ONE_PLAYER_GAME_MODE && game->history->numberOfMovesStored > 1;
 }
 
 

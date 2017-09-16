@@ -1,9 +1,9 @@
 #ifndef CHESS_CONSOLESETTINGSSTATE_H
 #define CHESS_CONSOLESETTINGSSTATE_H
 
+#include <stdio.h>
 #include "GameManager.h"
-#include "stdio.h"
-#include "parser.h"
+#include "Parser.h"
 
 typedef enum SETTINGS_COMMAND_TYPE{
 	SETTINGS_COMMAND_GAME_MODE, SETTINGS_COMMAND_DIFFICULTY ,SETTINGS_COMMAND_USER_COLOR,

@@ -71,3 +71,16 @@ void printLocationsList(Location** locations)
 	}
 
 }
+
+void destroyLocationsList(Location** list)
+{
+    if(list == NULL)
+        return;
+    int i = 0;
+    while(list[i] != NULL)
+    {
+        destroyLocation(list[i]);
+        i++;
+    }
+    free(list);
+}

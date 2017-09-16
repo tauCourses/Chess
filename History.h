@@ -13,5 +13,7 @@ GameHistory* createHistory(int maxNumberOfMoves);
 void destroyHistory(GameHistory* history);
 
 GameMove* popFromHistory(GameHistory* history);
-GameMove* pushToHistory(GameHistory* history, GameMove* move);
+GameMove* seekFirstHistory(GameHistory* history);
+void pushToHistory(GameHistory* history, GameMove* move);
+
 #endif //CHESS_HISTORY_H

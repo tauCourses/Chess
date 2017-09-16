@@ -18,7 +18,7 @@ typedef enum {
 } GAME_MOVE_MESSAGE;
 
 typedef enum {
-    VALID_GAME_STATE, GAME_CHECKMATE, GAME_TIE,
+    VALID_GAME_STATE, GAME_CHECKMATE, GAME_TIE, GAME_ERROR
 } GAME_STATE;
 
 typedef enum{
@@ -43,8 +43,7 @@ GAME_MOVE_MESSAGE movePiece(GameManager* game, Location* org, Location* des);
 
 GAME_STATE getGameState(GameManager* game);
 
-Location** getAllAvailableMovesFromLocation(GameManager* game,Location* location);
-void destroyLocationsList(Location** list);
+
 
 bool candoundo(GameManager* game); //just kidding, should be canDoUndo or isUndoAvailable
 

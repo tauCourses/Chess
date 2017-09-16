@@ -3,7 +3,7 @@
 
 #include "GameManager.h"
 #include "stdio.h"
-#include "parser.h"
+#include "Parser.h"
 #include "ConsoleGameState.h"
 #include "ConsoleSettingsState.h"
 #include "Location.h"

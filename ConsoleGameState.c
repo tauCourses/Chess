@@ -1,4 +1,5 @@
 #include "ConsoleGameState.h"
+#include "GameManager.h"
 
 GameStateCommand getGameStateCommandFromUser()
 {
@@ -201,7 +202,7 @@ void executeCommandGetPossibleMoves(GameManager* game, GameStateCommand GCommand
 {
 	if (isLegalGetPossibleMoves(game,GCommand))
 	{
-		Location** allMoves = getAllAvailableMovesFromLocation(game,GCommand.org);
+		Location** allMoves = getAllAvailableMovesFromLocation(game->state,GCommand.org);
 		if (allMoves == NULL)
 			printf(ERR_MALLOC);
 		else

@@ -2,6 +2,7 @@
 #include "ModeWindow.h"
 #include "MainWindow.h"
 #include "DifficultyWindow.h"
+#include "GameManager.h"
 
 int mainGUI()
 {
@@ -382,6 +383,11 @@ MANAGER_EVENT handleManagerDueToColorEvent(GUIManager* gui, COLOR_WINDOW_EVENTS 
 
             GameManager* game = createOnePlayerGame(gui->difficultyWindow->configurationChosen,
                                             getColorFromColorWindow(gui->colorWindow));
+            if(game->userColor == BLACK_PLAYER)
+            {
+                applyAIMove(game);
+                destroyMove(popFromHistory(game->history));
+            }
             gui->gameWindow = createGameWindow(gui->renderer, game); //TODO -> CHANGE IT TO two player chess
             gui->lastWindow = gui->activeWindow;
             gui->activeWindow = GAME_WINDOW_ACTIVE;

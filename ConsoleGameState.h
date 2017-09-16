@@ -3,7 +3,7 @@
 
 #include "GameManager.h"
 #include "stdio.h"
-#include "parser.h"
+#include "Parser.h"
 
 typedef enum GAME_STATE_COMMAND_TYPE{
 	GAME_STATE_COMMAND_QUIT, GAME_STATE_COMMAND_MOVE ,GAME_STATE_COMMAND_GET_POSSIBLE_MOVES,

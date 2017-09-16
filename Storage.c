@@ -55,16 +55,16 @@ bool isFileExist(char* filename)
 
 GameManager* loadGame(char* filename)
 {
+
+
+    FILE * file = fopen(filename, "r");
+    if(file == NULL)
+        return NULL;
+
     GameManager* game = createEmptyGame();
     if(game == NULL)
         return NULL;
 
-    FILE * file = fopen(filename, "r");
-    if(file == NULL)
-    {
-        destroyGame(game);
-        return NULL;
-    }
     updateGameParams(game,file);
     updateBoardFromFile(game->state, file);
     updateCastlesStateFromFile(game->state, file);

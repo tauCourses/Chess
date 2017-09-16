@@ -1,6 +1,7 @@
 #include "GameWindow.h"
 #include "GameManager.h"
 #include "GameState.h"
+#include "Button.h"
 
 GameWindow* createGameWindow(SDL_Renderer* renderer, GameManager* game)
 {
@@ -56,6 +57,8 @@ void createGameButtons(GameWindow* window)
     window->save = createButton(window->renderer, saveR, SAVE_ACTIVE_BUTTON, "", BUTTON_TYPE_ONE_OPTION);
     window->load = createButton(window->renderer, loadR, LOAD_ACTIVE_BUTTON, "", BUTTON_TYPE_ONE_OPTION);
     window->undo = createButton(window->renderer, undoR, UNDO_ACTIVE_BUTTON, UNDO_NOT_ACTIVE_BUTTON, BUTTON_TYPE_VALIDATE);
+    if(!candoundo(window->game))
+        window->undo->state.valid = BUTTON_INVALID;
 
     window->main = createButton(window->renderer, mainR, MAIN_MANU_ACTIVE_BUTTON, "", BUTTON_TYPE_ONE_OPTION);
     window->exit = createButton(window->renderer, exitR, EXIT_ACTIVE_BUTTON, "", BUTTON_TYPE_ONE_OPTION);
@@ -123,11 +126,24 @@ GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
             if(message == MOVE_VALID)
             {
                 window->isSaved = false;
+                if(candoundo(window->game))
+                    window->undo->state.valid = BUTTON_VALID;
+                else
+                    window->undo->state.valid = BUTTON_INVALID;
+
                 GAME_STATE state =  getGameState(window->game);
                 if(state == GAME_CHECKMATE)
                     gameEndMessageBox(oppositeColor(window->game->state->currentPlayer));
                 else if(state == GAME_TIE)
                     gameEndMessageBox(NONE_PLAYER_COLOR);
+                if(state != VALID_GAME_STATE)
+                    return GAME_NONE;
+
+                if(window->game->mode == ONE_PLAYER_GAME_MODE)
+                    applyAIMove(window->game);
+                state =  getGameState(window->game);
+                if(state == GAME_CHECKMATE)
+                    gameEndMessageBox(oppositeColor(window->game->state->currentPlayer));
             }
 
             return GAME_NONE;
@@ -146,8 +162,11 @@ GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
             newGame = createTwoPlayersGame();
         else
             newGame = createOnePlayerGame(window->game->difficulty,window->game->userColor);
+
         if(newGame == NULL)
             return GAME_NONE; //TODO -> WHAT TO DO?
+        if(newGame->mode == ONE_PLAYER_GAME_MODE &&newGame->userColor == BLACK_PLAYER)
+            applyAIMove(newGame);
         destroyGame(window->game);
         window->game = newGame;
 
@@ -164,7 +183,14 @@ GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
     else if(clickOnButton(window->undo, event->button.x, event->button.y))
     {
         if(candoundo(window->game))
+        {
             undoMove(window->game);
+            undoMove(window->game);
+        }
+        if(candoundo(window->game))
+            window->undo->state.valid = BUTTON_VALID;
+        else
+            window->undo->state.valid = BUTTON_INVALID;
         return GAME_NONE;
     }
     else if(clickOnButton(window->main, event->button.x, event->button.y) &&

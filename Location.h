@@ -23,5 +23,7 @@ char* getStringFromLocation(Location* loc);
 
 void printLocationsList(Location** locations);
 
+void destroyLocationsList(Location** list);
+
 
 #endif //CHESS_LOCATION_H

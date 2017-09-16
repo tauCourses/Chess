@@ -49,6 +49,9 @@ bool checkCastleMove(GameState* state, Location* org, Location* des);
 GameMove* applyMove(GameState* state, Location* org, Location* des);
 void applyUndoMove(GameState *state, GameMove *move);
 
+Location** getAllAvailableMovesFromLocation(GameState* state,Location* origin);
+void destroyLocationsList(Location** list);
+
 bool isKingThreatened(GameState* state);
 Location* findKingLocation(GameState* state, PLAYER_COLOR kingColor);
 bool isThreatened(GameState* state, Location* loc, PLAYER_COLOR byPlayer);
