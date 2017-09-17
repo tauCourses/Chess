@@ -306,17 +306,23 @@ void executeCommandUndo(GameManager* game)
 			break;
 	}
 	GameMove* move = undoMove(game);
+    char* originString = getStringFromLocation(move->origin);
+    char* destString = getStringFromLocation(move->des);
 	if (game->state->currentPlayer == WHITE_PLAYER)
-		printf(MSG_UNDO_BLACK,getStringFromLocation(move->origin),getStringFromLocation(move->des));
+		printf(MSG_UNDO_BLACK,originString,destString);
 	else
-		printf(MSG_UNDO_WHITE,getStringFromLocation(move->origin),getStringFromLocation(move->des));
-
+		printf(MSG_UNDO_WHITE,originString,destString);
+    free(originString);
+    free(destString);
 	move = undoMove(game);
+    originString = getStringFromLocation(move->origin);
+    destString = getStringFromLocation(move->des);
 	if (game->state->currentPlayer == WHITE_PLAYER)
-		printf(MSG_UNDO_WHITE,getStringFromLocation(move->origin),getStringFromLocation(move->des));
+		printf(MSG_UNDO_WHITE,originString,destString);
 	else
-		printf(MSG_UNDO_BLACK,getStringFromLocation(move->origin),getStringFromLocation(move->des));
-
+		printf(MSG_UNDO_BLACK,originString,destString);
+    free(originString);
+    free(destString);
 }
 
 void executeCommandReset(GameManager* game)
@@ -456,65 +462,85 @@ GAME_INPUT_STATE makeComputerMove(GameManager* game)
 
 void printComMove(GameMove* move, char piece)
 {
+	char* originString = getStringFromLocation(move->origin);
+	char* destString = getStringFromLocation(move->des);
+	if(originString == NULL || destString == NULL)
+	{
+		free(originString);
+		free(destString);
+		return;
+	}
     switch (piece)
     {
         case 'm':
         case 'M':
-            printf(MSG_COM_MOVE_PAWN,getStringFromLocation(move->origin), getStringFromLocation(move->des));
+            printf(MSG_COM_MOVE_PAWN,originString, destString);
             break;
         case 'r':
         case 'R':
-            printf(MSG_COM_MOVE_rook,getStringFromLocation(move->origin), getStringFromLocation(move->des));
+            printf(MSG_COM_MOVE_rook,originString, destString);
             break;
         case 'b':
         case 'B':
-            printf(MSG_COM_MOVE_BISHOP,getStringFromLocation(move->origin), getStringFromLocation(move->des));
+            printf(MSG_COM_MOVE_BISHOP,originString, destString);
             break;
         case 'n':
         case 'N':
-            printf(MSG_COM_MOVE_knight,getStringFromLocation(move->origin), getStringFromLocation(move->des));
+            printf(MSG_COM_MOVE_knight,originString, destString);
             break;
         case 'q':
         case 'Q':
-            printf(MSG_COM_MOVE_queen,getStringFromLocation(move->origin), getStringFromLocation(move->des));
+            printf(MSG_COM_MOVE_queen,originString, destString);
             break;
         case 'k':
         case 'K':
-            printf(MSG_COM_MOVE_king,getStringFromLocation(move->origin), getStringFromLocation(move->des));
+            printf(MSG_COM_MOVE_king,originString, destString);
             break;
         default:
             break;
     }
+	free(originString);
+	free(destString);
 }
 
 void printComPawnPromotion(GameMove* move,char desPiece)
 {
+	char* originString = getStringFromLocation(move->origin);
+	char* destString = getStringFromLocation(move->des);
+	if(originString == NULL || destString == NULL)
+	{
+		free(originString);
+		free(destString);
+		return;
+	}
     switch (desPiece)
     {
         case 'm':
         case 'M':
-            printf(MSG_COM_PAWN_PROMTION_PAWN,getStringFromLocation(move->origin), getStringFromLocation(move->des));
+            printf(MSG_COM_PAWN_PROMTION_PAWN,originString, destString);
             break;
         case 'r':
         case 'R':
-            printf(MSG_COM_PAWN_PROMTION_ROOK,getStringFromLocation(move->origin), getStringFromLocation(move->des));
+            printf(MSG_COM_PAWN_PROMTION_ROOK,originString, destString);
             break;
         case 'b':
         case 'B':
-            printf(MSG_COM_PAWN_PROMTION_BISHOP,getStringFromLocation(move->origin), getStringFromLocation(move->des));
+            printf(MSG_COM_PAWN_PROMTION_BISHOP,originString, destString);
             break;
         case 'n':
         case 'N':
-            printf(MSG_COM_PAWN_PROMTION_KNIGHT,getStringFromLocation(move->origin), getStringFromLocation(move->des));
+            printf(MSG_COM_PAWN_PROMTION_KNIGHT,originString, destString);
             break;
         case 'q':
         case 'Q':
-            printf(MSG_COM_PAWN_PROMTION_QUEEN,getStringFromLocation(move->origin), getStringFromLocation(move->des));
+            printf(MSG_COM_PAWN_PROMTION_QUEEN,originString, destString);
             break;
 
         default:
             break;
     }
+	free(originString);
+	free(destString);
 }
 
 
