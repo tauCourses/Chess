@@ -10,7 +10,7 @@
 #include "AI.h"
 
 typedef enum {
-    GAME_LOAD, GAME_MAIN, GAME_EXIT,  GAME_INVALID_ARGUMENT, GAME_NONE
+    GAME_LOAD, GAME_MAIN, GAME_EXIT,  GAME_WINDOW_ERROR, GAME_NONE, GAME_CONTINUE
 } GAME_WINDOW_EVENTS;
 
 typedef struct  {
@@ -33,7 +33,7 @@ typedef struct  {
 GameWindow* createGameWindow(SDL_Renderer* renderer, GameManager* game);
 void createGameButtons(GameWindow* window);
 void destroyGameWindow(GameWindow *window);
-void drawGameWindow(GameWindow *window);
+bool drawGameWindow(GameWindow *window);
 
 GAME_WINDOW_EVENTS handleLeftMouseUpGameWindow(GameWindow *window, SDL_Event *event);
 GAME_WINDOW_EVENTS  handleLeftMouseDownGameWindow(GameWindow *window, SDL_Event *event);

@@ -52,17 +52,17 @@ typedef struct{
 
 GameLayout* createGameLayout(SDL_Point startingPoint, SDL_Renderer* renderer);
 Pieces* createPieces(SDL_Renderer* renderer, char* pawn, char* rook, char* bishop, char* knight, char* queen, char* king);
-void setDragedPiece(GameLayout* game, int x, int y, char c);
+bool setDragedPiece(GameLayout* game, Location loc, char c);
 
 void destroyGameLayout(GameLayout* game);
 void destroyPieces(Pieces* pieces);
 void destroyDragPiece(GameLayout* game);
 
-void drawGameLayout(GameLayout* game, GameState* state);
-void drawSuggestMoves(GameLayout* game, GameState* state);
+bool drawGameLayout(GameLayout* game, GameState* state);
+bool drawSuggestMoves(GameLayout* game, GameState* state);
 
 SDL_Texture* charToTexture(GameLayout* game, char c);
-void drawSquare(GameLayout* game, int x, int y, char c);
+bool drawSquare(GameLayout* game, int x, int y, char c);
 
 bool isPointOnGameLayout(GameLayout *game, int x, int y);
 Location getSquare(GameLayout* game, int x, int y);

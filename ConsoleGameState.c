@@ -55,7 +55,7 @@ GAME_INPUT_STATE executeGameStateCommand(GameManager* game, GameStateCommand* GC
 	default:
 		break;
 	}
-	return GAME_STATE_COMMAND_INVALID;
+	return GAME_STATE_COMMAND_INVALID; //TODO -> IS THIS A REAL VALUE? WHY CLION HATE IT?
 }
 
 
@@ -254,7 +254,7 @@ void executeCommandGetPossibleMoves(GameManager* game, GameStateCommand* GComman
 	{
 		Location** allMoves = getAllAvailableMovesFromLocation(game->state,GCommand->org);
 		if (allMoves == NULL)
-			printf(ERR_MALLOC);
+			printf(ERR_MALLOC); //TODO->shouldn't we terminate in this case
 		else
 		{
 			printLocationsList(allMoves);
@@ -333,8 +333,8 @@ void executeCommandReset(GameManager* game)
 
 void executeCommandCastle(GameManager* game,GameStateCommand* GCommand)
 {
-    Location* kingLoc = findKingLocation(game->state, game->state->currentPlayer);
-	Location* kingDes = castleGetKingDes(game,GCommand);
+    Location* kingLoc = findKingLocation(game->state, game->state->currentPlayer); //TODO-> MIGHT FAIL! MALLOC INSIDE!
+	Location* kingDes = castleGetKingDes(game,GCommand); //TODO -> AND WHAT IF, IN A VERY NOT COMMON SENARIO, THE MALLOC INSIDE WILL FAIL?!?!
 	bool isPieceRook = false;
 	if (!isLocationOutOfBounds(GCommand->org) && game->state->currentPlayer == WHITE_PLAYER && game->state->board[GCommand->org->x][GCommand->org->y] == 'r' )
 		isPieceRook = true;
@@ -343,7 +343,7 @@ void executeCommandCastle(GameManager* game,GameStateCommand* GCommand)
 	if (isPieceRook)
 	{
 		if (kingDes != NULL && checkCastleMove(game->state,kingLoc,kingDes))
-			applyMove(game->state,kingLoc,kingDes);
+			applyMove(game->state,kingLoc,kingDes); //TODO -> applyMove may FAILED because of malloc!!!
 		else
 			printf(MSG_CASTLE_ILLEGAL);
 	}

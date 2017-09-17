@@ -59,7 +59,7 @@ void createGameButtons(GameWindow* window)
     window->save = createButton(window->renderer, saveR, SAVE_ACTIVE_BUTTON, "", BUTTON_TYPE_ONE_OPTION);
     window->load = createButton(window->renderer, loadR, LOAD_ACTIVE_BUTTON, "", BUTTON_TYPE_ONE_OPTION);
     window->undo = createButton(window->renderer, undoR, UNDO_ACTIVE_BUTTON, UNDO_NOT_ACTIVE_BUTTON, BUTTON_TYPE_VALIDATE);
-    if(!candoundo(window->game) == UNDO_POSSIBLE)
+    if(window->undo != NULL && candoundo(window->game) != UNDO_POSSIBLE)
         window->undo->state.valid = BUTTON_INVALID;
 
     window->main = createButton(window->renderer, mainR, MAIN_MANU_ACTIVE_BUTTON, "", BUTTON_TYPE_ONE_OPTION);
@@ -95,10 +95,10 @@ void destroyGameWindow(GameWindow *window)
     free(window);
 }
 
-void drawGameWindow(GameWindow *window)
+bool drawGameWindow(GameWindow *window)
 {
     if(window==NULL)
-        return;
+        return false;
 
     SDL_SetRenderDrawColor(window->renderer, 255, 255, 255, 255);
     SDL_RenderClear(window->renderer);
@@ -111,56 +111,112 @@ void drawGameWindow(GameWindow *window)
     drawButton(window->main);
     drawButton(window->exit);
 
-    drawGameLayout(window->board, window->game->state);
+    return drawGameLayout(window->board, window->game->state);
 }
 
+void updateUndoButton(GameWindow *window)
+{
+    if(candoundo(window->game) == UNDO_POSSIBLE)
+        window->undo->state.valid = BUTTON_VALID;
+    else
+        window->undo->state.valid = BUTTON_INVALID;
+}
+
+GAME_WINDOW_EVENTS handleLeftMouseUpGameLayout(GameWindow *window, SDL_Event *event)
+{
+    if(window->board->draged != NULL)
+    {
+        Location square = getSquare(window->board, event->button.x, event->button.y);
+        GAME_MOVE_MESSAGE message = movePiece(window->game, &window->board->draged->location, &square);
+        if(message == MOVE_ERROR)
+            return GAME_WINDOW_ERROR;
+        destroyDragPiece(window->board);
+
+        if(message == MOVE_VALID || message == MOVE_PAWN_REACH_END)
+        {
+            if(message == MOVE_PAWN_REACH_END)
+            {
+                char newPiece = gamePawnPromotionMessageBox(oppositeColor(window->game->state->currentPlayer));
+                window->game->state->board[square.x][square.y] = newPiece;
+            }
+            window->isSaved = false;
+            updateUndoButton(window);
+
+            GAME_STATE state =  getGameState(window->game);
+            if(state == GAME_CHECKMATE)
+                gameEndMessageBox(oppositeColor(window->game->state->currentPlayer));
+            else if(state == GAME_TIE)
+                gameEndMessageBox(NONE_PLAYER_COLOR);
+            else if(state == GAME_ERROR)
+                return GAME_WINDOW_ERROR;
+            if(state != VALID_GAME_STATE)
+                return GAME_NONE;
+
+            if(window->game->mode == ONE_PLAYER_GAME_MODE)
+            {
+                GameMove* move = applyAIMove(window->game);
+                if(move == NULL)
+                {
+                    printf("Error in preform AI move\n");
+                    return GAME_WINDOW_ERROR;
+                }
+            }
+            state =  getGameState(window->game);
+            if(state == GAME_CHECKMATE)
+                gameEndMessageBox(oppositeColor(window->game->state->currentPlayer));
+            else if(state == GAME_TIE)
+                gameEndMessageBox(NONE_PLAYER_COLOR);
+            else if(state == GAME_ERROR)
+                return GAME_WINDOW_ERROR;
+            updateUndoButton(window);
+        }
+    }
+    return GAME_NONE;
+}
+
+GAME_WINDOW_EVENTS handleLeftMouseUpRestart(GameWindow *window)
+{
+    GameManager *newGame;
+    if(window->game->mode == TWO_PLAYERS_GAME_MODE)
+        newGame = createTwoPlayersGame();
+    else
+        newGame = createOnePlayerGame(window->game->difficulty,window->game->userColor);
+
+    if(newGame == NULL)
+    {
+        printf("Failed to create a new restarted game!\n");
+        return GAME_WINDOW_ERROR;
+    }
+    if(newGame->mode == ONE_PLAYER_GAME_MODE &&newGame->userColor == BLACK_PLAYER)
+    {
+        GameMove* move = applyAIMove(newGame);
+        if(move == NULL)
+        {
+            printf("Failed to preform an AI move\n");
+            return GAME_WINDOW_ERROR;
+        }
+    }
+    destroyGame(window->game);
+    window->game = newGame;
+
+    return GAME_NONE;
+}
+
+GAME_WINDOW_EVENTS handleLeftMouseUpUndo(GameWindow *window)
+{
+    if(candoundo(window->game) == UNDO_POSSIBLE)
+    {
+        undoMove(window->game);
+        undoMove(window->game);
+    }
+    updateUndoButton(window);
+    return GAME_NONE;
+}
 
 GAME_WINDOW_EVENTS handleLeftMouseUpGameWindow(GameWindow *window, SDL_Event *event)
 {
     if(isPointOnGameLayout(window->board,event->button.x, event->button.y))
-    {
-        if(window->board->draged != NULL)
-        {
-            Location square = getSquare(window->board, event->button.x, event->button.y);
-            GAME_MOVE_MESSAGE message = movePiece(window->game, &window->board->draged->location, &square);
-            destroyDragPiece(window->board);
-            //check if pawn need to became something wlse //TODO
-
-            if(message == MOVE_VALID || message == MOVE_PAWN_REACH_END)
-            {
-                if(message == MOVE_PAWN_REACH_END)
-                {
-                    char newPiece = gamePawnPromotionMessageBox(oppositeColor(window->game->state->currentPlayer));
-                     window->game->state->board[square.x][square.y] = newPiece;
-                }
-                window->isSaved = false;
-                if(candoundo(window->game) == UNDO_POSSIBLE)
-                    window->undo->state.valid = BUTTON_VALID;
-                else
-                    window->undo->state.valid = BUTTON_INVALID;
-
-                GAME_STATE state =  getGameState(window->game);
-                if(state == GAME_CHECKMATE)
-                    gameEndMessageBox(oppositeColor(window->game->state->currentPlayer));
-                else if(state == GAME_TIE)
-                    gameEndMessageBox(NONE_PLAYER_COLOR);
-                if(state != VALID_GAME_STATE)
-                    return GAME_NONE;
-
-                if(window->game->mode == ONE_PLAYER_GAME_MODE)
-                    applyAIMove(window->game);
-                state =  getGameState(window->game);
-                if(state == GAME_CHECKMATE)
-                    gameEndMessageBox(oppositeColor(window->game->state->currentPlayer));
-                if(candoundo(window->game) == UNDO_POSSIBLE)
-                    window->undo->state.valid = BUTTON_VALID;
-                else
-                    window->undo->state.valid = BUTTON_INVALID;
-            }
-
-            return GAME_NONE;
-        }
-    }
+        return handleLeftMouseUpGameLayout(window, event);
     else if(window->board->draged != NULL)
     {
         destroyDragPiece(window->board);
@@ -168,22 +224,7 @@ GAME_WINDOW_EVENTS handleLeftMouseUpGameWindow(GameWindow *window, SDL_Event *ev
     }
 
     if(clickOnButton(window->restart, event->button.x, event->button.y))
-    {
-        GameManager *newGame;
-        if(window->game->mode == TWO_PLAYERS_GAME_MODE)
-            newGame = createTwoPlayersGame();
-        else
-            newGame = createOnePlayerGame(window->game->difficulty,window->game->userColor);
-
-        if(newGame == NULL)
-            return GAME_NONE; //TODO -> WHAT TO DO?
-        if(newGame->mode == ONE_PLAYER_GAME_MODE &&newGame->userColor == BLACK_PLAYER)
-            applyAIMove(newGame);
-        destroyGame(window->game);
-        window->game = newGame;
-
-        return GAME_NONE;
-    }
+        return handleLeftMouseUpRestart(window);
     else if(clickOnButton(window->save, event->button.x, event->button.y))
     {
         addGameToGameSlots(window->game);
@@ -193,18 +234,7 @@ GAME_WINDOW_EVENTS handleLeftMouseUpGameWindow(GameWindow *window, SDL_Event *ev
     else if(clickOnButton(window->load, event->button.x, event->button.y))
         return GAME_LOAD;
     else if(clickOnButton(window->undo, event->button.x, event->button.y))
-    {
-        if(candoundo(window->game) == UNDO_POSSIBLE)
-        {
-            undoMove(window->game);
-            undoMove(window->game);
-        }
-        if(candoundo(window->game) == UNDO_POSSIBLE)
-            window->undo->state.valid = BUTTON_VALID;
-        else
-            window->undo->state.valid = BUTTON_INVALID;
-        return GAME_NONE;
-    }
+        return handleLeftMouseUpUndo(window);
     else if(clickOnButton(window->main, event->button.x, event->button.y) &&
             (window->isSaved || exitConfirmationMessageBox() == 1))
         return GAME_MAIN;
@@ -218,12 +248,17 @@ GAME_WINDOW_EVENTS handleLeftMouseUpGameWindow(GameWindow *window, SDL_Event *ev
 GAME_WINDOW_EVENTS  handleLeftMouseDownGameWindow(GameWindow *window, SDL_Event *event)
 {
     if(isPointOnGameLayout(window->board,event->button.x, event->button.y))
-
     {
         Location square = getSquare(window->board, event->button.x, event->button.y);
         if(window->game->state->board[square.x][square.y] != EMPTY_PLACE_SYMBOL)
-            setDragedPiece(window->board, square.x, square.y, window->game->state->board[square.x][square.y]);
-
+        {
+            char piece = window->game->state->board[square.x][square.y];
+            if(setDragedPiece(window->board, square, piece) == false)
+            {
+                printf("Failed to drag the piece\n");
+                return GAME_WINDOW_ERROR;
+            }
+        }
     }
     return GAME_NONE;
 }
@@ -249,13 +284,18 @@ GAME_WINDOW_EVENTS  handleRightMouseDownGameWindow(GameWindow *window, SDL_Event
         return GAME_NONE;
     Location square = getSquare(window->board, event->button.x, event->button.y);
     window->board->suggestMoves = duplicateLocation(&square);
+    if(window->board->suggestMoves == NULL)
+    {
+        printf("Unable to create location for suggest piece\n");
+        return GAME_WINDOW_ERROR;
+    }
     return GAME_NONE;
 }
 
 GAME_WINDOW_EVENTS handleEventGameWindow(GameWindow *window, SDL_Event *event)
 {
     if(window == NULL || event==NULL)
-        return GAME_INVALID_ARGUMENT;
+        return GAME_WINDOW_ERROR;
 
     switch (event->type)
     {

@@ -7,13 +7,15 @@ GameMove* applyAIMove(GameManager* game)
     if(game->difficulty < 5)
         bestNode = getBestNode(game->state, type, game->difficulty);
     else
-    {
-        printf("not supported yet");
         return NULL;
-    }
     if(bestNode == NULL)
         return NULL;
-    movePiece(game, duplicateLocation(bestNode->origin), duplicateLocation(bestNode->des));
+    GAME_MOVE_MESSAGE move = movePiece(game, bestNode->origin, bestNode->des);
+    if(move == MOVE_ERROR)
+    {
+        destroyMinMaxNode(bestNode);
+        return NULL;
+    }
     if(bestNode->pawnPromotion != '\0')
         game->state->board[bestNode->des->x][bestNode->des->y] = bestNode->pawnPromotion;
     destroyMinMaxNode(bestNode);
@@ -125,6 +127,8 @@ nodeChain* getAllMinMaxNodes(MinMaxNode* node)
 MinMaxNode* getBestNode(GameState* state, MIN_MAX_NODE_TYPE type, int maxDepth)
 {
     MinMaxNode* node = createMinMaxNode(state, type, 0, maxDepth);
+    if(node == NULL)
+        return NULL;
     nodeChain* nodesChain = getAllMinMaxNodes(node);
     if(nodesChain == NULL)
         return NULL;
@@ -147,16 +151,33 @@ MinMaxNode* getBestNode(GameState* state, MIN_MAX_NODE_TYPE type, int maxDepth)
         currentNode = currentNode->next;
     }
     MinMaxNode* tempNode = findBestNode(nodesChain, node->type);
+
     destroyMinMaxNode(node);
     node = (MinMaxNode*) malloc(sizeof(MinMaxNode));
     if(node == NULL)
+    {
+        destroyChain(nodesChain);
         return NULL;
+    }
     node->origin = duplicateLocation(tempNode->origin);
+    if(node->origin == NULL)
+    {
+        destroyMinMaxNode(node);
+        destroyChain(nodesChain);
+        return NULL;
+    }
     node->des = duplicateLocation(tempNode->des);
+    if(node->des == NULL)
+    {
+        destroyMinMaxNode(node);
+        destroyChain(nodesChain);
+        return NULL;
+    }
+    destroyChain(nodesChain);
     node->state = NULL;
     node->pawnPromotion = tempNode->pawnPromotion;
 
-    destroyChain(nodesChain);
+
 
     return node;
 }

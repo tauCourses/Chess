@@ -40,18 +40,15 @@ castleState* createCastleState(bool hasKingMoved,bool hasLeftRookMoved, bool has
 castleState* duplicateCastleState(castleState* castle);
 void destroyCastleState(castleState* castle);
 
-
-bool isCastleMove(Location* org, Location* des); //return true if is valid castle move, false if not and unknown result for invalid move!
-
 GAME_IS_LEGAL_MESSAGE isMoveLegal(GameState* state, Location* org, Location* des);
 
 bool checkCastleMove(GameState* state, Location* org, Location* des);
 
 GameMove* applyMove(GameState* state, Location* org, Location* des);
+void applyCastleUndo(GameState *state, GameMove *move);
 void applyUndoMove(GameState *state, GameMove *move);
 
 Location** getAllAvailableMovesFromLocation(GameState* state,Location* origin);
-void destroyLocationsList(Location** list);
 
 bool isKingThreatened(GameState* state);
 Location* findKingLocation(GameState* state, PLAYER_COLOR kingColor);

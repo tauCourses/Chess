@@ -83,10 +83,10 @@ void destroyLoadWindow(LoadWindow *window)
     free(window);
 }
 
-void drawLoadWindow(LoadWindow *window)
+bool drawLoadWindow(LoadWindow *window)
 {
     if(window==NULL)
-        return;
+        return false;
 
 
     SDL_SetRenderDrawColor(window->renderer, 255, 255, 255, 255);
@@ -97,12 +97,13 @@ void drawLoadWindow(LoadWindow *window)
     for (int i = 0; i < numberOfGameSlots(); i++)
         drawButton(window->slots[i]);
 
+    return true;
 }
 
 LOAD_WINDOW_EVENTS handleEventLoadWindow(LoadWindow *window, SDL_Event *event)
 {
     if(window == NULL || event==NULL)
-        return LOAD_INVALID_ARGUMENT;
+        return LOAD_ERROR;
 
     switch (event->type)
     {

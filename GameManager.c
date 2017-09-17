@@ -73,6 +73,8 @@ GAME_MOVE_MESSAGE movePiece(GameManager* game, Location* org, Location* des)
 	}
 
     GameMove* move = applyMove(game->state, org, des);
+    if(move == NULL)
+        return MOVE_ERROR;
 
     pushToHistory(game->history, move);
 

@@ -12,7 +12,7 @@ int main(int argc, char** argv)
         if(strncmp(argv[1], "-c", 2) == 0)
             return mainConsole();
         else if(strncmp(argv[1], "-g", 2) == 0)
-            mainGUI();
+            return mainGUI();
         else
         {
             printf("Unknown argument %s\n", argv[1]);

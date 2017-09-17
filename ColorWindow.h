@@ -10,7 +10,7 @@
 #define SELECT_COLOR_TITLE "images/titles/selectYourColor.bmp"
 
 typedef enum {
-    COLOR_START, COLOR_BACK, COLOR_EXIT,  COLOR_INVALID_ARGUMENT, COLOR_NONE
+    COLOR_START, COLOR_BACK, COLOR_EXIT,  COLOR_ERROR, COLOR_NONE
 } COLOR_WINDOW_EVENTS;
 
 typedef struct  {
@@ -26,7 +26,7 @@ typedef struct  {
 ColorWindow* createColorWindow(SDL_Renderer* renderer);
 void createColorButtons(ColorWindow* window);
 void destroyColorWindow(ColorWindow *window);
-void drawColorWindow(ColorWindow *window);
+bool drawColorWindow(ColorWindow *window);
 COLOR_WINDOW_EVENTS handleEventColorWindow(ColorWindow *window, SDL_Event *event);
 
 PLAYER_COLOR getColorFromColorWindow(ColorWindow *window);

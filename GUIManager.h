@@ -21,6 +21,7 @@ typedef enum{
 
 typedef enum{
     MANAGER_QUIT,
+    MANAGER_ERROR,
     MANAGER_NONE,
 }MANAGER_EVENT;
 
@@ -45,7 +46,7 @@ GUIManager* managerCreate();
 void createSidesBoards(GUIManager* src);
 bool createWindows(GUIManager* gui);
 void managerDestroy(GUIManager* src);
-void managerDraw(GUIManager* src);
+bool managerDraw(GUIManager* src);
 
 void hideCurrentWindow(GUIManager* src);
 void switchWindow(GUIManager* src, ACTIVE_WINDOW next);

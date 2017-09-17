@@ -9,7 +9,7 @@
 #define SELECT_MODE_TITLE "images/titles/GameMode.bmp"
 
 typedef enum {
-    MODE_NEXT, MODE_START, MODE_BACK, MODE_EXIT,  MODE_INVALID_ARGUMENT, MODE_NONE
+    MODE_NEXT, MODE_START, MODE_BACK, MODE_EXIT,  MODE_ERROR, MODE_NONE
 } MODE_WINDOW_EVENTS;
 
 typedef struct  {
@@ -26,7 +26,7 @@ typedef struct  {
 ModeWindow* createModeWindow(SDL_Renderer* renderer);
 void createModeButtons(ModeWindow* window);
 void destroyModeWindow(ModeWindow *window);
-void drawModeWindow(ModeWindow *window);
+bool drawModeWindow(ModeWindow *window);
 MODE_WINDOW_EVENTS handleEventModeWindow(ModeWindow *window, SDL_Event *event);
 
 void changeChoiceModeWindow(ModeWindow* window, int i);

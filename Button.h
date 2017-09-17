@@ -48,9 +48,6 @@
 #define GAME_SLOT_4_NOT_ACTIVE_BUTTON "images/buttons/GameSlot4NotActive.bmp"
 #define GAME_SLOT_5_NOT_ACTIVE_BUTTON "images/buttons/GameSlot5NotActive.bmp"
 
-#define EXPERT_ACTIVE_BUTTON "images/buttons/ExpertActive.bmp"
-#define EXPERT_NOT_ACTIVE_BUTTON "images/buttons/ExpertNotActive.bmp"
-
 #define EXIT_ACTIVE_BUTTON "images/buttons/ExitActive.bmp"
 
 #define EASY_ACTIVE_BUTTON "images/buttons/EasyActive.bmp"

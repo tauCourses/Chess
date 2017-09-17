@@ -6,7 +6,7 @@
 #include "Button.h"
 
 typedef enum {
-    MAIN_EXIT, MAIN_START, MAIN_LOAD, MAIN_INVALID_ARGUMENT, MAIN_NONE
+    MAIN_EXIT, MAIN_START, MAIN_LOAD, MAIN_ERROR, MAIN_NONE
 } MAIN_WINDOW_EVENTS;
 
 typedef struct  {
@@ -20,7 +20,7 @@ typedef struct  {
 MainWindow* createMainWindow(SDL_Renderer* renderer);
 void createMainButtons(MainWindow* window);
 void destroyMainWindow(MainWindow *window);
-void drawMainWindow(MainWindow *window);
+bool drawMainWindow(MainWindow *window);
 
 MAIN_WINDOW_EVENTS handleEventMainWindow(MainWindow *window, SDL_Event *event);
 #endif

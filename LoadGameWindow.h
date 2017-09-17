@@ -10,7 +10,7 @@
 #include "Storage.h"
 
 typedef enum {
-    LOAD_BACK, LOAD_EXIT, LOAD_START, LOAD_INVALID_ARGUMENT, LOAD_NONE
+    LOAD_BACK, LOAD_EXIT, LOAD_START, LOAD_ERROR, LOAD_NONE
 } LOAD_WINDOW_EVENTS;
 
 typedef struct  {
@@ -25,7 +25,7 @@ typedef struct  {
 LoadWindow* createLoadWindow(SDL_Renderer* renderer);
 void createLoadButtons(LoadWindow* window);
 void destroyLoadWindow(LoadWindow *window);
-void drawLoadWindow(LoadWindow *window);
+bool drawLoadWindow(LoadWindow *window);
 LOAD_WINDOW_EVENTS handleEventLoadWindow(LoadWindow *window, SDL_Event *event);
 
 void changeChoiceLoadWindow(LoadWindow* window, int i);

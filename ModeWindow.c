@@ -62,12 +62,9 @@ void destroyModeWindow(ModeWindow *window)
     free(window);
 }
 
-void drawModeWindow(ModeWindow *window) {
+bool drawModeWindow(ModeWindow *window) {
     if (window == NULL)
-    {
-        printf("Asdfdsaf");
-        return;
-    }
+        return false;
 
     SDL_SetRenderDrawColor(window->renderer, 255, 255, 255, 255);
     SDL_RenderClear(window->renderer);
@@ -77,12 +74,13 @@ void drawModeWindow(ModeWindow *window) {
     drawButton(window->twoPlayers);
     drawButton(window->progress);
     drawButton(window->back);
+    return true;
 }
 
 MODE_WINDOW_EVENTS handleEventModeWindow(ModeWindow *window, SDL_Event *event)
 {
     if(window == NULL || event==NULL)
-        return MODE_INVALID_ARGUMENT;
+        return MODE_ERROR;
 
     switch (event->type)
     {

@@ -21,10 +21,12 @@ int mainGUI()
     SDL_Event event;
     while (1) {
         SDL_WaitEvent(&event);
-        if(managerHandleEvent(gui,&event) == MANAGER_QUIT)
+        MANAGER_EVENT response = managerHandleEvent(gui,&event);
+        if(response == MANAGER_QUIT || response == MANAGER_ERROR)
             break;
 
-        managerDraw(gui);
+        if(managerDraw(gui) == false)
+            break;
     }
     managerDestroy(gui);
     SDL_Quit();
@@ -127,48 +129,46 @@ void managerDestroy(GUIManager* gui)
     free(gui);
 }
 
-void managerDraw(GUIManager* gui)
+bool managerDraw(GUIManager* gui)
 {
     if (gui == NULL)
-    {
-        printf("null draw");
-        return;
-    }
+        return false;
 
     switch(gui->activeWindow)
     {
         case MAIN_WINDOW_ACTIVE:
-            drawMainWindow(gui->mainWindow);
-            drawBoardLayout(gui->renderer, gui->leftBoard);
-            drawBoardLayout(gui->renderer, gui->rightBoard);
+            if(drawMainWindow(gui->mainWindow) == false)
+                return false;
             break;
         case LOAD_WINDOW_ACTIVE:
-            drawLoadWindow(gui->loadWindow);
-            drawBoardLayout(gui->renderer, gui->leftBoard);
-            drawBoardLayout(gui->renderer, gui->rightBoard);
+            if(drawLoadWindow(gui->loadWindow) == false)
+                return false;
             break;
         case MODE_WINDOW_ACTIVE:
-            drawModeWindow(gui->modeWindow);
-            drawBoardLayout(gui->renderer, gui->leftBoard);
-            drawBoardLayout(gui->renderer, gui->rightBoard);
+            if(drawModeWindow(gui->modeWindow) == false)
+                return false;
             break;
         case DIFFICULTY_WINDOW_ACTIVE:
-            drawDifficultyWindow(gui->difficultyWindow);
-            drawBoardLayout(gui->renderer, gui->leftBoard);
-            drawBoardLayout(gui->renderer, gui->rightBoard);
+            if(drawDifficultyWindow(gui->difficultyWindow) == false)
+                return false;
             break;
         case COLOR_WINDOW_ACTIVE:
-            drawColorWindow(gui->colorWindow);
-            drawBoardLayout(gui->renderer, gui->leftBoard);
-            drawBoardLayout(gui->renderer, gui->rightBoard);
+            if(drawColorWindow(gui->colorWindow) == false)
+                return false;
+
             break;
         case GAME_WINDOW_ACTIVE:
-            drawGameWindow(gui->gameWindow);
-            break;
+            if(drawGameWindow(gui->gameWindow) == false)
+                return false;
+            SDL_RenderPresent(gui->renderer);
+            return true;
         default:
-            printf("unknown window to draw %d\n", gui->activeWindow); //TODO -> WHAT WE SHOULD DO IN BUGS?
+            return false;
     }
+    drawBoardLayout(gui->renderer, gui->leftBoard);
+    drawBoardLayout(gui->renderer, gui->rightBoard);
     SDL_RenderPresent(gui->renderer);
+    return true;
 
 }
 
@@ -180,7 +180,7 @@ void switchWindow(GUIManager* gui, ACTIVE_WINDOW next)
 
 MANAGER_EVENT managerHandleEvent(GUIManager* gui, SDL_Event* event) {
     if (gui == NULL || event == NULL )
-        return MANAGER_NONE;
+        return MANAGER_ERROR;
 
     switch(gui->activeWindow)
     {
@@ -197,48 +197,40 @@ MANAGER_EVENT managerHandleEvent(GUIManager* gui, SDL_Event* event) {
         case GAME_WINDOW_ACTIVE:
             return handleManagerDueToGameEvent(gui, handleEventGameWindow(gui->gameWindow, event));
         default:
-            printf("unkonwn event\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
+            return MANAGER_ERROR;
     }
-
-    return MANAGER_NONE; //TODO -> WHAT WE SHOULD DO IN BUGS?
 }
 
 MANAGER_EVENT handleManagerDueToMainEvent(GUIManager* gui, MAIN_WINDOW_EVENTS event)
 {
     if (gui == NULL )
-        return MANAGER_NONE;
+        return MANAGER_ERROR;
 
     switch (event)
     {
         case MAIN_EXIT:
             return MANAGER_QUIT;
-            break;
         case MAIN_START:
             switchWindow(gui, MODE_WINDOW_ACTIVE);
             return MANAGER_NONE;
-            break;
         case MAIN_LOAD:
             switchWindow(gui, LOAD_WINDOW_ACTIVE);
             return MANAGER_NONE;
-            break;
-        case MAIN_INVALID_ARGUMENT:
-            printf("INVALID, BUG1?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
-            return MANAGER_NONE;
-            break;
+        case MAIN_ERROR:
+            printf("Error in main window\n");
+            return MANAGER_ERROR;
         case MAIN_NONE:
             return MANAGER_NONE;
-            break;
         default:
-            return MANAGER_NONE; //TODO -> WHAT WE SHOULD DO IN BUGS?
+            printf("Invalid main window response\n");
+            return MANAGER_ERROR;
     }
-
-    return MANAGER_NONE;
 }
 
 MANAGER_EVENT handleManagerDueToLoadEvent(GUIManager* gui, LOAD_WINDOW_EVENTS event)
 {
     if (gui == NULL )
-        return MANAGER_NONE;
+        return MANAGER_ERROR;
 
     switch (event)
     {
@@ -248,165 +240,176 @@ MANAGER_EVENT handleManagerDueToLoadEvent(GUIManager* gui, LOAD_WINDOW_EVENTS ev
         case LOAD_BACK:
             switchWindow(gui, gui->lastWindow);
             return MANAGER_NONE;
-            break;
-
         case LOAD_START:
             if(gui->gameWindow != NULL)
                 destroyGameWindow(gui->gameWindow);
             GameManager* game = loadGameFromSlots(gui->loadWindow->slotChosed+1);
             if(game == NULL)
-                return MANAGER_NONE;
+            {
+                printf("unable to create game\n");
+                return MANAGER_ERROR;
+            }
             gui->gameWindow = createGameWindow(gui->renderer,game);
+            if(gui->gameWindow == NULL)
+            {
+                printf("unable to create game window\n");
+                return MANAGER_ERROR;
+            }
             gui->lastWindow = gui->activeWindow;
             gui->activeWindow = GAME_WINDOW_ACTIVE;
-
             return MANAGER_NONE;
-            break;
-        case LOAD_INVALID_ARGUMENT:
-            printf("INVALID, BUG2?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
-            return MANAGER_NONE;
-            break;
+        case LOAD_ERROR:
+            printf("Error in load window\n");
+            return MANAGER_ERROR;
         case LOAD_NONE:
-            // printf("TODO BOOM\n");
             return MANAGER_NONE;
-            break;
         default:
-            printf("INVALID, BUG3?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
-            return MANAGER_NONE;
+            printf("Invalid load window response\n");
+            return MANAGER_ERROR;
     }
-
-    return MANAGER_NONE;
 }
 
 MANAGER_EVENT handleManagerDueToModeEvent(GUIManager* gui, MODE_WINDOW_EVENTS event)
 {
     if (gui == NULL )
-        return MANAGER_NONE;
+        return MANAGER_ERROR;
 
     switch (event)
     {
         case MODE_EXIT:
             return MANAGER_QUIT;
-            break;
+
         case MODE_BACK:
             switchWindow(gui, MAIN_WINDOW_ACTIVE);
             return MANAGER_NONE;
-            break;
+
         case MODE_START:
             if(gui->gameWindow != NULL)
                 destroyGameWindow(gui->gameWindow);
             GameManager* game = createTwoPlayersGame();
-            if(game == NULL) {
-                printf("null\n");
-                return MANAGER_NONE;
+            if(game == NULL)
+            {
+                printf("unable to create game \n");
+                return MANAGER_ERROR;
             }
             gui->gameWindow = createGameWindow(gui->renderer, game);
             if(gui->gameWindow == NULL)
             {
-                printf("null game\n");
-                return MANAGER_NONE;
+                printf("unable to create game window\n");
+                return MANAGER_ERROR;
             }
             gui->lastWindow = gui->activeWindow;
             gui->activeWindow = GAME_WINDOW_ACTIVE;
 
             return MANAGER_NONE;
-            break;
+
         case MODE_NEXT:
             switchWindow(gui, DIFFICULTY_WINDOW_ACTIVE);
             return MANAGER_NONE;
-            break;
-        case MODE_INVALID_ARGUMENT:
-            printf("INVALID, BUG4?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
-            return MANAGER_NONE;
-            break;
+
+        case MODE_ERROR:
+            printf("Error in mode window\n");
+            return MANAGER_ERROR;
+
         case MODE_NONE:
             return MANAGER_NONE;
-            break;
         default:
-            printf("INVALID, BUG5?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
-            return MANAGER_NONE;
+            printf("Invalid mode window response\n");
+            return MANAGER_ERROR;
     }
 
-    return MANAGER_NONE;
 }
 
 MANAGER_EVENT handleManagerDueToDifficultyEvent(GUIManager* gui, DIFFICULTY_WINDOW_EVENTS event)
 {
     if (gui == NULL )
-        return MANAGER_NONE;
+        return MANAGER_ERROR;
 
     switch (event)
     {
         case DIFFICULTY_EXIT:
             return MANAGER_QUIT;
-            break;
+
         case DIFFICULTY_BACK:
             switchWindow(gui, MODE_WINDOW_ACTIVE);
             return MANAGER_NONE;
-            break;
+
         case DIFFICULTY_NEXT:
             switchWindow(gui, COLOR_WINDOW_ACTIVE);
             return MANAGER_NONE;
-            break;
+
         case DIFFICULTY_NONE:
             return MANAGER_NONE;
-            break;
-        case DIFFICULTY_INVALID_ARGUMENT:
-            printf("INVALID, BUG4?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
-            return MANAGER_NONE;
-            break;
+
+        case DIFFICULTY_ERROR:
+            printf("Error in difficulty window\n");
+            return MANAGER_ERROR;
 
         default:
-            printf("INVALID, BUG5?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
-            return MANAGER_NONE;
+            printf("Invalid difficulty window response\n");
+            return MANAGER_ERROR;
     }
-    return MANAGER_NONE;
+
 }
 
 MANAGER_EVENT handleManagerDueToColorEvent(GUIManager* gui, COLOR_WINDOW_EVENTS event)
 {
     if (gui == NULL )
-        return MANAGER_NONE;
+        return MANAGER_ERROR;
 
     switch (event)
     {
         case COLOR_EXIT:
             return MANAGER_QUIT;
-            break;
+
         case COLOR_BACK:
             switchWindow(gui, DIFFICULTY_WINDOW_ACTIVE);
             return MANAGER_NONE;
-            break;
+
         case COLOR_START:
             if(gui->gameWindow != NULL)
                 destroyGameWindow(gui->gameWindow);
 
             GameManager* game = createOnePlayerGame(gui->difficultyWindow->configurationChosen+1,
                                             getColorFromColorWindow(gui->colorWindow));
+            if(game == NULL)
+            {
+                printf("unable to create game \n");
+                return MANAGER_ERROR;
+            }
             if(game->userColor == BLACK_PLAYER)
             {
-                applyAIMove(game);
+                if(applyAIMove(game) == NULL)
+                {
+                    printf("unable to run AI move\n");
+                    destroyGame(game);
+                    return MANAGER_ERROR;
+                }
                 destroyMove(popFromHistory(game->history));
             }
             gui->gameWindow = createGameWindow(gui->renderer, game);
+            if(gui->gameWindow == NULL)
+            {
+                printf("unable to create game window\n");
+                return MANAGER_ERROR;
+            }
             gui->lastWindow = gui->activeWindow;
             gui->activeWindow = GAME_WINDOW_ACTIVE;
 
             return MANAGER_NONE;
-            break;
+
         case COLOR_NONE:
             return MANAGER_NONE;
-            break;
-        case COLOR_INVALID_ARGUMENT:
-            printf("INVALID, BUG4?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
-            return MANAGER_NONE;
-            break;
+
+        case COLOR_ERROR:
+            printf("Error in color window\n");
+            return MANAGER_ERROR;
 
         default:
-            printf("INVALID, BUG5?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
-            return MANAGER_NONE;
+            printf("Invalid color window response\n");
+            return MANAGER_ERROR;
     }
-    return MANAGER_NONE;
+
 }
 
 MANAGER_EVENT handleManagerDueToGameEvent(GUIManager* gui, GAME_WINDOW_EVENTS event)
@@ -418,26 +421,24 @@ MANAGER_EVENT handleManagerDueToGameEvent(GUIManager* gui, GAME_WINDOW_EVENTS ev
     {
         case GAME_EXIT:
             return MANAGER_QUIT;
-            break;
+
         case GAME_MAIN:
             switchWindow(gui, MAIN_WINDOW_ACTIVE);
             return MANAGER_NONE;
-            break;
+
         case GAME_LOAD:
             switchWindow(gui, LOAD_WINDOW_ACTIVE);
             return MANAGER_NONE;
-            break;
+
         case GAME_NONE:
             return MANAGER_NONE;
-            break;
-        case GAME_INVALID_ARGUMENT:
-            printf("INVALID, BUG4?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
-            return MANAGER_NONE;
-            break;
+
+        case GAME_WINDOW_ERROR:
+            printf("Error in game window\n");
+            return MANAGER_ERROR;
 
         default:
-            printf("INVALID, BUG5?!\n"); //TODO -> WHAT WE SHOULD DO IN BUGS?
-            return MANAGER_NONE;
+            printf("Invalid game window response\n");
+            return MANAGER_ERROR;
     }
-    return MANAGER_NONE;
 }

@@ -61,9 +61,10 @@ void destroyColorWindow(ColorWindow *window)
     free(window);
 }
 
-void drawColorWindow(ColorWindow *window) {
+bool drawColorWindow(ColorWindow *window)
+{
     if (window == NULL)
-        return;
+        return false;
 
     SDL_SetRenderDrawColor(window->renderer, 255, 255, 255, 255);
     SDL_RenderClear(window->renderer);
@@ -74,12 +75,14 @@ void drawColorWindow(ColorWindow *window) {
 
     drawButton(window->start);
     drawButton(window->back);
+
+    return true;
 }
 
 COLOR_WINDOW_EVENTS handleEventColorWindow(ColorWindow *window, SDL_Event *event)
 {
     if(window == NULL || event==NULL)
-        return COLOR_INVALID_ARGUMENT;
+        return COLOR_ERROR;
 
     switch (event->type)
     {

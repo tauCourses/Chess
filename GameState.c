@@ -57,7 +57,17 @@ GameState* duplicateGameState(GameState* state)
         return NULL;
 
     newState->blackCastle = duplicateCastleState(state->blackCastle);
+    if(newState->blackCastle == NULL)
+    {
+        destroyGameState(newState);
+        return NULL;
+    }
     newState->whiteCastle = duplicateCastleState(state->whiteCastle);
+    if(newState->whiteCastle == NULL)
+    {
+        destroyGameState(newState);
+        return NULL;
+    }
     newState->currentPlayer = state->currentPlayer;
     for(int x=0;x<CHESS_BOARD_SIZE;++x)
         for (int y = 0; y < CHESS_BOARD_SIZE; ++y)
@@ -96,6 +106,11 @@ Location** getAllAvailableMovesFromLocation(GameState* state,Location* origin)
             if (isMoveLegal(state,origin, &destination) == IS_LEGAL_VALID)
             {
                 possibleMoves[numberOfElements] = duplicateLocation(&destination);
+                if(possibleMoves[numberOfElements] == NULL)
+                {
+                    destroyLocationsList(possibleMoves);
+                    return NULL;
+                }
                 numberOfElements++;
             }
         }
@@ -134,7 +149,7 @@ GAME_IS_LEGAL_MESSAGE isMoveLegal(GameState* state, Location* org, Location* des
     	return IS_LEGAL_VALID;
 }
 
-bool isKingThreatened(GameState* state)
+bool isKingThreatened(GameState* state)  //TODO-> THIS FUNCTION CONTAIN MALLOC! SHOULD RETURN SOMETHING ELSE
 {
     Location* kingLocation = findKingLocation(state, state->currentPlayer);
     if(kingLocation == NULL)
@@ -152,7 +167,7 @@ Location* findKingLocation(GameState* state, PLAYER_COLOR kingColor)
             if(state->board[x][y] == kingChar)
                 return createLocation(x,y);
 
-    printf("BUG!!32141");
+    printf("Error - no king found!");
     return NULL;
 }
 
@@ -212,6 +227,7 @@ void checkIfCastleChanged(GameState *state, Location *org)
     if(org->x == 7 && org->y == 4)
         state->blackCastle->hasKingMoved = true;
 }
+
 void applyCastleChange(GameState *state, Location *org, Location *des)
 {
     checkIfCastleChanged(state, org);
@@ -269,9 +285,29 @@ GameMove* applyMove(GameState* state, Location* org, Location* des)
     if(move == NULL)
         return NULL;
     move->blackCastle = duplicateCastleState(state->blackCastle);
+    if(move->blackCastle == NULL)
+    {
+        destroyMove(move);
+        return NULL;
+    }
     move->whiteCastle = duplicateCastleState(state->whiteCastle);
+    if(move->whiteCastle == NULL)
+    {
+        destroyMove(move);
+        return NULL;
+    }
     move->origin = duplicateLocation(org);
+    if(move->origin == NULL)
+    {
+        destroyMove(move);
+        return NULL;
+    }
     move->des = duplicateLocation(des);
+    if(move->des == NULL)
+    {
+        destroyMove(move);
+        return NULL;
+    }
     move->beatedPiece = state->board[des->x][des->y];
 
     if(state->board[org->x][org->y] == WHITE_PAWN_SYMBOL && org->x == 6)
@@ -299,7 +335,7 @@ bool isCastleUndo(GameState *state, GameMove *move)
     return false;
 }
 
-bool applyCastleUndo(GameState *state, GameMove *move) //just move the rook to the position before castle TODO->RETURN VALUE?!
+void applyCastleUndo(GameState *state, GameMove *move)
 {
     char castleRook = (char)((state->currentPlayer == WHITE_PLAYER) ? BLACK_ROOK_SYMBOL : WHITE_ROOK_SYMBOL);
     if(move->des->y == 6)
@@ -312,7 +348,6 @@ bool applyCastleUndo(GameState *state, GameMove *move) //just move the rook to t
         state->board[move->des->x][0] = castleRook;
         state->board[move->des->x][3] = EMPTY_PLACE_SYMBOL;
     }
-    return true;
 }
 
 void applyUndoMove(GameState *state, GameMove *move)

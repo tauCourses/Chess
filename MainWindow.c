@@ -49,10 +49,10 @@ void destroyMainWindow(MainWindow *window)
     free(window);
 }
 
-void drawMainWindow(MainWindow *window)
+bool drawMainWindow(MainWindow *window)
 {
     if(window==NULL)
-        return;
+        return false;
 
 
     SDL_SetRenderDrawColor(window->renderer, 255, 255, 255, 255);
@@ -62,12 +62,13 @@ void drawMainWindow(MainWindow *window)
     drawButton(window->load);
     drawButton(window->exit);
 
+    return true;
 }
 
 MAIN_WINDOW_EVENTS handleEventMainWindow(MainWindow *window, SDL_Event *event)
 {
     if(window == NULL || event==NULL)
-        return MAIN_INVALID_ARGUMENT;
+        return MAIN_ERROR;
 
     switch (event->type)
     {

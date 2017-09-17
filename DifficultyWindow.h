@@ -9,7 +9,7 @@
 #define SELECT_DIFFICULTY_TITLE "images/titles/Difficulty.bmp"
 
 typedef enum {
-    DIFFICULTY_NEXT, DIFFICULTY_BACK, DIFFICULTY_EXIT,  DIFFICULTY_INVALID_ARGUMENT, DIFFICULTY_NONE
+    DIFFICULTY_NEXT, DIFFICULTY_BACK, DIFFICULTY_EXIT,  DIFFICULTY_ERROR, DIFFICULTY_NONE
 } DIFFICULTY_WINDOW_EVENTS;
 
 typedef struct  {
@@ -20,7 +20,6 @@ typedef struct  {
     Button* easy;
     Button* moderate;
     Button* hard;
-    Button* expert;
     Button* back;
     Button* next;
     int configurationChosen;
@@ -29,7 +28,7 @@ typedef struct  {
 DifficultyWindow* createDifficultyWindow(SDL_Renderer* renderer);
 void createDifficultyButtons(DifficultyWindow* window);
 void destroyDifficultyWindow(DifficultyWindow *window);
-void drawDifficultyWindow(DifficultyWindow *window);
+bool drawDifficultyWindow(DifficultyWindow *window);
 DIFFICULTY_WINDOW_EVENTS handleEventDifficultyWindow(DifficultyWindow *window, SDL_Event *event);
 
 void changeChoiceDifficultyWindow(DifficultyWindow* window, int i);

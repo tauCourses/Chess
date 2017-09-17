@@ -104,8 +104,8 @@ void updateCastlesStateFromFile(GameState* state, FILE* file) //please do not re
     }
     else
     {
-        state->blackCastle = createCastleState(true,true,true);
-        state->whiteCastle = createCastleState(true,true,true);
+        state->blackCastle = createCastleState(true,true,true); //TODO -> MALLOC! WHAT IF FAIL?
+        state->whiteCastle = createCastleState(true,true,true); //TODO -> MALLOC! WHAT IF FAIL?
     }
 }
 void updateGameParams(GameManager* game, FILE* file)

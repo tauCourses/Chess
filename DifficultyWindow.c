@@ -12,7 +12,7 @@ DifficultyWindow* createDifficultyWindow(SDL_Renderer* renderer)
 
     createDifficultyButtons(window);
     if (window->title == NULL || window->back == NULL || window->next == NULL || window->noob == NULL ||
-        window->easy == NULL || window->moderate == NULL || window->hard == NULL || window->expert == NULL)
+        window->easy == NULL || window->moderate == NULL || window->hard == NULL)
     {
         destroyDifficultyWindow(window);
         return NULL;
@@ -45,7 +45,6 @@ void createDifficultyButtons(DifficultyWindow* window)
     window->easy = createButton(window->renderer, easyR, EASY_ACTIVE_BUTTON, EASY_NOT_ACTIVE_BUTTON, BUTTON_TYPE_CHOICE);
     window->moderate = createButton(window->renderer, moderateR, MODERATE_ACTIVE_BUTTON, MODERATE_NOT_ACTIVE_BUTTON, BUTTON_TYPE_CHOICE);
     window->hard = createButton(window->renderer, hardR, HARD_ACTIVE_BUTTON, HARD_NOT_ACTIVE_BUTTON, BUTTON_TYPE_CHOICE);
-    window->expert = createButton(window->renderer, expertR, EXPERT_ACTIVE_BUTTON, EXPERT_NOT_ACTIVE_BUTTON, BUTTON_TYPE_CHOICE);
 
     window->next = createButton(window->renderer, nextR, NEXT_ACTIVE_BUTTON, "", BUTTON_TYPE_ONE_OPTION);
     window->back = createButton(window->renderer, backR, BACK_ACTIVE_BUTTON, "", BUTTON_TYPE_ONE_OPTION);
@@ -66,8 +65,6 @@ void destroyDifficultyWindow(DifficultyWindow *window)
         destroyButton(window->moderate);
     if(window->hard != NULL)
         destroyButton(window->hard);
-    if(window->expert != NULL)
-        destroyButton(window->expert);
 
     if(window->next != NULL)
         destroyButton(window->next);
@@ -78,10 +75,10 @@ void destroyDifficultyWindow(DifficultyWindow *window)
     free(window);
 }
 
-void drawDifficultyWindow(DifficultyWindow *window)
+bool drawDifficultyWindow(DifficultyWindow *window)
 {
     if(window==NULL)
-        return;
+        return false;
 
 
     SDL_SetRenderDrawColor(window->renderer, 255, 255, 255, 255);
@@ -93,16 +90,17 @@ void drawDifficultyWindow(DifficultyWindow *window)
     drawButton(window->easy);
     drawButton(window->moderate);
     drawButton(window->hard);
-    drawButton(window->expert);
 
     drawButton(window->next);
     drawButton(window->back);
+
+    return true;
 }
 
 DIFFICULTY_WINDOW_EVENTS handleEventDifficultyWindow(DifficultyWindow *window, SDL_Event *event)
 {
     if(window == NULL || event==NULL)
-        return DIFFICULTY_INVALID_ARGUMENT;
+        return DIFFICULTY_ERROR;
 
     switch (event->type)
     {
@@ -123,8 +121,6 @@ DIFFICULTY_WINDOW_EVENTS handleEventDifficultyWindow(DifficultyWindow *window, S
                 changeChoiceDifficultyWindow(window, 2);
             if(clickOnButton(window->hard, event->button.x, event->button.y))
                 changeChoiceDifficultyWindow(window, 3);
-            if(clickOnButton(window->expert, event->button.x, event->button.y))
-                changeChoiceDifficultyWindow(window, 4);
             break;
         default:
             return DIFFICULTY_NONE;
@@ -135,14 +131,13 @@ DIFFICULTY_WINDOW_EVENTS handleEventDifficultyWindow(DifficultyWindow *window, S
 
 void changeChoiceDifficultyWindow(DifficultyWindow* window, int i)
 {
-    if(i<0 || i>4)
+    if(i<0 || i>3)
         return;
 
     window->noob->state.choosen = BUTTON_UNCHOSEN;
     window->easy->state.choosen = BUTTON_UNCHOSEN;
     window->moderate->state.choosen = BUTTON_UNCHOSEN;
     window->hard->state.choosen = BUTTON_UNCHOSEN;
-    window->expert->state.choosen = BUTTON_UNCHOSEN;
     switch(i)
     {
         case 0:
@@ -156,9 +151,6 @@ void changeChoiceDifficultyWindow(DifficultyWindow* window, int i)
             break;
         case 3:
             window->hard->state.choosen = BUTTON_CHOSEN;
-            break;
-        case 4:
-            window->expert->state.choosen = BUTTON_CHOSEN;
             break;
         default:
             printf("BUG!!!1");
