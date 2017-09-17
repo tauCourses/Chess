@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include "GameManager.h"
+#include "Storage.h"
 #include "Parser.h"
 #include "AI.h"
 
@@ -99,13 +100,13 @@ bool isLegalGetPossibleMoves(GameManager* game, GameStateCommand* GCommand);
 
 void executeCommandSave(GameManager* game, GameStateCommand GCommand);
 
-void executeCommandUndo(GameManager* game, GameStateCommand GCommand);
+void executeCommandUndo(GameManager* game);
 
 void executeCommandCastle(GameManager* game,GameStateCommand* GCommand);
 
 Location* castleGetKingDes(GameManager* game,GameStateCommand* GCommand);
 
-void executeCommandReset(GameManager* game, GameStateCommand GCommand);
+void executeCommandReset(GameManager* game);
 
 void executePawnPromotion(GameManager* game, Location* des);
 

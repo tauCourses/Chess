@@ -34,7 +34,7 @@ GAME_INPUT_STATE executeGameStateCommand(GameManager* game, GameStateCommand* GC
 		return GAME_INPUT_GAME_STATE;
 
 	case GAME_STATE_COMMAND_UNDO:
-		executeCommandUndo(game,*GCommand);
+		executeCommandUndo(game);
 		return GAME_INPUT_GAME_STATE;
 
     case GAME_STATE_COMMAND_CASTLE:
@@ -42,7 +42,7 @@ GAME_INPUT_STATE executeGameStateCommand(GameManager* game, GameStateCommand* GC
         return GAME_INPUT_GAME_STATE;
 
 	case GAME_STATE_COMMAND_RESET:
-		executeCommandReset(game,*GCommand);
+		executeCommandReset(game);
 		return GAME_INPUT_SETTINGS_STATE;
 
 	case GAME_STATE_COMMAND_INVALID:
@@ -173,7 +173,6 @@ GAME_STATE_COMMAND_TYPE gameStateCommandFromStr(char* token) {
 GAME_INPUT_STATE executeCommandMove(GameManager* game, GameStateCommand* GCommand)
 {
 	GAME_MOVE_MESSAGE moveMessage;
-	GAME_STATE gameState;
 	if (GCommand->org != NULL && GCommand->des != NULL)
 	{
 		moveMessage = movePiece(game,GCommand->org,GCommand->des);
@@ -293,7 +292,7 @@ void executeCommandSave(GameManager* game, GameStateCommand GCommand)
 		printf(MSG_FILE_CANNOT_CREATED_MODIFIED);
 }
 
-void executeCommandUndo(GameManager* game, GameStateCommand GCommand)
+void executeCommandUndo(GameManager* game)
 {
 	switch (candoundo(game))
 	{
@@ -320,7 +319,7 @@ void executeCommandUndo(GameManager* game, GameStateCommand GCommand)
 
 }
 
-void executeCommandReset(GameManager* game, GameStateCommand GCommand)
+void executeCommandReset(GameManager* game)
 {
 	printf(MSG_RESTART);
 	destroyGame(game);

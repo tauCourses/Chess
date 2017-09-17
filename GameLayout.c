@@ -247,7 +247,7 @@ void drawSquare(GameLayout* game, int x, int y, char c)
             .y=game->boardLayout->startingPoint.y + y * (SQUARE_SIZE + SQUARE_GAP),
             .h=SQUARE_SIZE,
             .w=SQUARE_SIZE};
-    SDL_Texture* image;
+
 
     SDL_Texture* texture = charToTexture(game,c);
     if(texture == NULL)

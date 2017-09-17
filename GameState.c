@@ -90,7 +90,7 @@ Location** getAllAvailableMovesFromLocation(GameState* state,Location* origin)
     Location destination;
     for(int x=0; x<CHESS_BOARD_SIZE; x++)
     {
-        for(int y=0;y<CHESS_BOARD_SIZE && numberOfElements < maxPossibleMoves-1;y++)
+        for(int y=0;y<CHESS_BOARD_SIZE && numberOfElements < (int)maxPossibleMoves-1;y++)
         {
             destination = (Location){.x=x,.y=y};
             if (isMoveLegal(state,origin, &destination) == IS_LEGAL_VALID)
@@ -299,7 +299,7 @@ bool isCastleUndo(GameState *state, GameMove *move)
     return false;
 }
 
-bool applyCastleUndo(GameState *state, GameMove *move) //just move the rook to the position before castle
+bool applyCastleUndo(GameState *state, GameMove *move) //just move the rook to the position before castle TODO->RETURN VALUE?!
 {
     char castleRook = (char)((state->currentPlayer == WHITE_PLAYER) ? BLACK_ROOK_SYMBOL : WHITE_ROOK_SYMBOL);
     if(move->des->y == 6)
@@ -312,6 +312,7 @@ bool applyCastleUndo(GameState *state, GameMove *move) //just move the rook to t
         state->board[move->des->x][0] = castleRook;
         state->board[move->des->x][3] = EMPTY_PLACE_SYMBOL;
     }
+    return true;
 }
 
 void applyUndoMove(GameState *state, GameMove *move)

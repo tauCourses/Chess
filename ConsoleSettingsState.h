@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include "GameManager.h"
+#include "Storage.h"
 #include "Parser.h"
 
 typedef enum SETTINGS_COMMAND_TYPE{
