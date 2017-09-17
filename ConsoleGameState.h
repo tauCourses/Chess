@@ -48,11 +48,11 @@ typedef enum GAME_INPUT_STATE{
 #define MSG_RESTART "Restarting...\n"
 
 #define MSG_COM_MOVE_PAWN "Computer: move pawn at %s -> %s\n"
-#define MSG_COM_MOVE_BISHOP "Computer: move bishop at <%d,%d> -> <%d,%d>\n"
-#define MSG_COM_MOVE_knight "Computer: move knight at <%d,%d> -> <%d,%d>\n"
-#define MSG_COM_MOVE_rook "Computer: move rook at <%d,%d> -> <%d,%d>\n"
-#define MSG_COM_MOVE_queen "Computer: move queen at <%d,%d> -> <%d,%d>\n"
-#define MSG_COM_MOVE_king "Computer: move king at <%d,%d> -> <%d,%d>\n"
+#define MSG_COM_MOVE_BISHOP "Computer: move bishop at %s -> %s\n"
+#define MSG_COM_MOVE_knight "Computer: move knight at %s -> %s\n"
+#define MSG_COM_MOVE_rook "Computer: move rook at %s -> %s>\n"
+#define MSG_COM_MOVE_queen "Computer: move queen at %s -> %s\n"
+#define MSG_COM_MOVE_king "Computer: move king at %s -> %s\n"
 
 #define MSG_COM_PAWN_PROMTION_PAWN "Computer: move pawn %s to %s and promote to pawn\n"
 #define MSG_COM_PAWN_PROMTION_BISHOP "Computer: move pawn %s to %s and promote to bishop\n"

@@ -45,7 +45,7 @@ int compareLocations(const void * item1, const void * item2)
 
 char* getStringFromLocation(Location* loc)
 {
-	char* result = (char*) malloc(sizeof(char)*6);
+	char* result = (char*) calloc(6, sizeof(char));
 	if (result == NULL)
 		return NULL;
 	result[0] = '<';
@@ -53,7 +53,6 @@ char* getStringFromLocation(Location* loc)
 	result[2] = ',';
 	result[3] = loc->y + 'A';
 	result[4] = '>';
-    result[5] = '\0';
 	return result;
 
 }
