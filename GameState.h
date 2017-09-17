@@ -55,7 +55,9 @@ void destroyLocationsList(Location** list);
 
 bool isKingThreatened(GameState* state);
 Location* findKingLocation(GameState* state, PLAYER_COLOR kingColor);
-bool isThreatened(GameState* state, Location* loc, PLAYER_COLOR byPlayer);
+bool isThreatened(GameState *state, Location *loc, PLAYER_COLOR byPlayer);
+bool isREALLYThreatened(GameState *state, Location *loc);
+
 
 
 #endif //CHESS_STATE_H

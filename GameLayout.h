@@ -21,6 +21,11 @@
 #define WHITE_QUEEN_IMAGE "images/pieces/whiteQueen.bmp"
 
 #define PIECES_BACK_GROUND_COLOR 34, 177, 76
+#define SUGGEST_MOVE_THREATENED_COLOR 0,0,255,20
+#define SUGGEST_MOVE_BEAT_COLOR 0,255,0,20
+#define SUGGEST_MOVE_REGULAR_COLOR 0,255,255,20
+#define SUGGEST_MOVE_CASLTLE_COLOR 70, 20, 90, 20
+
 
 typedef struct{
     SDL_Texture* pawn;
@@ -42,6 +47,7 @@ typedef struct{
     Pieces* white;
     Pieces* black;
     DragedPiece* draged;
+    Location* suggestMoves;
 } GameLayout;
 
 GameLayout* createGameLayout(SDL_Point startingPoint, SDL_Renderer* renderer);
@@ -52,7 +58,8 @@ void destroyGameLayout(GameLayout* game);
 void destroyPieces(Pieces* pieces);
 void destroyDragPiece(GameLayout* game);
 
-void drawGameLayout(GameLayout* game, Board board);
+void drawGameLayout(GameLayout* game, GameState* state);
+void drawSuggestMoves(GameLayout* game, GameState* state);
 
 SDL_Texture* charToTexture(GameLayout* game, char c);
 void drawSquare(GameLayout* game, int x, int y, char c);

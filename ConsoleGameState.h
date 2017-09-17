@@ -1,9 +1,9 @@
 #ifndef CHESS_CONSOLEGAMESTATE_H
 #define CHESS_CONSOLEGAMESTATE_H
 
+#include <stdio.h>
 #include "GameManager.h"
-#include "stdio.h"
-#include "parser.h"
+#include "Parser.h"
 #include "AI.h"
 
 typedef enum GAME_STATE_COMMAND_TYPE{

@@ -5,12 +5,8 @@
 #ifndef CHESS_PARSER_H
 #define CHESS_PARSER_H
 
-#include "string.h"
-#include "GameManager.h"
+#include <string.h>
 #include "Location.h"
-#include "Storage.h"
-
-
 
 #define MAX_LINE_LENGTH 1024
 

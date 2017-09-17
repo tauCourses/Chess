@@ -3,6 +3,7 @@
 #include "GameState.h"
 #include "Button.h"
 #include "Location.h"
+#include "GameLayout.h"
 
 GameWindow* createGameWindow(SDL_Renderer* renderer, GameManager* game)
 {
@@ -110,11 +111,11 @@ void drawGameWindow(GameWindow *window)
     drawButton(window->main);
     drawButton(window->exit);
 
-    drawGameLayout(window->board, window->game->state->board);
+    drawGameLayout(window->board, window->game->state);
 }
 
 
-GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
+GAME_WINDOW_EVENTS handleLeftMouseUpGameWindow(GameWindow *window, SDL_Event *event)
 {
     if(isPointOnGameLayout(window->board,event->button.x, event->button.y))
     {
@@ -214,6 +215,43 @@ GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
     return GAME_NONE;
 }
 
+GAME_WINDOW_EVENTS  handleLeftMouseDownGameWindow(GameWindow *window, SDL_Event *event)
+{
+    if(isPointOnGameLayout(window->board,event->button.x, event->button.y))
+
+    {
+        Location square = getSquare(window->board, event->button.x, event->button.y);
+        if(window->game->state->board[square.x][square.y] != EMPTY_PLACE_SYMBOL)
+            setDragedPiece(window->board, square.x, square.y, window->game->state->board[square.x][square.y]);
+
+    }
+    return GAME_NONE;
+}
+
+GAME_WINDOW_EVENTS  handleRightMouseUpGameWindow(GameWindow *window, SDL_Event *event)
+{
+    if(window->board->suggestMoves != NULL)
+    {
+        destroyLocation(window->board->suggestMoves);
+        window->board->suggestMoves = NULL;
+    }
+    return GAME_NONE;
+}
+GAME_WINDOW_EVENTS  handleRightMouseDownGameWindow(GameWindow *window, SDL_Event *event)
+{
+    if(window->board->draged != NULL)
+        return GAME_NONE;
+    if(!isPointOnGameLayout(window->board,event->button.x, event->button.y))
+        return GAME_NONE;
+    if(window->game->mode != ONE_PLAYER_GAME_MODE || window->game->difficulty > 2)
+        return GAME_NONE;
+    if(window->board->suggestMoves != NULL)
+        return GAME_NONE;
+    Location square = getSquare(window->board, event->button.x, event->button.y);
+    window->board->suggestMoves = duplicateLocation(&square);
+    return GAME_NONE;
+}
+
 GAME_WINDOW_EVENTS handleEventGameWindow(GameWindow *window, SDL_Event *event)
 {
     if(window == NULL || event==NULL)
@@ -226,18 +264,18 @@ GAME_WINDOW_EVENTS handleEventGameWindow(GameWindow *window, SDL_Event *event)
                 return GAME_EXIT;
             break;
         case SDL_MOUSEBUTTONUP:
-            return handleMouseUpGameWindow(window,event);
+            if(event->button.button == SDL_BUTTON_LEFT)
+                return handleLeftMouseUpGameWindow(window, event);
+            else if(event->button.button == SDL_BUTTON_RIGHT)
+                return handleRightMouseUpGameWindow(window, event);
             break;
         case SDL_MOUSEBUTTONDOWN:
-            if(isPointOnGameLayout(window->board,event->button.x, event->button.y))
-            {
-                Location square = getSquare(window->board, event->button.x, event->button.y);
-                if(window->game->state->board[square.x][square.y] != EMPTY_PLACE_SYMBOL)
-                    setDragedPiece(window->board, square.x, square.y, window->game->state->board[square.x][square.y]);
-
-            }
-            return GAME_NONE;
+            if(event->button.button == SDL_BUTTON_LEFT)
+                return handleLeftMouseDownGameWindow(window, event);
+            else if(event->button.button == SDL_BUTTON_RIGHT)
+                return handleRightMouseDownGameWindow(window, event);
             break;
+
         default:
             return GAME_NONE;
 

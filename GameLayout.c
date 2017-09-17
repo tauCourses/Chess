@@ -1,5 +1,7 @@
 #include "GameLayout.h"
 #include "BoardLayout.h"
+#include "Location.h"
+#include "GameState.h"
 
 GameLayout* createGameLayout(SDL_Point startingPoint, SDL_Renderer* renderer)
 {
@@ -33,6 +35,7 @@ GameLayout* createGameLayout(SDL_Point startingPoint, SDL_Renderer* renderer)
         return NULL;
     }
     game->draged = NULL;
+    game->suggestMoves = NULL;
     return game;
 }
 
@@ -130,15 +133,17 @@ void destroyGameLayout(GameLayout* game)
     free(game);
 }
 
-void drawGameLayout(GameLayout* game, Board board)
+void drawGameLayout(GameLayout* game, GameState* state)
 {
     drawBoardLayout(game->renderer, game->boardLayout);
+    if(game->suggestMoves != NULL)
+        drawSuggestMoves(game, state);
     for(int i=0;i<CHESS_BOARD_SIZE;i++)
     {
         for(int j=0;j<CHESS_BOARD_SIZE;j++)
         {
-            if(board[7-i][j] != EMPTY_PLACE_SYMBOL)
-                drawSquare(game, j, i, board[7-i][j]);
+            if(state->board[7-i][j] != EMPTY_PLACE_SYMBOL)
+                drawSquare(game, j, i, state->board[7-i][j]);
         }
     }
     if(game->draged != NULL && game->draged->texture != NULL)
@@ -148,6 +153,61 @@ void drawGameLayout(GameLayout* game, Board board)
         SDL_Rect ract = { x - SQUARE_SIZE/2, y - SQUARE_SIZE/2, .h=SQUARE_SIZE, .w=SQUARE_SIZE};
         SDL_RenderCopy(game->renderer, game->draged->texture, NULL, &ract);
     }
+}
+
+Location toLayoutLocation(Location* loc)
+{
+    return (Location) {.x = loc->y, .y = 7-loc->x};
+}
+
+void drawSuggestMoves(GameLayout* game, GameState* state)
+{
+    Location** dests = getAllAvailableMovesFromLocation(state,game->suggestMoves);
+    if(dests == NULL)
+        return;
+    int i=0;
+    while(dests[i] != NULL)
+    {
+        Location realSquare = toLayoutLocation(dests[i]);
+        SDL_Rect ract = {   .x= game->boardLayout->startingPoint.x + realSquare.x  * (SQUARE_SIZE + SQUARE_GAP),
+                .y=game->boardLayout->startingPoint.y + realSquare.y * (SQUARE_SIZE + SQUARE_GAP),
+                .h=SQUARE_SIZE,
+                .w=SQUARE_SIZE};
+        GameState* tempState = duplicateGameState(state);
+        if(tempState == NULL)
+            continue;
+        GameMove* move = applyMove(tempState, game->suggestMoves, dests[i]);
+        if(move == NULL)
+        {
+            destroyGameState(tempState);
+            continue;
+        }
+        if(isREALLYThreatened(tempState, dests[i]))
+            SDL_SetRenderDrawColor(game->renderer, SUGGEST_MOVE_THREATENED_COLOR);
+        else if(getPieceColor(state->board[dests[i]->x][dests[i]->y]) == oppositeColor(state->currentPlayer))
+            SDL_SetRenderDrawColor(game->renderer, SUGGEST_MOVE_BEAT_COLOR);
+        else
+            SDL_SetRenderDrawColor(game->renderer, SUGGEST_MOVE_REGULAR_COLOR);
+        destroyGameState(tempState);
+        if(tolower(state->board[game->suggestMoves->x][game->suggestMoves->y]) == 'k' &&
+                abs(game->suggestMoves->y - dests[i]->y) > 1) {
+            SDL_SetRenderDrawColor(game->renderer, SUGGEST_MOVE_CASLTLE_COLOR);
+            Location *rookLocation = createLocation(game->suggestMoves->x, (dests[i]->y > game->suggestMoves->y) ? CHESS_BOARD_SIZE-1 : 0);
+            if(rookLocation == NULL)
+                continue;
+            Location rookSquare = toLayoutLocation(rookLocation);
+            destroyLocation(rookLocation);
+            SDL_Rect rookRact = {   .x= game->boardLayout->startingPoint.x + rookSquare.x  * (SQUARE_SIZE + SQUARE_GAP),
+                    .y=game->boardLayout->startingPoint.y + rookSquare.y * (SQUARE_SIZE + SQUARE_GAP),
+                    .h=SQUARE_SIZE,
+                    .w=SQUARE_SIZE};
+            SDL_RenderFillRect(game->renderer,&rookRact);
+        }
+        SDL_RenderFillRect(game->renderer,&ract);
+        i++;
+    }
+    destroyLocationsList(dests);
+
 }
 
 SDL_Texture* charToTexture(GameLayout* game, char c)

@@ -156,7 +156,7 @@ Location* findKingLocation(GameState* state, PLAYER_COLOR kingColor)
     return NULL;
 }
 
-bool isThreatened(GameState* state, Location* loc, PLAYER_COLOR byPlayer)
+bool isThreatened(GameState *state, Location *loc, PLAYER_COLOR byPlayer)
 {
     for(int x=0; x<CHESS_BOARD_SIZE; ++x)
     {
@@ -183,6 +183,20 @@ bool isThreatened(GameState* state, Location* loc, PLAYER_COLOR byPlayer)
     return false;
 }
 
+bool isREALLYThreatened(GameState *state, Location *loc)
+{
+    for(int x=0; x<CHESS_BOARD_SIZE; ++x)
+    {
+        for (int y = 0; y < CHESS_BOARD_SIZE; ++y)
+        {
+            Location org = {.x=x,.y=y};
+            if(isMoveLegal(state,&org,loc) == IS_LEGAL_VALID)
+                return true;
+        }
+    }
+    return false;
+}
+
 void checkIfCastleChanged(GameState *state, Location *org)
 {
     if(org->x == 0 && org->y == 0)
@@ -196,7 +210,7 @@ void checkIfCastleChanged(GameState *state, Location *org)
     if(org->x == 7 && org->y == 7)
         state->blackCastle->hasRightRookMoved = true;
     if(org->x == 7 && org->y == 4)
-        state->whiteCastle->hasKingMoved = true;
+        state->blackCastle->hasKingMoved = true;
 }
 void applyCastleChange(GameState *state, Location *org, Location *des)
 {
@@ -323,16 +337,20 @@ void applyUndoMove(GameState *state, GameMove *move)
 bool checkCastleMove(GameState* state, Location* org, Location* des)
 {
     castleState* castleState = state->currentPlayer == WHITE_PLAYER ? state->whiteCastle : state->blackCastle;
-    if(tolower(state->board[org->x][org->y]) != 'k')
+    if(state->board[org->x][org->y] != (state->currentPlayer == WHITE_PLAYER ? WHITE_KING_SYMBOL : BLACK_KING_SYMBOL))
         return false;
+    int rookY = (org->y < des->y) ? 7 : 0;
+    if(state->board[org->x][rookY] != (state->currentPlayer == WHITE_PLAYER ? WHITE_ROOK_SYMBOL : BLACK_ROOK_SYMBOL))
+        return false;
+
     if(org->y == 4 && des->y == 6 && org->x == des->x
        && castleState->hasKingMoved == false && castleState->hasRightRookMoved == false) //right castle
     {
         Location first = {.x = des->x, .y=5};
         Location second = {.x = des->x, .y=6};
         return !isKingThreatened(state) &&
-               !isThreatened(state, &first , oppositeColor(state->currentPlayer)) &&
-               !isThreatened(state, &second , oppositeColor(state->currentPlayer)) &&
+               !isThreatened(state, &first, oppositeColor(state->currentPlayer)) &&
+               !isThreatened(state, &second, oppositeColor(state->currentPlayer)) &&
                state->board[des->x][5] == EMPTY_PLACE_SYMBOL &&
                state->board[des->x][6] == EMPTY_PLACE_SYMBOL;
     }
@@ -342,8 +360,8 @@ bool checkCastleMove(GameState* state, Location* org, Location* des)
         Location first = {.x = des->x, .y=3};
         Location second = {.x = des->x, .y=2};
         return !isKingThreatened(state) &&
-               !isThreatened(state, &first , oppositeColor(state->currentPlayer)) &&
-               !isThreatened(state, &second , oppositeColor(state->currentPlayer)) &&
+               !isThreatened(state, &first, oppositeColor(state->currentPlayer)) &&
+               !isThreatened(state, &second, oppositeColor(state->currentPlayer)) &&
                state->board[des->x][3] == EMPTY_PLACE_SYMBOL &&
                state->board[des->x][2] == EMPTY_PLACE_SYMBOL &&
                state->board[des->x][1] == EMPTY_PLACE_SYMBOL;

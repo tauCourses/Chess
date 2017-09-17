@@ -7,7 +7,6 @@
 #include "Button.h"
 #include "GameLayout.h"
 #include "Storage.h"
-#include "GameManager.h"
 #include "AI.h"
 
 typedef enum {
@@ -36,7 +35,11 @@ void createGameButtons(GameWindow* window);
 void destroyGameWindow(GameWindow *window);
 void drawGameWindow(GameWindow *window);
 
-GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event);
+GAME_WINDOW_EVENTS handleLeftMouseUpGameWindow(GameWindow *window, SDL_Event *event);
+GAME_WINDOW_EVENTS  handleLeftMouseDownGameWindow(GameWindow *window, SDL_Event *event);
+GAME_WINDOW_EVENTS  handleRightMouseUpGameWindow(GameWindow *window, SDL_Event *event);
+GAME_WINDOW_EVENTS  handleRightMouseDownGameWindow(GameWindow *window, SDL_Event *event);
+
 GAME_WINDOW_EVENTS handleEventGameWindow(GameWindow *window, SDL_Event *event);
 
 int exitConfirmationMessageBox();

@@ -14,9 +14,16 @@ bool saveGame(GameManager* game, char* filename)
     fprintf(file, "<current_turn>%d</current_turn>\n",game->state->currentPlayer == BLACK_PLAYER ? 0 : 1);
     fprintf(file, "<game_mode>%d</game_mode>\n",game->mode==ONE_PLAYER_GAME_MODE?1:2);
 
-    fprintf(file, "<difficulty>%d</difficulty>\n",2);
-    fprintf(file, "<user_color>%d</user_color>\n",1);
-
+    if(game->mode == ONE_PLAYER_GAME_MODE)
+    {
+        fprintf(file, "<difficulty>2</difficulty>\n");
+        fprintf(file, "<user_color>1</user_color>\n");
+    }
+    else
+    {
+        fprintf(file, "<difficulty>%d</difficulty>\n", game->difficulty);
+        fprintf(file, "<user_color>%d</user_color>\n", game->userColor == BLACK_PLAYER ? 0 : 1);
+    }
     saveBoard(file, game->state);
     fprintf(file, "<general>%d%d%d%d%d%d</general>\n",game->state->whiteCastle->hasLeftRookMoved,
             game->state->whiteCastle->hasRightRookMoved,

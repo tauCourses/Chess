@@ -9,8 +9,6 @@
 #include "DifficultyWindow.h"
 #include "ColorWindow.h"
 #include "GameWindow.h"
-#include "GameManager.h"
-#include "AI.h"
 
 typedef enum{
     MAIN_WINDOW_ACTIVE,
