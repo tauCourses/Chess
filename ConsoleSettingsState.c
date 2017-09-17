@@ -17,7 +17,7 @@ void destroySettings(Settings* settings)
 void resetSettings(Settings* settings)
 {
 	settings->difficulty = 2;
-	settings->gameMode = 1;
+	settings->gameMode = ONE_PLAYER_GAME_MODE;
 	settings->playerColor = WHITE_PLAYER;
 }
 
@@ -44,27 +44,38 @@ SETTINGS_INPUT_STATE executeSettingsCommand(GameManager** game, SettingsCommand 
 	case SETTINGS_COMMAND_GAME_MODE:
 		executeCommandGameMode(SCommand,settings);
 		return SETTINGS_INPUT_SETTINGS_STATE;
+
 	case SETTINGS_COMMAND_DIFFICULTY:
 		executeCommandDifficulty(SCommand,settings);
 		return SETTINGS_INPUT_SETTINGS_STATE;
+
 	case SETTINGS_COMMAND_USER_COLOR:
 		executeCommandUserColor(SCommand,settings);
 		return SETTINGS_INPUT_SETTINGS_STATE;
+
 	case SETTINGS_COMMAND_LOAD:
-		executeCommandLoad(game,SCommand);
-		return SETTINGS_INPUT_GAME_STATE;
+		if (executeCommandLoad(game,SCommand))
+			return SETTINGS_INPUT_GAME_STATE;
+		else
+			return SETTINGS_INPUT_SETTINGS_STATE;
+
 	case SETTINGS_COMMAND_DEFAULT_VALUES:
 		executeCommandDefaultValues(settings);
 		return SETTINGS_INPUT_SETTINGS_STATE;
+
 	case SETTINGS_COMMAND_PRINT_SETTINGS:
 		executeCommandPrintSettings(settings);
+        printf("TestPrint executeSettingsCommand: about to return SETTINGS_INPUT_SETTINGS_STATE\n");
 		return SETTINGS_INPUT_SETTINGS_STATE;
+
 	case SETTINGS_COMMAND_START:
 		executeCommandStart(game,settings);
 		return SETTINGS_INPUT_GAME_STATE;
+
 	case SETTINGS_COMMAND_INVALID:
 		printf(MSG_INVALID_IN_SETTINGS);
 		return SETTINGS_INPUT_SETTINGS_STATE;
+
 	case SETTINGS_COMMAND_QUIT:
 		break;
 	default:
@@ -87,7 +98,12 @@ SettingsCommand ParseSettingsLine(const char* str)
 	printf("TestPrint ParseSettingsLine: this is ScommandType: |%d|\n", result.type);
 
     parseSettingsCommandWithInt(&result,token,delimeter);
-    parseSettingsCommandWithPath(&result,token,delimeter);
+
+	if (result.type == SETTINGS_COMMAND_LOAD)
+	{
+		token = strtok(NULL, delimeter);
+		result.path = token;
+	}
 
     token = strtok(NULL, delimeter);
     if (token != NULL)
@@ -96,7 +112,7 @@ SettingsCommand ParseSettingsLine(const char* str)
     return result;
 }
 
-void parseSettingsCommandWithInt(SettingsCommand* result, const char* token,const char delimeter[])
+void parseSettingsCommandWithInt(SettingsCommand* result, const char* token, const char delimeter[])
 {
     if (result->type == SETTINGS_COMMAND_GAME_MODE || result->type == SETTINGS_COMMAND_DIFFICULTY ||
     		result->type == SETTINGS_COMMAND_USER_COLOR )
@@ -112,11 +128,12 @@ void parseSettingsCommandWithInt(SettingsCommand* result, const char* token,cons
     }
 }
 
-void parseSettingsCommandWithPath(SettingsCommand* result, const char*  token,const char delimeter[]){
+void parseSettingsCommandWithPath(SettingsCommand* result, char* token, char delimeter[])
+{
     if (result->type == SETTINGS_COMMAND_LOAD)
     {
         token = strtok(NULL, delimeter);
-        result->path = (char*)token;
+        result->path = token;
     }
 }
 
@@ -152,13 +169,13 @@ void executeCommandGameMode(SettingsCommand SCommand, Settings* settings)
 	if (SCommand.value == 1)
 	{
 		printf(MSG_GAME_MODE_1);
-		settings->gameMode = 1;
+		settings->gameMode = ONE_PLAYER_GAME_MODE;
 		return;
 	}
 	if (SCommand.value == 2)
 	{
 		printf(MSG_GAME_MODE_2);
-		settings->gameMode = 2;
+		settings->gameMode = TWO_PLAYERS_GAME_MODE;
 		return;
 	}
 	printf(MSG_GAME_MODE_WRONG);
@@ -198,33 +215,37 @@ void executeCommandUserColor(SettingsCommand SCommand, Settings* settings)
 		printf(MSG_INVALID_IN_SETTINGS);
 }
 
-void executeCommandLoad(GameManager** game, SettingsCommand SCommand)
+bool executeCommandLoad(GameManager** game, SettingsCommand SCommand)
 {
 	if (isFileExist(SCommand.path))
 	{
+
 		GameManager* newGame = loadGame(SCommand.path);
+		//newGame = loadGame("C:\\jael.xml");
 		if (newGame != NULL)
 		{
 			destroyGame(*game);
 			*game = newGame;
+			return 1;
 		}
 		else
 			printf(ERR_IN_WRITING_TO_FILE);
 	}
 	else
 		printf(ERR_FILE_CANNOT_OPEN_DONT_EXISTS);
+	return 0;
 }
 
 void executeCommandDefaultValues(Settings* settings)
 {
-	settings->gameMode = 1;
+	settings->gameMode = ONE_PLAYER_GAME_MODE;
 	settings->difficulty = 2;
 	settings->playerColor = WHITE_PLAYER;
 }
 
 void executeCommandPrintSettings(Settings* settings)
 {
-	if (settings->gameMode == 1)
+	if (settings->gameMode == ONE_PLAYER_GAME_MODE)
 	{
 		printf("SETTINGS:\n");
 		printf("GAME_MODE: 1\n");
@@ -240,7 +261,7 @@ void executeCommandPrintSettings(Settings* settings)
 
 void executeCommandStart(GameManager** game, Settings* settings)
 {
-	if (settings->gameMode == 1)
+	if (settings->gameMode == ONE_PLAYER_GAME_MODE)
 	{
 		*game = createOnePlayerGame(settings->difficulty,settings->playerColor);
 	}

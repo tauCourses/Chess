@@ -2,6 +2,8 @@
 #include "GameManager.h"
 #include "GameState.h"
 
+#include <errno.h>//for testing, can be deleted after load and save game in console works
+
 bool saveGame(GameManager* game, char* filename)
 {
     FILE * file = fopen(filename, "w");
@@ -11,11 +13,10 @@ bool saveGame(GameManager* game, char* filename)
     fprintf(file, "<game>\n");
     fprintf(file, "<current_turn>%d</current_turn>\n",game->state->currentPlayer == BLACK_PLAYER ? 0 : 1);
     fprintf(file, "<game_mode>%d</game_mode>\n",game->mode==ONE_PLAYER_GAME_MODE?1:2);
-    if(game->mode == 1)
-    {
-        fprintf(file, "<difficulty>%d</difficulty>\n",2);
-        fprintf(file, "<user_color>%d</user_color>\n",1);
-    }
+
+    fprintf(file, "<difficulty>%d</difficulty>\n",2);
+    fprintf(file, "<user_color>%d</user_color>\n",1);
+
     saveBoard(file, game->state);
     fprintf(file, "<general>%d%d%d%d%d%d</general>\n",game->state->whiteCastle->hasLeftRookMoved,
             game->state->whiteCastle->hasRightRookMoved,
@@ -44,6 +45,7 @@ void saveBoard(FILE* file, GameState* state)
 
 bool isFileExist(char* filename)
 {
+    printf("isFileExists: this is filename |%s|\n",filename);
     FILE * file = fopen(filename, "r");
     if(file != NULL)
     {
@@ -55,16 +57,23 @@ bool isFileExist(char* filename)
 
 GameManager* loadGame(char* filename)
 {
-
-
-    FILE * file = fopen(filename, "r");
-    if(file == NULL)
-        return NULL;
-
     GameManager* game = createEmptyGame();
     if(game == NULL)
         return NULL;
 
+    errno = 0;//for testing
+
+    FILE * file = fopen(filename, "r");
+
+    if (file==NULL) //for testing
+        printf("Error %d \n", errno);//for testing
+
+
+    if(file == NULL)
+    {
+        destroyGame(game);
+        return NULL;
+    }
     updateGameParams(game,file);
     updateBoardFromFile(game->state, file);
     updateCastlesStateFromFile(game->state, file);

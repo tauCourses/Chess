@@ -107,17 +107,20 @@ GAME_STATE getGameState(GameManager* game)
 }
 
 
-bool candoundo(GameManager* game)
+GAME_UNDO_MOVE_MESSAGE candoundo(GameManager* game)
 {
-    return game->mode == ONE_PLAYER_GAME_MODE && game->history->numberOfMovesStored > 1;
+    if (game->mode == TWO_PLAYERS_GAME_MODE)
+    	return UNDO_REFUSED;
+	if (game->history->numberOfMovesStored < 2)
+		return UNDO_NO_HISTORY;
+	return UNDO_POSSIBLE;
 }
 
 
-GAME_UNDO_MOVE_MESSAGE undoMove(GameManager* game)
+GameMove* undoMove(GameManager* game)
 {
     GameMove* move = popFromHistory(game->history);
     applyUndoMove(game->state,move);
-    destroyMove(move);
-    return UNDO_SUCCEEDED;
+    return move;
 }
 

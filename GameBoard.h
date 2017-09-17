@@ -56,5 +56,7 @@ bool isCoordinatesOutOfBounds(int x, int y);
 PLAYER_COLOR getPieceColor(char piece);
 PLAYER_COLOR oppositeColor(PLAYER_COLOR currentPlayerColor);
 
+bool isKing(Board board, Location* loc);
+
 
 #endif //CHESS_GAMEBOARD_H

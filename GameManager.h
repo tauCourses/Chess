@@ -22,8 +22,10 @@ typedef enum {
 } GAME_STATE;
 
 typedef enum{
-    UNDO_SUCCEEDED, UNDO_NO_HISTORY, UNDO_REFUSED
+    UNDO_POSSIBLE, UNDO_NO_HISTORY, UNDO_REFUSED, UNDO_SUCCEEDED
 }GAME_UNDO_MOVE_MESSAGE;
+
+
 
 typedef struct{
     GameState* state;
@@ -45,8 +47,8 @@ GAME_STATE getGameState(GameManager* game);
 
 
 
-bool candoundo(GameManager* game); //just kidding, should be canDoUndo or isUndoAvailable
+GAME_UNDO_MOVE_MESSAGE candoundo(GameManager* game); //just kidding, should be canDoUndo or isUndoAvailable
 
-GAME_UNDO_MOVE_MESSAGE undoMove(GameManager* game);
+GameMove* undoMove(GameManager* game);
 
 #endif //CHESS_GAME_H

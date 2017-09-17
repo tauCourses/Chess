@@ -39,8 +39,7 @@ GameMove* popFromHistory(GameHistory* history)
     return move;
 }
 
-GameMove* seekFirstHistory(GameHistory* history)
-{
+GameMove* seekFirstHistory(GameHistory *history) {
     if(history->numberOfMovesStored == 0)
         return NULL;
     return history->movesList[0];

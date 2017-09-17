@@ -1,6 +1,4 @@
 #include "AI.h"
-#include "GameManager.h"
-#include "GameState.h"
 
 GameMove* applyAIMove(GameManager* game)
 {
@@ -17,7 +15,7 @@ GameMove* applyAIMove(GameManager* game)
         return NULL;
     movePiece(game, duplicateLocation(bestNode->origin), duplicateLocation(bestNode->des));
     destroyMinMaxNode(bestNode);
-    return seekFirstHistory(game->history);
+    return (seekFirstHistory(game->history));
 }
 
 void destroyChain(nodeChain* chain)

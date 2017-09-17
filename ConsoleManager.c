@@ -1,66 +1,46 @@
 #include "ConsoleManager.h"
+#include "GameManager.h"
 
 int mainConsole()
 {
-	setvbuf(stdout, NULL, _IOLBF, 0);
 	GameManager* game = NULL;
     INPUT_STATE inputState = INPUT_SETTINGS_STATE;
-
     SETTINGS_INPUT_STATE settingsInputState;
     GAME_INPUT_STATE gameInputState;
     SettingsCommand SCommand;
     GameStateCommand GCommand;
-
+    SCommand.type = SETTINGS_COMMAND_INVALID;
+    GCommand.type = GAME_STATE_COMMAND_INVALID;
     Settings* settings = createSettings();
 
+    printf(MSG_SETTING_BEGIN);
     do {
-        switch (inputState)
+		switch (inputState)
         {
             case INPUT_SETTINGS_STATE:
             	SCommand = getSettingsCommandFromUser();
-				printf("TestPrint mainConsole, this is Scommand.value %d\n",SCommand.value);
+                printf("This is SCommand.type BEFORE execute %d\n",SCommand.type);
             	settingsInputState = executeSettingsCommand(&game,SCommand,settings);
-            	if (settingsInputState == SETTINGS_INPUT_GAME_STATE)
-            		inputState = INPUT_GAME_STATE;
-            	if (settingsInputState == SETTINGS_INPUT_GAME_QUIT)
-            		inputState = INPUT_GAME_QUIT;
+                printf("This is SCommand.type AFTER execute %d\n",SCommand.type);
+                inputState = updateInputStateSetting(settingsInputState);
             	break;
             case INPUT_GAME_STATE:
-            	if (game->userColor == game->state->currentPlayer)
-            	{
-            		printBoard(game->state->board);
-            		if (game->state->currentPlayer == WHITE_PLAYER)
-            			printf(MSG_NEXT_MOVE_WHITE);
-            		else
-            		    printf(MSG_NEXT_MOVE_BLACK);
-            		GCommand = getGameStateCommandFromUser();
-
-            		gameInputState = executeGameStateCommand(game,GCommand);
-            		if (GCommand.type == GAME_STATE_COMMAND_RESET)
-            		    resetSettings(settings);
-            	}
-            	else
-            	{
-            		if (gameInputState != GAME_INPUT_GAME_QUIT && game->mode == 1)
-            		            			gameInputState = makeComputerMove(game);
-            	}
-
-            	if (gameInputState == GAME_INPUT_GAME_STATE)
-            	    inputState = INPUT_GAME_STATE;
-            	if (gameInputState == GAME_INPUT_GAME_QUIT)
-            	    inputState = INPUT_GAME_QUIT;
+				if (game->mode == TWO_PLAYERS_GAME_MODE || game->userColor == game->state->currentPlayer)
+                    gameInputState = makeUserMove(&game, &GCommand, &settings);
+                else//computer's turn
+                    gameInputState = makeComputerMove(game);
+                inputState = updateInputStateGame(gameInputState);
             	break;
             case INPUT_GAME_QUIT:
             	printf("ERROR: should have quit bug 21812");
             	break;
             default:
             	break;
-        }
+        }//switch
     }while(SCommand.type != SETTINGS_COMMAND_QUIT && GCommand.type != GAME_STATE_COMMAND_QUIT);
     printf(MSG_QUIT);
-   	destroySettings(settings);
-    destroyGame(game);
-
+	destroySettings(settings);
+	destroyGame(game);
     return 1;
 }
 
@@ -78,6 +58,43 @@ void printBoard(Board board){
 }
 
 
-void executeCommandInvalid(){
-	printf("Invalid command\n");
+GAME_INPUT_STATE makeUserMove(GameManager** game, GameStateCommand* GCommand, Settings** settings)
+{
+    GAME_INPUT_STATE gameInputState;
+    printf("PRINT BOARD execute this is turn of:%d\n", (*game)->state->currentPlayer);
+    printBoard((*game)->state->board);
+    if ((*game)->state->currentPlayer == WHITE_PLAYER)
+        printf(MSG_NEXT_MOVE_WHITE);
+    else
+        printf(MSG_NEXT_MOVE_BLACK);
+    *GCommand = getGameStateCommandFromUser();
+
+    gameInputState = executeGameStateCommand(*game, GCommand);
+
+    if (GCommand->type == GAME_STATE_COMMAND_RESET) {
+        resetSettings(*settings);
+        *game = NULL;
+        printf(MSG_SETTING_BEGIN);
+    }
+
+    return gameInputState;
+}
+
+
+INPUT_STATE updateInputStateSetting(SETTINGS_INPUT_STATE settingsInputState)
+{
+    if (settingsInputState == SETTINGS_INPUT_GAME_STATE)
+        return INPUT_GAME_STATE;
+    if (settingsInputState == SETTINGS_INPUT_GAME_QUIT)
+        return INPUT_GAME_QUIT;
+}
+
+INPUT_STATE updateInputStateGame(GAME_INPUT_STATE gameInputState)
+{
+    if (gameInputState == GAME_INPUT_GAME_STATE)
+        return INPUT_GAME_STATE;
+    if (gameInputState == GAME_INPUT_SETTINGS_STATE)
+        return INPUT_SETTINGS_STATE;
+    if (gameInputState == GAME_INPUT_GAME_QUIT)
+        return INPUT_GAME_QUIT;
 }

@@ -57,7 +57,7 @@ void createGameButtons(GameWindow* window)
     window->save = createButton(window->renderer, saveR, SAVE_ACTIVE_BUTTON, "", BUTTON_TYPE_ONE_OPTION);
     window->load = createButton(window->renderer, loadR, LOAD_ACTIVE_BUTTON, "", BUTTON_TYPE_ONE_OPTION);
     window->undo = createButton(window->renderer, undoR, UNDO_ACTIVE_BUTTON, UNDO_NOT_ACTIVE_BUTTON, BUTTON_TYPE_VALIDATE);
-    if(!candoundo(window->game))
+    if(!candoundo(window->game) == UNDO_POSSIBLE)
         window->undo->state.valid = BUTTON_INVALID;
 
     window->main = createButton(window->renderer, mainR, MAIN_MANU_ACTIVE_BUTTON, "", BUTTON_TYPE_ONE_OPTION);
@@ -126,7 +126,7 @@ GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
             if(message == MOVE_VALID)
             {
                 window->isSaved = false;
-                if(candoundo(window->game))
+                if(candoundo(window->game) == UNDO_POSSIBLE)
                     window->undo->state.valid = BUTTON_VALID;
                 else
                     window->undo->state.valid = BUTTON_INVALID;
@@ -182,12 +182,12 @@ GAME_WINDOW_EVENTS handleMouseUpGameWindow(GameWindow *window, SDL_Event *event)
         return GAME_LOAD;
     else if(clickOnButton(window->undo, event->button.x, event->button.y))
     {
-        if(candoundo(window->game))
+        if(candoundo(window->game) == UNDO_POSSIBLE)
         {
             undoMove(window->game);
             undoMove(window->game);
         }
-        if(candoundo(window->game))
+        if(candoundo(window->game) == UNDO_POSSIBLE)
             window->undo->state.valid = BUTTON_VALID;
         else
             window->undo->state.valid = BUTTON_INVALID;

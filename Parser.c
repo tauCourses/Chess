@@ -25,14 +25,11 @@ Location* parseLocation(const char* token)
 		return NULL;
 	if ('8' < token[1] || token[1] < '1')
 		return NULL;
-    printf("after token[1]\n");
 	if (token[2] != ',')
 		return NULL;
 	if ('A' > token[3] || token[3] > 'I')
 		return NULL;
-    printf("after token[3]\n");
 	if (token[4] != '>')
 		return NULL;
-	printf("TestPrint i'm about to create and send Location\n");
     return createLocation(token[1]-'1', token[3]-'A');
 }

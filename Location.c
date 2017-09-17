@@ -68,6 +68,7 @@ void printLocationsList(Location** locations)
 			printf("%s\n",currentLoc);
 		else
 			printf("ERROR: failed to malloc in Location.c - getStringFromLocation");
+        index++;
 	}
 
 }

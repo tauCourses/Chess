@@ -1,9 +1,9 @@
 #ifndef CHESS_CONSOLESETTINGSSTATE_H
 #define CHESS_CONSOLESETTINGSSTATE_H
 
-#include <stdio.h>
 #include "GameManager.h"
-#include "Parser.h"
+#include "stdio.h"
+#include "parser.h"
 
 typedef enum SETTINGS_COMMAND_TYPE{
 	SETTINGS_COMMAND_GAME_MODE, SETTINGS_COMMAND_DIFFICULTY ,SETTINGS_COMMAND_USER_COLOR,
@@ -12,7 +12,7 @@ typedef enum SETTINGS_COMMAND_TYPE{
 } SETTINGS_COMMAND_TYPE;
 
 typedef struct Settings{
-	int gameMode;
+	GAME_MODE gameMode;
 	int difficulty;
 	PLAYER_COLOR playerColor;
 } Settings;
@@ -42,7 +42,7 @@ typedef enum SETTINGS_INPUT_STATE{
 #define ERR_FILE_CANNOT_OPEN_DONT_EXISTS "Error: File does not exist or cannot be opened\n"
 #define ERR_MALLOC "ERROR: in allocating memory\n"
 #define ERR_FGETS "ERROR: in receiving user input\n"
-#define ERR_IN_WRITING_TO_FILE "ERROR: in writing to file (file does exists)"
+#define ERR_IN_WRITING_TO_FILE "ERROR: in writing to file (file does exists)\n"
 
 Settings* createSettings();
 
@@ -60,7 +60,7 @@ SETTINGS_COMMAND_TYPE settingsCommandFromStr(char* token);
 
 void parseSettingsCommandWithInt(SettingsCommand* result, const char* token,const char delimeter[]);
 
-void parseSettingsCommandWithPath(SettingsCommand* result, const char* token,const char delimeter[]);
+void parseSettingsCommandWithPath(SettingsCommand* result, char* token, char delimeter[]);
 
 
 void executeCommandGameMode(SettingsCommand SCommand, Settings* settings);
@@ -69,7 +69,7 @@ void executeCommandDifficulty(SettingsCommand SCommand, Settings* settings);
 
 void executeCommandUserColor(SettingsCommand SCommand, Settings* settings);
 
-void executeCommandLoad(GameManager** game, SettingsCommand SCommand);
+bool executeCommandLoad(GameManager** game, SettingsCommand SCommand);
 
 void executeCommandDefaultValues(Settings* settings);
 

@@ -3,7 +3,7 @@
 
 #include "GameManager.h"
 #include "stdio.h"
-#include "Parser.h"
+#include "parser.h"
 #include "ConsoleGameState.h"
 #include "ConsoleSettingsState.h"
 #include "Location.h"
@@ -16,7 +16,11 @@ int mainConsole();
 
 void printBoard(Board board);
 
-void executeCommandInvalid();
+GAME_INPUT_STATE makeUserMove(GameManager** game, GameStateCommand* GCommand, Settings** settings);
+
+INPUT_STATE updateInputStateSetting(SETTINGS_INPUT_STATE settingsInputState);
+
+INPUT_STATE updateInputStateGame(GAME_INPUT_STATE gameInputState);
 
 
 #endif //CHESS_MAINCONSOLE_H
