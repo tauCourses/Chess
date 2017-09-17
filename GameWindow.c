@@ -152,7 +152,7 @@ GAME_WINDOW_EVENTS handleLeftMouseUpGameWindow(GameWindow *window, SDL_Event *ev
                 state =  getGameState(window->game);
                 if(state == GAME_CHECKMATE)
                     gameEndMessageBox(oppositeColor(window->game->state->currentPlayer));
-                if(candoundo(window->game))
+                if(candoundo(window->game) == UNDO_POSSIBLE)
                     window->undo->state.valid = BUTTON_VALID;
                 else
                     window->undo->state.valid = BUTTON_INVALID;
