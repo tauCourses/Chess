@@ -13,7 +13,7 @@ int mainConsole();
 
 void printBoard(Board board);
 
-GAME_INPUT_STATE makeUserMove(GameManager** game, GameStateCommand* GCommand, Settings** settings);
+GAME_INPUT_STATE makeUserMove(GameManager** game, GameStateCommand** GCommand, Settings** settings);
 
 INPUT_STATE updateInputStateSetting(SETTINGS_INPUT_STATE settingsInputState);
 

@@ -14,7 +14,7 @@ typedef enum GAME_STATE_COMMAND_TYPE{
 
 typedef struct GameStateCommand{
 	GAME_STATE_COMMAND_TYPE type;
-    char* path;
+    char path[MAX_LINE_LENGTH];
     Location* org;
     Location* des;
 } GameStateCommand;
@@ -43,6 +43,7 @@ typedef enum GAME_INPUT_STATE{
 #define MSG_UNDO_EMPTY_HISTORY "Empty history, move cannot be undone\n"
 #define MSG_UNDO_WHITE "Undo move for player white : %s -> %s\n"
 #define MSG_UNDO_BLACK "Undo move for player black : %s -> %s\n"
+#define MSG_UNDO_COM_CASTLE "Computer: castle King at %s and Rook at %s\n"
 #define MSG_CASTLE_WRONG_POSITION_ROOK "Wrong position for a rook\n"
 #define MSG_CASTLE_ILLEGAL "Illegal castling move\n"
 #define MSG_RESTART "Restarting...\n"
@@ -71,11 +72,11 @@ typedef enum GAME_INPUT_STATE{
 #define ERR_FGETS "ERROR: in receiving user input\n"
 
 
-GameStateCommand getGameStateCommandFromUser();
+void getGameStateCommandFromUser(GameStateCommand** GCommand);
 
 GAME_INPUT_STATE executeGameStateCommand(GameManager* game, GameStateCommand* GCommand);
 
-GameStateCommand PraseGameStateLine(const char* str);
+GameStateCommand* PraseGameStateLine(const char* str);
 
 GAME_STATE_COMMAND_TYPE gameStateCommandFromStr(char* token);
 

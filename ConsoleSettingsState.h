@@ -20,7 +20,7 @@ typedef struct Settings{
 
 typedef struct SettingsCommand{
 	SETTINGS_COMMAND_TYPE type;
-    char* path;
+    char path[MAX_LINE_LENGTH];
     int value;
 } SettingsCommand;
 
@@ -51,11 +51,11 @@ void destroySettings(Settings* settings);
 
 void resetSettings(Settings* settings);
 
-SettingsCommand getSettingsCommandFromUser();
+void getSettingsCommandFromUser(SettingsCommand** SCommand);
 
-SETTINGS_INPUT_STATE executeSettingsCommand(GameManager** game, SettingsCommand SCommand, Settings* settings);
+SETTINGS_INPUT_STATE executeSettingsCommand(GameManager** game, SettingsCommand* SCommand, Settings* settings);
 
-SettingsCommand ParseSettingsLine(const char* str);
+SettingsCommand* ParseSettingsLine(const char* str);
 
 SETTINGS_COMMAND_TYPE settingsCommandFromStr(char* token);
 
@@ -64,13 +64,13 @@ void parseSettingsCommandWithInt(SettingsCommand* result, const char* token,cons
 void parseSettingsCommandWithPath(SettingsCommand* result, char* token, char delimeter[]);
 
 
-void executeCommandGameMode(SettingsCommand SCommand, Settings* settings);
+void executeCommandGameMode(SettingsCommand* SCommand, Settings* settings);
 
-void executeCommandDifficulty(SettingsCommand SCommand, Settings* settings);
+void executeCommandDifficulty(SettingsCommand* SCommand, Settings* settings);
 
-void executeCommandUserColor(SettingsCommand SCommand, Settings* settings);
+void executeCommandUserColor(SettingsCommand* SCommand, Settings* settings);
 
-bool executeCommandLoad(GameManager** game, SettingsCommand SCommand);
+bool executeCommandLoad(GameManager** game, SettingsCommand* SCommand);
 
 void executeCommandDefaultValues(Settings* settings);
 

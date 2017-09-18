@@ -6,7 +6,16 @@
 
 bool saveGame(GameManager* game, char* filename)
 {
+    printf("saveGame: this is filename |%s|\n",filename);
+
+
+    errno = 0;//for testing
+
     FILE * file = fopen(filename, "w");
+
+    if (file==NULL) //for testing
+        printf("Error %d \n", errno);//for testing
+
     if(file == NULL)
         return false;
     fprintf(file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -68,13 +77,7 @@ GameManager* loadGame(char* filename)
     if(game == NULL)
         return NULL;
 
-    errno = 0;//for testing
-
     FILE * file = fopen(filename, "r");
-
-    if (file==NULL) //for testing
-        printf("Error %d \n", errno);//for testing
-
 
     if(file == NULL)
     {

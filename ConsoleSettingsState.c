@@ -1,4 +1,5 @@
 #include "ConsoleSettingsState.h"
+#include "GameManager.h"
 
 Settings* createSettings()
 {
@@ -21,7 +22,7 @@ void resetSettings(Settings* settings)
 	settings->playerColor = WHITE_PLAYER;
 }
 
-SettingsCommand getSettingsCommandFromUser()
+void getSettingsCommandFromUser(SettingsCommand** SCommand)
 {
 	char input[MAX_LINE_LENGTH];
     fgets(input,MAX_LINE_LENGTH,stdin);
@@ -29,17 +30,16 @@ SettingsCommand getSettingsCommandFromUser()
     if (input == NULL)//error in fgets
     {
         printf(ERR_FGETS);
-        SettingsCommand errorCommand;
-        errorCommand.type = SETTINGS_COMMAND_INVALID;
-        return errorCommand;
+        (*SCommand)->type = SETTINGS_COMMAND_INVALID;
+        return;
     }
-    return ParseSettingsLine(input);
+    *SCommand = ParseSettingsLine(input);
 }
 
-SETTINGS_INPUT_STATE executeSettingsCommand(GameManager** game, SettingsCommand SCommand, Settings* settings)
+SETTINGS_INPUT_STATE executeSettingsCommand(GameManager** game, SettingsCommand* SCommand, Settings* settings)
 {
-	printf("TestPrint executeSettingsCommand: this is SCommand.type: |%d|\n", SCommand.type);
-	switch (SCommand.type)
+	printf("TestPrint executeSettingsCommand: this is SCommand.type: |%d|\n", SCommand->type);
+	switch (SCommand->type)
 	{
 	case SETTINGS_COMMAND_GAME_MODE:
 		executeCommandGameMode(SCommand,settings);
@@ -84,30 +84,37 @@ SETTINGS_INPUT_STATE executeSettingsCommand(GameManager** game, SettingsCommand 
 	return SETTINGS_COMMAND_INVALID;
 }
 
-SettingsCommand ParseSettingsLine(const char* str)
+SettingsCommand* ParseSettingsLine(const char* str)
 {
     const char delimeter[] = " \t\r\n";
     char line[MAX_LINE_LENGTH], *token;
 
-    SettingsCommand result;
+    SettingsCommand* result = (SettingsCommand*)malloc(sizeof(SettingsCommand));
+    if (result == NULL)
+    {
+        printf(ERR_MALLOC);
+        return NULL;
+    }
+
+
     strcpy(line, str);
     token = strtok(line, delimeter);
 
 	printf("TestPrint ParseSettingsLine: this is token: |%s|\n", token);
-    result.type = settingsCommandFromStr(token);
-	printf("TestPrint ParseSettingsLine: this is ScommandType: |%d|\n", result.type);
+    result->type = settingsCommandFromStr(token);
+	printf("TestPrint ParseSettingsLine: this is ScommandType: |%d|\n", result->type);
 
-    parseSettingsCommandWithInt(&result,token,delimeter);
+    parseSettingsCommandWithInt(result,token,delimeter);
 
-	if (result.type == SETTINGS_COMMAND_LOAD)
+	if (result->type == SETTINGS_COMMAND_LOAD)
 	{
 		token = strtok(NULL, delimeter);
-		result.path = token;
+		strcpy(result->path, token);
 	}
 
     token = strtok(NULL, delimeter);
     if (token != NULL)
-        result.type = SETTINGS_COMMAND_INVALID;
+        result->type = SETTINGS_COMMAND_INVALID;
 
     return result;
 }
@@ -133,7 +140,7 @@ void parseSettingsCommandWithPath(SettingsCommand* result, char* token, char del
     if (result->type == SETTINGS_COMMAND_LOAD)
     {
         token = strtok(NULL, delimeter);
-        result->path = token;
+        strcpy(result->path, token);
     }
 }
 
@@ -164,15 +171,15 @@ SETTINGS_COMMAND_TYPE settingsCommandFromStr(char* token)
 }
 
 
-void executeCommandGameMode(SettingsCommand SCommand, Settings* settings)
+void executeCommandGameMode(SettingsCommand* SCommand, Settings* settings)
 {
-	if (SCommand.value == 1)
+	if (SCommand->value == 1)
 	{
 		printf(MSG_GAME_MODE_1);
 		settings->gameMode = ONE_PLAYER_GAME_MODE;
 		return;
 	}
-	if (SCommand.value == 2)
+	if (SCommand->value == 2)
 	{
 		printf(MSG_GAME_MODE_2);
 		settings->gameMode = TWO_PLAYERS_GAME_MODE;
@@ -181,17 +188,17 @@ void executeCommandGameMode(SettingsCommand SCommand, Settings* settings)
 	printf(MSG_GAME_MODE_WRONG);
 }
 
-void executeCommandDifficulty(SettingsCommand SCommand, Settings* settings)
+void executeCommandDifficulty(SettingsCommand* SCommand, Settings* settings)
 {
-	printf("TestPrint executeCommandDifficulty: this SCommand type and value <%d,%d>\n",SCommand.type, SCommand.value);
+	printf("TestPrint executeCommandDifficulty: this SCommand type and value <%d,%d>\n",SCommand->type, SCommand->value);
 	if (settings->gameMode == 1)
 	{
-		if (0 < SCommand.value && SCommand.value < 5)
+		if (0 < SCommand->value && SCommand->value < 5)
 		{
-			if ( SCommand.value == 5)
+			if ( SCommand->value == 5)
 				printf(MSG_EXPERT_NOT_SUPPORTED);
 			else
-				settings->difficulty = SCommand.value;
+				settings->difficulty = SCommand->value;
 		}
 		else
 			printf(MSG_WRONG_DIFFICULTY);
@@ -200,36 +207,39 @@ void executeCommandDifficulty(SettingsCommand SCommand, Settings* settings)
 		printf(MSG_INVALID_IN_SETTINGS);
 }
 
-void executeCommandUserColor(SettingsCommand SCommand, Settings* settings)
+void executeCommandUserColor(SettingsCommand* SCommand, Settings* settings)
 {
 	if (settings->gameMode == 1)
 	{
-		if (SCommand.value == 0)
+		if (SCommand->value == 0)
 			settings->playerColor = BLACK_PLAYER;
-		if (SCommand.value == 1)
+		if (SCommand->value == 1)
 			settings->playerColor = WHITE_PLAYER;
-		if (SCommand.value != 0 && SCommand.value != 1)
+		if (SCommand->value != 0 && SCommand->value != 1)
 			printf(MSG_INVALID_IN_SETTINGS);
 	}
 	else
 		printf(MSG_INVALID_IN_SETTINGS);
 }
 
-bool executeCommandLoad(GameManager** game, SettingsCommand SCommand)
+bool executeCommandLoad(GameManager** game, SettingsCommand* SCommand)
 {
-	if (isFileExist(SCommand.path))
+    if (isFileExist(SCommand->path))
 	{
-
-		GameManager* newGame = loadGame(SCommand.path);
-		//newGame = loadGame("C:\\jael.xml");
+		GameManager* newGame = loadGame(SCommand->path);
 		if (newGame != NULL)
 		{
-			destroyGame(*game);
-			*game = newGame;
-			return 1;
+			if (newGame->difficulty == 5)
+                printf(MSG_EXPERT_NOT_SUPPORTED);
+            else
+            {
+                destroyGame(*game);
+                *game = newGame;
+                return 1;
+            }
 		}
 		else
-			printf(ERR_IN_WRITING_TO_FILE);
+			printf(ERR_FILE_CANNOT_OPEN_DONT_EXISTS);
 	}
 	else
 		printf(ERR_FILE_CANNOT_OPEN_DONT_EXISTS);
