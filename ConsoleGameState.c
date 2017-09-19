@@ -84,7 +84,6 @@ GameStateCommand* PraseGameStateLine(const char* str) {
 	parsePossibleMovesCommand(result,token,delimeter);
     parseCastle(result,token,delimeter);
 
-
 	token = strtok(NULL, delimeter);
 	if (token != NULL )
 		result->type = GAME_STATE_COMMAND_INVALID;
@@ -104,7 +103,7 @@ void parseSaveCommand(GameStateCommand* result, const char* token,const char del
 
 void parseMoveCommand(GameStateCommand* result, const char* token,const char delimeter[])
 {
-	printf("TestPrint in parseMoveCommand\n ");
+	printf("TestPrint in parseMoveCommand\n");
 	if (result->type == GAME_STATE_COMMAND_MOVE) {
 		token = strtok(NULL, delimeter);
 		printf("TestPrint in parseMoveCommand before parseLocation\n ");
@@ -123,7 +122,8 @@ void parseMoveCommand(GameStateCommand* result, const char* token,const char del
 
 void parsePossibleMovesCommand(GameStateCommand* result, const char* token,const char delimeter[])
 {
-	if (result->type == GAME_STATE_COMMAND_GET_POSSIBLE_MOVES) {
+    printf("TestPrint in parsePossibleMovesCommand\n");
+    if (result->type == GAME_STATE_COMMAND_GET_POSSIBLE_MOVES) {
 		token = strtok(NULL, delimeter);
 		result->org = parseLocation(token);
 		if (result->org == NULL )
@@ -146,12 +146,6 @@ GAME_STATE_COMMAND_TYPE gameStateCommandFromStr(char* token) {
 
     if (token == NULL )
 		return GAME_STATE_COMMAND_INVALID;
-
-    if (strcmp(token, "game_mode") == 0)
-		return GAME_STATE_COMMAND_MOVE;
-
-    if (strcmp(token, "start") == 0)
-		return GAME_STATE_COMMAND_SAVE;
 
     if (strcmp(token, "move") == 0)
 		return GAME_STATE_COMMAND_MOVE;
@@ -181,7 +175,8 @@ GAME_STATE_COMMAND_TYPE gameStateCommandFromStr(char* token) {
 GAME_INPUT_STATE executeCommandMove(GameManager* game, GameStateCommand* GCommand)
 {
 	GAME_MOVE_MESSAGE moveMessage;
-	if (GCommand->org != NULL && GCommand->des != NULL)
+	bool isKingCastleInMove = isKing(game->state->board,GCommand->org) && (GCommand->des->y + 2 == GCommand->org->y || GCommand->des->y - 2 == GCommand->org->y);
+	if (GCommand->org != NULL && GCommand->des != NULL && !isKingCastleInMove)
 	{
 		moveMessage = movePiece(game,GCommand->org,GCommand->des);
 	}
@@ -258,14 +253,15 @@ GAME_INPUT_STATE afterValidMove(GameManager* game)
 
 void executeCommandGetPossibleMoves(GameManager* game, GameStateCommand* GCommand)
 {
-	if (isLegalGetPossibleMoves(game,GCommand))
+	printf("TestPrint executeCommandGetPossibleMoves Begin\n");
+    if (isLegalGetPossibleMoves(game,GCommand))
 	{
 		Location** allMoves = getAllAvailableMovesFromLocation(game->state,GCommand->org);
 		if (allMoves == NULL)
 			printf(ERR_MALLOC); //TODO->shouldn't we terminate in this case
 		else
 		{
-			printLocationsList(allMoves);
+			printLocationsList(game->state,allMoves,GCommand->org);
 			destroyLocationsList(allMoves);
 		}
 	}
@@ -277,7 +273,7 @@ bool isLegalGetPossibleMoves(GameManager* game, GameStateCommand* GCommand)
 {
 	if (game->difficulty > 2 || game->mode == TWO_PLAYERS_GAME_MODE)
 	{
-		printf(MSG_INVALID_IN_GAME);
+		printf(MSG_INVALID_GET_MOVES);
 		return false;
 	}
 	if (GCommand->org == NULL)
@@ -292,6 +288,64 @@ bool isLegalGetPossibleMoves(GameManager* game, GameStateCommand* GCommand)
 		return false;
 	}
 	return true;
+}
+
+void printLocationsList(GameState* gameState,Location** locations, Location* org)
+{
+    int index = 0 ;
+    char* currentLoc;
+    char* castleLeft = NULL;
+    char* castleRight = NULL;
+    bool isCastleKingMoveRight;
+    bool isCastleKingMoveLeft;
+
+    while (locations[index] != NULL)
+    {
+        currentLoc = getStringFromLocation(locations[index]);
+        if (currentLoc != NULL)
+        {
+            isCastleKingMoveRight = isKing(gameState->board,locations[index]) && locations[index]->y + 2 == org->y;
+            isCastleKingMoveLeft = isKing(gameState->board,locations[index]) && locations[index]->y - 2 == org->y;
+            if (isCastleKingMoveLeft)
+                strcpy(castleLeft,currentLoc);
+            if (isCastleKingMoveRight)
+                strcpy(castleRight,currentLoc);
+
+            if (!isCastleKingMoveLeft && !isCastleKingMoveLeft)
+            {
+                printf("%s",currentLoc);
+
+                if (isThreatened(gameState,locations[index],oppositeColor(gameState->currentPlayer)))
+                    printf("*");
+                if (getPieceColor(gameState->board[locations[index]->x][locations[index]->y]) == oppositeColor(gameState->currentPlayer))
+                    printf("^");
+            }
+            printf("\n");
+        }
+        else
+            printf("ERROR: failed to malloc in Location.c - getStringFromLocation");
+        index++;
+        free(currentLoc);
+    }
+    if (castleLeft != NULL)
+        printf("castle %s\n",castleLeft);
+    if (castleRight != NULL)
+        printf("castle %s\n",castleRight);
+    if (gameState->board[org->x][org->y] == WHITE_ROOK_SYMBOL && gameState->currentPlayer == WHITE_PLAYER)
+    {
+        if (org->y == 0 && !gameState->whiteCastle->hasKingMoved && !gameState->whiteCastle->hasLeftRookMoved)
+            printf("castle <1,A>\n");
+        if (org->y == 7 && !gameState->whiteCastle->hasKingMoved && !gameState->whiteCastle->hasRightRookMoved)
+            printf("castle <1,H>\n");
+    }
+    if (gameState->board[org->x][org->y] == BLACK_ROOK_SYMBOL && gameState->currentPlayer == BLACK_PLAYER)
+    {
+        if (org->y == 0 && !gameState->blackCastle->hasKingMoved && !gameState->blackCastle->hasLeftRookMoved)
+            printf("castle <8,A>\n");
+        if (org->y == 7 &&!gameState->blackCastle->hasKingMoved && !gameState->blackCastle->hasRightRookMoved)
+            printf("castle <8,H>\n");
+    }
+
 }
 
 void executeCommandSave(GameManager* game, GameStateCommand GCommand)
@@ -369,7 +423,7 @@ void executeCommandCastle(GameManager* game,GameStateCommand* GCommand)
 	if (isPieceRook)
 	{
 		if (kingDes != NULL && checkCastleMove(game->state,kingLoc,kingDes))
-			applyMove(game->state,kingLoc,kingDes); //TODO -> applyMove may FAILED because of malloc!!!
+			movePiece(game,kingLoc,kingDes); //TODO -> applyMove may FAILED because of malloc!!!
 		else
 			printf(MSG_CASTLE_ILLEGAL);
 	}
@@ -432,35 +486,35 @@ char parsePawnPromotion(PLAYER_COLOR playerColor, char* input)
 		return '\0';
 	if (strcmp(token, "rook") == 0)
 	{
-		if (playerColor == WHITE_PLAYER)
+		if (playerColor == BLACK_PLAYER)//if next turn is the Black turn
 			piece = 'r';
 		else
 			piece = 'R';
 	}
 	if (strcmp(token, "knight") == 0)
 	{
-		if (playerColor == WHITE_PLAYER)
+		if (playerColor == BLACK_PLAYER)
 			piece = 'n';
 		else
 			piece = 'N';
 	}
 	if (strcmp(token, "bishop") == 0)
 	{
-		if (playerColor == WHITE_PLAYER)
+		if (playerColor == BLACK_PLAYER)
 			piece = 'b';
 		else
 			piece = 'B';
 	}
 	if (strcmp(token, "pawn") == 0)
 	{
-		if (playerColor == WHITE_PLAYER)
+		if (playerColor == BLACK_PLAYER)
 			piece = 'm';
 		else
 			piece = 'M';
 	}
     if (strcmp(token, "queen") == 0)
     {
-        if (playerColor == WHITE_PLAYER)
+        if (playerColor == BLACK_PLAYER)
             piece = 'q';
         else
             piece = 'Q';

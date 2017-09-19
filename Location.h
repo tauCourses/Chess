@@ -21,8 +21,6 @@ int compareLocations(const void * item1, const void * item2);
 
 char* getStringFromLocation(Location* loc);
 
-void printLocationsList(Location** locations);
-
 void destroyLocationsList(Location** list);
 
 

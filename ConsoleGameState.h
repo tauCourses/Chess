@@ -46,6 +46,7 @@ typedef enum GAME_INPUT_STATE{
 #define MSG_UNDO_COM_CASTLE "Computer: castle King at %s and Rook at %s\n"
 #define MSG_CASTLE_WRONG_POSITION_ROOK "Wrong position for a rook\n"
 #define MSG_CASTLE_ILLEGAL "Illegal castling move\n"
+#define MSG_INVALID_GET_MOVES "get_moves is not available in difficulty above 2 and in two players mode\n"
 #define MSG_RESTART "Restarting...\n"
 
 #define MSG_COM_MOVE_PAWN "Computer: move pawn at %s -> %s\n"
@@ -98,6 +99,8 @@ GAME_INPUT_STATE afterValidMove(GameManager* game);
 void executeCommandGetPossibleMoves(GameManager* game, GameStateCommand* GCommand);
 
 bool isLegalGetPossibleMoves(GameManager* game, GameStateCommand* GCommand);
+
+void printLocationsList(GameState* gameState, Location** locations,Location* org);
 
 void executeCommandSave(GameManager* game, GameStateCommand GCommand);
 

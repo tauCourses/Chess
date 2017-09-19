@@ -57,22 +57,7 @@ char* getStringFromLocation(Location* loc)
 
 }
 
-void printLocationsList(Location** locations)
-{
-	int index = 0 ;
-	char* currentLoc;
-	while (locations[index] != NULL)
-	{
-		currentLoc = getStringFromLocation(locations[index]);
-		if (currentLoc != NULL)
-			printf("%s\n",currentLoc);
-		else
-			printf("ERROR: failed to malloc in Location.c - getStringFromLocation");
-        index++;
-        free(currentLoc);
-	}
 
-}
 
 void destroyLocationsList(Location** list)
 {

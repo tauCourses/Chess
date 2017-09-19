@@ -191,9 +191,9 @@ void executeCommandGameMode(SettingsCommand* SCommand, Settings* settings)
 void executeCommandDifficulty(SettingsCommand* SCommand, Settings* settings)
 {
 	printf("TestPrint executeCommandDifficulty: this SCommand type and value <%d,%d>\n",SCommand->type, SCommand->value);
-	if (settings->gameMode == 1)
+	if (settings->gameMode == ONE_PLAYER_GAME_MODE)
 	{
-		if (0 < SCommand->value && SCommand->value < 5)
+		if (0 < SCommand->value && SCommand->value < 6)
 		{
 			if ( SCommand->value == 5)
 				printf(MSG_EXPERT_NOT_SUPPORTED);
@@ -209,7 +209,7 @@ void executeCommandDifficulty(SettingsCommand* SCommand, Settings* settings)
 
 void executeCommandUserColor(SettingsCommand* SCommand, Settings* settings)
 {
-	if (settings->gameMode == 1)
+	if (settings->gameMode == ONE_PLAYER_GAME_MODE)
 	{
 		if (SCommand->value == 0)
 			settings->playerColor = BLACK_PLAYER;

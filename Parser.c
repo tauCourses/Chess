@@ -20,7 +20,10 @@ bool IsInt(const char* str)
 
 Location* parseLocation(const char* token)
 {
-    printf("TestPrint this is token in parseLocation %s\n", token );
+    printf("TestPrint this is token in Begin parseLocation |%s|\n", token );
+    if (token == NULL)
+        return NULL;
+
     if (token[0] != '<')
 		return NULL;
 	if ('8' < token[1] || token[1] < '1')
@@ -31,5 +34,6 @@ Location* parseLocation(const char* token)
 		return NULL;
 	if (token[4] != '>')
 		return NULL;
+    printf("TestPrint this is token in End parseLocation |%s|\n", token );
     return createLocation(token[1]-'1', token[3]-'A');
 }
