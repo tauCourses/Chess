@@ -4,6 +4,7 @@
 #include <limits.h>
 #include "GameManager.h"
 
+#define END_GAME_SCORE 1000
 typedef enum {
     MAX_NODE_TYPE, MIN_NODE_TYPE
 } MIN_MAX_NODE_TYPE;

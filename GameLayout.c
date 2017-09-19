@@ -194,6 +194,7 @@ bool drawSuggestMoves(GameLayout* game, GameState* state)
             destroyLocationsList(dests);
             return false;
         }
+        destroyMove(move);
         if(isREALLYThreatened(tempState, dests[i]))
             SDL_SetRenderDrawColor(game->renderer, SUGGEST_MOVE_THREATENED_COLOR);
         else if(getPieceColor(state->board[dests[i]->x][dests[i]->y]) == oppositeColor(state->currentPlayer))
@@ -234,22 +235,16 @@ SDL_Texture* charToTexture(GameLayout* game, char c)
     {
         case 'r':
             return pieces->rook;
-            break;
         case 'n':
             return pieces->knight;
-            break;
         case 'b':
             return pieces->bishop;
-            break;
         case 'k':
             return pieces->king;
-            break;
         case 'q':
             return pieces->queen;
-            break;
         case 'm':
             return pieces->pawn;
-            break;
         default:
             printf("BUG %c\n", c);
             return NULL;

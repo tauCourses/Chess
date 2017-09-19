@@ -32,8 +32,8 @@ bool isLocationOutOfBounds(Location* des)
 
 int compareLocations(const void * item1, const void * item2)
 {
-    Location* loc1 = (Location*)item1;
-    Location* loc2 = (Location*)item2;
+    const Location* loc1 = *(Location* const *)item1;
+    const Location* loc2 = *(Location* const *)item2;
     if (loc1->x > loc2->x)
         return 1;
 

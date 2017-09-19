@@ -115,7 +115,7 @@ Location** getAllAvailableMovesFromLocation(GameState* state,Location* origin)
             }
         }
     }
-    qsort(possibleMoves, (size_t)numberOfElements, sizeof(Location), &compareLocations);
+    qsort(possibleMoves, (size_t)numberOfElements, sizeof(Location*), compareLocations);
     if(numberOfElements > 50) //TODO-> remove!
         printf("what?");
     return possibleMoves;

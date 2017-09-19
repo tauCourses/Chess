@@ -65,6 +65,7 @@ nodeChain* updateChainByRegularMove(MinMaxNode* node, nodeChain *chain, Location
     if(tempNode->des == NULL)
         return NULL;
     tempNode->origin = duplicateLocation(origin);
+
     if(tempNode->origin == NULL)
         return NULL;
     chain->node = tempNode;
@@ -131,9 +132,13 @@ MinMaxNode* getBestNode(GameState* state, MIN_MAX_NODE_TYPE type, int maxDepth)
         return NULL;
     nodeChain* nodesChain = getAllMinMaxNodes(node);
     if(nodesChain == NULL)
+    {
+        destroyMinMaxNode(node);
         return NULL;
+    }
     if(nodesChain->node == NULL) // no posible moves
     {
+        destroyMinMaxNode(node);
         free(nodesChain); //there are no nodes inside the nodesChain
         return NULL;
     }
@@ -144,6 +149,7 @@ MinMaxNode* getBestNode(GameState* state, MIN_MAX_NODE_TYPE type, int maxDepth)
         if(minMaxNodeScore(currentNode->node, currentPrunningScore) == GET_SCORE_FAILED)
         {
             destroyChain(nodesChain);
+            destroyMinMaxNode(node);
             return NULL;
         }
         if(isBetterScore(currentPrunningScore, currentNode->node->score, node->type))
@@ -151,8 +157,13 @@ MinMaxNode* getBestNode(GameState* state, MIN_MAX_NODE_TYPE type, int maxDepth)
         currentNode = currentNode->next;
     }
     MinMaxNode* tempNode = findBestNode(nodesChain, node->type);
-
     destroyMinMaxNode(node);
+    if(tempNode == NULL)
+    {
+        destroyChain(nodesChain);
+        return NULL;
+    }
+
     node = (MinMaxNode*) malloc(sizeof(MinMaxNode));
     if(node == NULL)
     {
@@ -184,7 +195,7 @@ MinMaxNode* getBestNode(GameState* state, MIN_MAX_NODE_TYPE type, int maxDepth)
 
 MinMaxNode* createMinMaxNode(GameState* state, MIN_MAX_NODE_TYPE type, int depth, int maxDepth)
 {
-    MinMaxNode* node = (MinMaxNode*) malloc(sizeof(MinMaxNode));
+    MinMaxNode* node = (MinMaxNode*) calloc(1,sizeof(MinMaxNode));
     if(node == NULL)
         return NULL;
     node->state = duplicateGameState(state);
@@ -207,6 +218,7 @@ void destroyMinMaxNode(MinMaxNode *node)
 {
     if(node == NULL)
         return;
+
     if(node->state != NULL)
         destroyGameState(node->state);
     if(node->origin != NULL)
@@ -223,7 +235,7 @@ void destroyMinMaxNode(MinMaxNode *node)
 GET_SCORE_RESULT endGameNodeScore(MinMaxNode* node)
 {
     if(isKingThreatened(node->state))
-        node->score = (node->state->currentPlayer == WHITE_PLAYER)? INT_MIN : INT_MAX;
+        node->score = (node->state->currentPlayer == WHITE_PLAYER)? -END_GAME_SCORE : END_GAME_SCORE;
     else
         node->score = 0;
 
@@ -285,8 +297,12 @@ int findBestScore(nodeChain* nodesChain, MIN_MAX_NODE_TYPE type)
 
 MinMaxNode* findBestNode(nodeChain* nodesChain, MIN_MAX_NODE_TYPE type)
 {
-    int score = worstScore(type);
-    MinMaxNode* node = NULL;
+    if(nodesChain == NULL)
+        return NULL;
+    if(nodesChain->node == NULL)
+        return NULL;
+    int score = nodesChain->node->score;
+    MinMaxNode* node = nodesChain->node;
     nodeChain* currentNode = nodesChain;
     while(currentNode->node != NULL)
     {

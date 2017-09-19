@@ -61,7 +61,6 @@ void saveBoard(FILE* file, GameState* state)
 
 bool isFileExist(char* filename)
 {
-    printf("isFileExists: this is filename |%s|\n",filename);
     FILE * file = fopen(filename, "r");
     if(file != NULL)
     {
