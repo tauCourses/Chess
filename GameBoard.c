@@ -2,6 +2,7 @@
 
 void setInitialBoard(Board board)
 {
+    int x,y;
     //WHITE PIECES:
     board[0][0] = WHITE_ROOK_SYMBOL;
     board[0][7] = WHITE_ROOK_SYMBOL;
@@ -11,16 +12,16 @@ void setInitialBoard(Board board)
     board[0][5] = WHITE_BISHOP_SYMBOL;
     board[0][4] = WHITE_KING_SYMBOL;
     board[0][3] = WHITE_QUEEN_SYMBOL;
-    for(int y=0;y<CHESS_BOARD_SIZE; ++y) //set white pawns line
+    for(y=0;y<CHESS_BOARD_SIZE; ++y) //set white pawns line
         board[1][y] = WHITE_PAWN_SYMBOL;
 
     //EMPTY GAP:
-    for(int x=2;x<6;++x) //set empty gap
-        for(int y=0;y<CHESS_BOARD_SIZE;++y)
+    for(x=2;x<6;++x) //set empty gap
+        for(y=0;y<CHESS_BOARD_SIZE;++y)
             board[x][y] = EMPTY_PLACE_SYMBOL;
 
     //BLACK PIECES:
-    for(int y=0;y<CHESS_BOARD_SIZE; ++y) //set black pawns line
+    for(y=0;y<CHESS_BOARD_SIZE; ++y) //set black pawns line
         board[6][y] = BLACK_PAWN_SYMBOL;
     board[7][0] = BLACK_ROOK_SYMBOL;
     board[7][7] = BLACK_ROOK_SYMBOL;
@@ -113,9 +114,10 @@ bool isBlackPawnMoveLegal(Board board, Location* org, Location* des){
 
 bool isRookMoveLegal(Board board, Location* org, Location* des)
 {
+    int i;
     if (org->x == des->x)
     {
-        for (int i = MIN(org->y,des->y)+1; i< MAX(org->y,des->y); i++)
+        for (i = MIN(org->y,des->y)+1; i< MAX(org->y,des->y); i++)
             if (board[org->x][i] != EMPTY_PLACE_SYMBOL)
                 return false;
 
@@ -123,7 +125,7 @@ bool isRookMoveLegal(Board board, Location* org, Location* des)
     }
     if (org->y == des->y)
     {
-        for (int i = MIN(org->x, des->x) + 1; i < MAX(org->x, des->x); i++) {
+        for (i = MIN(org->x, des->x) + 1; i < MAX(org->x, des->x); i++) {
             if (board[i][org->y] != EMPTY_PLACE_SYMBOL)
                 return false;
         }
@@ -236,3 +238,15 @@ bool isKing(Board board, Location* loc)
     return (board[loc->x][loc->y] == 'k' || board[loc->x][loc->y] == 'K');
 }
 
+void printBoard(Board board){
+    int i,j;
+    for (i=CHESS_BOARD_SIZE-1; i>=0; i--){
+        printf("%d| ",i+1);
+        for (j=0; j<CHESS_BOARD_SIZE; j++){
+            printf("%c ",board[i][j]);
+        }
+        printf("|\n");
+    }
+    printf("  -----------------\n");
+    printf("   A B C D E F G H\n");
+}

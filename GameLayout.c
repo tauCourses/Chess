@@ -138,15 +138,16 @@ void destroyGameLayout(GameLayout* game)
 
 bool drawGameLayout(GameLayout* game, GameState* state)
 {
-    drawBoardLayout(game->renderer, game->boardLayout);
+    int i,j;
+	drawBoardLayout(game->renderer, game->boardLayout);
     if(game->suggestMoves != NULL)
     {
         if(drawSuggestMoves(game, state) == false)
             return false;
     }
-    for(int i=0;i<CHESS_BOARD_SIZE;i++)
+    for(i=0;i<CHESS_BOARD_SIZE;i++)
     {
-        for(int j=0;j<CHESS_BOARD_SIZE;j++)
+        for(j=0;j<CHESS_BOARD_SIZE;j++)
         {
             if(state->board[7-i][j] != EMPTY_PLACE_SYMBOL)
                 if(drawSquare(game, j, i, state->board[7-i][j]) == false)

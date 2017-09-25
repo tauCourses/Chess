@@ -13,11 +13,13 @@ OBJS =  Location.o \
 
 EXEC = chessprog
 
-COMP_FLAG = -std=c99 -Wall -Wextra \
+
+
+CC_COMP_FLAG = -std=c99 -Wall -Wextra \
   -pedantic-errors
 
-SDL_COMP_FLAG = -I/usr/include/SDL2 -D_REENTRANT 
-SDL_LIB = -L/usr/lib/x86_64-linux-gnu -Wl,-rpath,/usr/local/lib/sdl_2.0.5/lib -Wl,--enable-new-dtags -lSDL2 -lSDL2main
+SDL_COMP_FLAG = -I/usr/local/lib/sdl_2.0.5/include/SDL2 -D_REENTRANT 
+SDL_LIB = -L/usr/local/lib/sdl_2.0.5/lib -Wl,-rpath,/usr/local/lib/sdl_2.0.5/lib -Wl,--enable-new-dtags -lSDL2 -lSDL2main
 
 $(EXEC): $(OBJS)
 	$(CC) $(OBJS) $(SDL_LIB) -o $@

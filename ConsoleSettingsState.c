@@ -1,12 +1,14 @@
 #include "ConsoleSettingsState.h"
 #include "GameManager.h"
+#include "GameState.h"
 
 Settings* createSettings()
 {
 	Settings* settings = (Settings*) malloc(sizeof(Settings));
 	if (settings == NULL)
 		printf(ERR_MALLOC);
-	executeCommandDefaultValues(settings);
+	else
+		executeCommandDefaultValues(settings);
 	return settings;
 }
 
@@ -38,7 +40,7 @@ void getSettingsCommandFromUser(SettingsCommand** SCommand)
 
 SETTINGS_INPUT_STATE executeSettingsCommand(GameManager** game, SettingsCommand* SCommand, Settings* settings)
 {
-	printf("TestPrint executeSettingsCommand: this is SCommand.type: |%d|\n", SCommand->type);
+	//printf("TestPrint executeSettingsCommand: this is SCommand.type: |%d|\n", SCommand->type);
 	switch (SCommand->type)
 	{
 	case SETTINGS_COMMAND_GAME_MODE:
@@ -54,10 +56,8 @@ SETTINGS_INPUT_STATE executeSettingsCommand(GameManager** game, SettingsCommand*
 		return SETTINGS_INPUT_SETTINGS_STATE;
 
 	case SETTINGS_COMMAND_LOAD:
-		if (executeCommandLoad(game,SCommand))
-			return SETTINGS_INPUT_GAME_STATE;
-		else
-			return SETTINGS_INPUT_SETTINGS_STATE;
+		executeCommandLoad(game,SCommand,settings);
+		return SETTINGS_INPUT_SETTINGS_STATE;
 
 	case SETTINGS_COMMAND_DEFAULT_VALUES:
 		executeCommandDefaultValues(settings);
@@ -65,11 +65,12 @@ SETTINGS_INPUT_STATE executeSettingsCommand(GameManager** game, SettingsCommand*
 
 	case SETTINGS_COMMAND_PRINT_SETTINGS:
 		executeCommandPrintSettings(settings);
-        printf("TestPrint executeSettingsCommand: about to return SETTINGS_INPUT_SETTINGS_STATE\n");
+        //printf("TestPrint executeSettingsCommand: about to return SETTINGS_INPUT_SETTINGS_STATE\n");
 		return SETTINGS_INPUT_SETTINGS_STATE;
 
 	case SETTINGS_COMMAND_START:
 		executeCommandStart(game,settings);
+		printBoard((*game)->state->board);
 		return SETTINGS_INPUT_GAME_STATE;
 
 	case SETTINGS_COMMAND_INVALID:
@@ -77,6 +78,7 @@ SETTINGS_INPUT_STATE executeSettingsCommand(GameManager** game, SettingsCommand*
 		return SETTINGS_INPUT_SETTINGS_STATE;
 
 	case SETTINGS_COMMAND_QUIT:
+		printf(MSG_QUIT);
 		break;
 	default:
 		break;
@@ -100,17 +102,12 @@ SettingsCommand* ParseSettingsLine(const char* str)
     strcpy(line, str);
     token = strtok(line, delimeter);
 
-	printf("TestPrint ParseSettingsLine: this is token: |%s|\n", token);
+	//printf("TestPrint ParseSettingsLine: this is token: |%s|\n", token);
     result->type = settingsCommandFromStr(token);
-	printf("TestPrint ParseSettingsLine: this is ScommandType: |%d|\n", result->type);
+	//printf("TestPrint ParseSettingsLine: this is ScommandType: |%d|\n", result->type);
 
     parseSettingsCommandWithInt(result,token,delimeter);
-
-	if (result->type == SETTINGS_COMMAND_LOAD)
-	{
-		token = strtok(NULL, delimeter);
-		strcpy(result->path, token);
-	}
+	parseSettingsCommandWithPath(result,token,delimeter);
 
     token = strtok(NULL, delimeter);
     if (token != NULL)
@@ -125,23 +122,26 @@ void parseSettingsCommandWithInt(SettingsCommand* result, const char* token, con
     		result->type == SETTINGS_COMMAND_USER_COLOR )
     {
         token = strtok(NULL, delimeter);
-		printf("TestPrint parseSettingsCommandWithInt this isInt:%d\n", IsInt(token));
+		//printf("TestPrint parseSettingsCommandWithInt this isInt:%d\n", IsInt(token));
 		if (IsInt(token)){
 			result->value = atoi(token);
-			printf("TestPrint parseSettingsCommandWithInt this is resulat.value:%d\n", result->value);
+			//printf("TestPrint parseSettingsCommandWithInt this is resulat.value:%d\n", result->value);
 		}
         else
             result->type = SETTINGS_COMMAND_INVALID;
     }
 }
 
-void parseSettingsCommandWithPath(SettingsCommand* result, char* token, char delimeter[])
+void parseSettingsCommandWithPath(SettingsCommand* result, const char* token, const char delimeter[])
 {
-    if (result->type == SETTINGS_COMMAND_LOAD)
-    {
-        token = strtok(NULL, delimeter);
-        strcpy(result->path, token);
-    }
+	if (result->type == SETTINGS_COMMAND_LOAD)
+	{
+		token = strtok(NULL, delimeter);
+		if (token != NULL )
+			strcpy(result->path,token);
+		else
+			result->type = SETTINGS_COMMAND_INVALID;
+	}
 }
 
 SETTINGS_COMMAND_TYPE settingsCommandFromStr(char* token)
@@ -190,7 +190,7 @@ void executeCommandGameMode(SettingsCommand* SCommand, Settings* settings)
 
 void executeCommandDifficulty(SettingsCommand* SCommand, Settings* settings)
 {
-	printf("TestPrint executeCommandDifficulty: this SCommand type and value <%d,%d>\n",SCommand->type, SCommand->value);
+	//printf("TestPrint executeCommandDifficulty: this SCommand type and value <%d,%d>\n",SCommand->type, SCommand->value);
 	if (settings->gameMode == ONE_PLAYER_GAME_MODE)
 	{
 		if (0 < SCommand->value && SCommand->value < 6)
@@ -222,9 +222,9 @@ void executeCommandUserColor(SettingsCommand* SCommand, Settings* settings)
 		printf(MSG_INVALID_IN_SETTINGS);
 }
 
-bool executeCommandLoad(GameManager** game, SettingsCommand* SCommand)
+bool executeCommandLoad(GameManager** game, SettingsCommand* SCommand, Settings* settings)
 {
-    if (isFileExist(SCommand->path))
+	if (isFileExist(SCommand->path))
 	{
 		GameManager* newGame = loadGame(SCommand->path);
 		if (newGame != NULL)
@@ -235,7 +235,10 @@ bool executeCommandLoad(GameManager** game, SettingsCommand* SCommand)
             {
                 destroyGame(*game);
                 *game = newGame;
-                return 1;
+				settings->difficulty = (*game)->difficulty;
+				settings->gameMode = (*game)->mode;
+				settings->playerColor = (*game)->userColor;
+                return true;
             }
 		}
 		else
@@ -243,7 +246,7 @@ bool executeCommandLoad(GameManager** game, SettingsCommand* SCommand)
 	}
 	else
 		printf(ERR_FILE_CANNOT_OPEN_DONT_EXISTS);
-	return 0;
+	return false;
 }
 
 void executeCommandDefaultValues(Settings* settings)
@@ -260,7 +263,7 @@ void executeCommandPrintSettings(Settings* settings)
 		printf("SETTINGS:\n");
 		printf("GAME_MODE: 1\n");
 		printf("DIFFICULTY_LVL: %d\n",settings->difficulty);
-		printf("USER_CLR: %d\n",(settings->playerColor == WHITE_PLAYER ? 1 : 0));
+		printf("USER_CLR: %s\n",(settings->playerColor == WHITE_PLAYER ? "WHITE" : "BLACK"));
 	}
 	else
 	{
@@ -271,14 +274,24 @@ void executeCommandPrintSettings(Settings* settings)
 
 void executeCommandStart(GameManager** game, Settings* settings)
 {
-	if (settings->gameMode == ONE_PLAYER_GAME_MODE)
+	if (*game == NULL)
 	{
-		*game = createOnePlayerGame(settings->difficulty,settings->playerColor);
+		if (settings->gameMode == ONE_PLAYER_GAME_MODE)
+		{
+			*game = createOnePlayerGame(settings->difficulty,settings->playerColor);
+		}
+		else
+		{
+			*game = createTwoPlayersGame();
+		}
 	}
-	else
+	else //a game was loaded
 	{
-		*game = createTwoPlayersGame();
+		(*game)->difficulty = settings->difficulty;
+		(*game)->mode = settings->gameMode;
+		(*game)->userColor = settings->playerColor;
 	}
+
 }
 
 

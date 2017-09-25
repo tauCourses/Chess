@@ -18,22 +18,56 @@ bool IsInt(const char* str)
 }
 
 
+//Location* parseLocation2(const char* token)
+//{
+//    if (token == NULL)
+//        return NULL;
+//
+//    char* runToken;
+//    strcpy(runToken,token);
+//
+//    if (*runToken != '<')
+//		return NULL;
+//    //first parameter parsing
+//    runToken++;
+//    if (*runToken == '-')
+//        runToken++;
+//    do
+//    {
+//        if ((*str < '0') || (*str > '9'))
+//            return false;
+//        str++;
+//    }while (*str != '\0' && *str != '\n');
+//
+//
+//    if ('8' < token[1] || token[1] < '1')
+//		return NULL;
+//	if (token[2] != ',')
+//		return NULL;
+//	if ('A' > token[3] || token[3] > 'Z')
+//		return NULL;
+//	if (token[4] != '>')
+//		return NULL;
+//    //printf("TestPrint this is token in End parseLocation |%s|\n", token );
+//    return createLocation(token[1]-'1', token[3]-'A');
+//}
+
 Location* parseLocation(const char* token)
 {
-    printf("TestPrint this is token in Begin parseLocation |%s|\n", token );
+    //printf("TestPrint this is token in Begin parseLocation |%s|\n", token );
     if (token == NULL)
         return NULL;
 
     if (token[0] != '<')
-		return NULL;
-	if ('8' < token[1] || token[1] < '1')
-		return NULL;
-	if (token[2] != ',')
-		return NULL;
-	if ('A' > token[3] || token[3] > 'I')
-		return NULL;
-	if (token[4] != '>')
-		return NULL;
-    printf("TestPrint this is token in End parseLocation |%s|\n", token );
+        return NULL;
+    if ('8' < token[1] || token[1] < '1')
+        return NULL;
+    if (token[2] != ',')
+        return NULL;
+    if ('A' > token[3] || token[3] > 'Z')
+        return NULL;
+    if (token[4] != '>')
+        return NULL;
+    //printf("TestPrint this is token in End parseLocation |%s|\n", token );
     return createLocation(token[1]-'1', token[3]-'A');
 }

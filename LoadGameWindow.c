@@ -2,7 +2,8 @@
 
 LoadWindow* createLoadWindow(SDL_Renderer* renderer)
 {
-    LoadWindow *window = NULL;
+    int i;
+	LoadWindow *window = NULL;
 
     window = calloc(sizeof(LoadWindow), sizeof(char));
     if (window == NULL)
@@ -16,7 +17,7 @@ LoadWindow* createLoadWindow(SDL_Renderer* renderer)
         destroyLoadWindow(window);
         return NULL;
     }
-    for (int i = 0; i < MAX_NUMBER_OF_LOAD_GAMES; i++)
+    for (i = 0; i < MAX_NUMBER_OF_LOAD_GAMES; i++)
     {
         if (window->slots[i] == NULL)
         {
@@ -31,7 +32,8 @@ LoadWindow* createLoadWindow(SDL_Renderer* renderer)
 
 void createLoadButtons(LoadWindow* window)
 {
-    if(window == NULL || window->renderer == NULL)
+    int i;
+	if(window == NULL || window->renderer == NULL)
         return;
 
     SDL_Rect backR = { .x = 250, .y = 650, .h = BUTTON_DEFAULT_HEIGHT, .w = BUTTON_DEFAULT_WIDTH };
@@ -41,7 +43,7 @@ void createLoadButtons(LoadWindow* window)
     window->load = createButton(window->renderer, loadR, LOAD_ACTIVE_BUTTON, LOAD_NOT_ACTIVE_BUTTON, BUTTON_TYPE_VALIDATE);
     if(window->load != NULL)
         window->load->state.valid = BUTTON_INVALID;
-    for (int i = 0; i < MAX_NUMBER_OF_LOAD_GAMES; i++)
+    for (i = 0; i < MAX_NUMBER_OF_LOAD_GAMES; i++)
     {
         switch(i)
         {
@@ -69,14 +71,15 @@ void createLoadButtons(LoadWindow* window)
 
 void destroyLoadWindow(LoadWindow *window)
 {
-    if (window == NULL)
+    int i;
+	if (window == NULL)
         return;
     //buttons:
     if(window->back!= NULL)
         destroyButton(window->back);
     if(window->load!= NULL)
         destroyButton(window->load);
-    for (int i = 0; i < MAX_NUMBER_OF_LOAD_GAMES; i++)
+    for (i = 0; i < MAX_NUMBER_OF_LOAD_GAMES; i++)
         if(window->slots[i] != NULL)
             destroyButton(window->slots[i]);
 
@@ -85,7 +88,8 @@ void destroyLoadWindow(LoadWindow *window)
 
 bool drawLoadWindow(LoadWindow *window)
 {
-    if(window==NULL)
+    int i;
+	if(window==NULL)
         return false;
 
 
@@ -94,7 +98,7 @@ bool drawLoadWindow(LoadWindow *window)
 
     drawButton(window->back);
     drawButton(window->load);
-    for (int i = 0; i < numberOfGameSlots(); i++)
+    for (i = 0; i < numberOfGameSlots(); i++)
         drawButton(window->slots[i]);
 
     return true;
@@ -102,7 +106,8 @@ bool drawLoadWindow(LoadWindow *window)
 
 LOAD_WINDOW_EVENTS handleEventLoadWindow(LoadWindow *window, SDL_Event *event)
 {
-    if(window == NULL || event==NULL)
+    int i;
+	if(window == NULL || event==NULL)
         return LOAD_ERROR;
 
     switch (event->type)
@@ -121,7 +126,7 @@ LOAD_WINDOW_EVENTS handleEventLoadWindow(LoadWindow *window, SDL_Event *event)
                     return LOAD_START;
                 return LOAD_NONE;
             }
-            for (int i = 0; i < numberOfGameSlots(); i++)
+            for (i = 0; i < numberOfGameSlots(); i++)
             {
                 if (clickOnButton(window->slots[i], event->button.x, event->button.y))
                 {

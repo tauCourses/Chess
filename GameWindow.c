@@ -430,6 +430,6 @@ char gamePawnPromotionMessageBox(PLAYER_COLOR player)
         return -1;
 
     }
-    char result = (char)(player == WHITE_PLAYER ? buttonid : toupper(buttonid));
+    char result = (char)(player == WHITE_PLAYER ? buttonid : toUpper(buttonid));
     return result;
 }

@@ -3,6 +3,11 @@
 #include <SDL.h>
 #include <stdbool.h>
 
+/**
+ * Button summary:
+ * Responsible for all button basic structure and function
+ */
+
 #define RESTART_ACTIVE_BUTTON "images/buttons/RestartActive.bmp"
 
 #define START_ACTIVE_BUTTON "images/buttons/StartActive.bmp"
@@ -97,15 +102,50 @@ typedef struct{
     ButtonType type;
 } Button;
 
+
+/**
+ *  create new button
+ *  @param renderer - the renderer for the button
+ *  location - location for the button
+ *  mainPath - path for picutre active
+ *  secondaryPath - path for picutre non-active
+ *  type - the button type
+ *  @return
+ *  the new button.
+ */
 Button* createButton(SDL_Renderer* renderer, SDL_Rect location, const char* mainPath,
                      const char* secondaryPath, ButtonType type);
 
+/**
+ *  set texture for a button
+ *  @param button - the button to update
+ *  mainPath - path for picutre active
+ *  secondaryPath - path for picutre non-active
+ *  @return void
+ */
 void setTextures(Button* button, const char* mainPath, const char* secondaryPath);
 
+/**
+ *  destroy button
+ *  @param button - the button to destroy
+ *  @return void
+ */
 void destroyButton(Button* button);
 
+/**
+ *  draw button
+ *  @param button - the button to draw
+ *  @return void
+ */
 void drawButton(Button* button);
 
+/**
+ *  check if button is clicked on.
+ *  @param button - the button which is checked
+ *  x - x of the click
+ *  y - y of the click
+ *  @return true if button is clicked, false otherwise.
+ */
 bool clickOnButton(Button* button, int x, int y);
 
 #endif

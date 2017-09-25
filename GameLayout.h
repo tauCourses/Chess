@@ -6,6 +6,11 @@
 #include "BoardLayout.h"
 #include "GameManager.h"
 
+/**
+ * GameLayout summary:
+ * the GameLayout module handle all functions that belongs to Game Layout
+ */
+
 #define BLACK_PAWN_IMAGE "images/pieces/blackPawn.bmp"
 #define BLACK_ROOK_IMAGE "images/pieces/blackRook.bmp"
 #define BLACK_KNIGHT_IMAGE "images/pieces/blackKnight.bmp"
@@ -50,21 +55,109 @@ typedef struct{
     Location* suggestMoves;
 } GameLayout;
 
+/**
+ *  create new Game Layout
+ *  @param renderer - the renderer for the window
+ *  startingPoint - the starting point for creating the window
+ *  @return
+ *  the new Game Layout.
+ */
 GameLayout* createGameLayout(SDL_Point startingPoint, SDL_Renderer* renderer);
+
+/**
+ *  create new pieces
+ *  @param renderer - the renderer for the pieces
+ *  pawn - symbol of pawn
+ *  rook - symbol of rook
+ *  bishop - symbol of bishop
+ *  knight - symbol of knight
+ *  queen - symbol of queen
+ *  king - symbol of king
+ *  @return
+ *  the new pieces created
+ */
 Pieces* createPieces(SDL_Renderer* renderer, char* pawn, char* rook, char* bishop, char* knight, char* queen, char* king);
+
+/**
+ *  create new draged piece
+ *  @param game - the game layout to drag in
+ *  loc - location in which the piece
+ *  c - the char of piece
+ *  @return true is success, false otherwise.
+ */
 bool setDragedPiece(GameLayout* game, Location loc, char c);
 
+/**
+ *  destroy game layout
+ *  @param game - game layout to destroy
+ *  @return void
+ */
 void destroyGameLayout(GameLayout* game);
+
+/**
+ *  destroy pieces
+ *  @param pieces - pieces to destroy
+ *  @return void
+ */
 void destroyPieces(Pieces* pieces);
+
+/**
+ *  destroy dragged piece
+ *  @param game - game layout to destroy dragged piece in
+ *  @return void
+ */
 void destroyDragPiece(GameLayout* game);
 
+/**
+ *  draw game layout
+ *  @param game - game layout to draw
+ *  state - the current game state to draw from
+ *  @return true if success, false otherwise.
+ */
 bool drawGameLayout(GameLayout* game, GameState* state);
+
+/**
+ *  draw suggestes moves
+ *  @param game - game layout to draw
+ *  state - the current game state to draw from
+ *  @return true if success, false otherwise.
+ */
 bool drawSuggestMoves(GameLayout* game, GameState* state);
 
+/**
+ *  turns char to the currect texture
+ *  @param game - game layout to draw
+ *  c - the char to draw
+ *  @return the texture that fits the char.
+ */
 SDL_Texture* charToTexture(GameLayout* game, char c);
+
+/**
+ *  draw square in game layout
+ *  @param game - game layout to draw
+ *  x - x of point to draw
+ *  y - y of point to draw
+ *  c - char of piece to draw
+ *  @return true if success, false otherwise.
+ */
 bool drawSquare(GameLayout* game, int x, int y, char c);
 
+/**
+ *  check if point is on game layout
+ *  @param game - game layout to check
+ *  x - x of point to check
+ *  y - y of point to check
+ *  @return true if point is on game layout, false otherwise.
+ */
 bool isPointOnGameLayout(GameLayout *game, int x, int y);
+
+/**
+ *  get sqaure from game layout with point
+ *  @param game - game layout to get sqaure from
+ *  x - x of point to get sqaure from
+ *  y - y of point to get sqaure from
+ *  @return location of square.
+ */
 Location getSquare(GameLayout* game, int x, int y);
 
 #endif //CHESS_GAMELAYOUT_H

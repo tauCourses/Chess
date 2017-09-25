@@ -23,13 +23,14 @@ void destroyBoardLayout(BoardLayout* board)
 
 void drawBoardLayout(SDL_Renderer* renderer, BoardLayout* board)
 {
-    if (board == NULL )
+    int i,j;
+	if (board == NULL )
         return;
 
     Board_Square_Type currentType = BOARD_SQUARE_WHITE;
-    for(int i=0; i<board->numInX; i++)
+    for(i=0; i<board->numInX; i++)
     {
-        for(int j=0;j<board->numInY;j++)
+        for(j=0;j<board->numInY;j++)
         {
             if(currentType == BOARD_SQUARE_WHITE)
             {

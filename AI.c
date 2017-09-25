@@ -37,11 +37,12 @@ void destroyChain(nodeChain* chain)
 
 nodeChain* updateChainByPawnPromotion(MinMaxNode* node, nodeChain *chain, Location *origin, Location *dest)
 {
+    int i;
     char pieces[] = {'m','b','n','r','q'};
     nodeChain* current = chain, *next = NULL;
-    for(int i=0;i<5;i++)
+    for(i=0;i<5;i++)
     {
-        char piece = (char)(node->state->currentPlayer == WHITE_PLAYER ?  pieces[i] : toupper(pieces[i]));
+        char piece = (char)(node->state->currentPlayer == WHITE_PLAYER ?  pieces[i] : toUpper(pieces[i]));
         next = updateChainByRegularMove(node, current, origin, dest);
         if (next == NULL)
             return NULL;
@@ -81,7 +82,7 @@ nodeChain* updateChainByDests(MinMaxNode* node, nodeChain *chain, Location *orig
     nodeChain* current = chain;
     while(dests[i] != NULL)
     {
-        if(tolower(node->state->board[origin->x][origin->y]) == 'm' && (dests[i]->x == 0 || dests[i]->x == 7))
+        if(toLower(node->state->board[origin->x][origin->y]) == 'm' && (dests[i]->x == 0 || dests[i]->x == 7))
             current = updateChainByPawnPromotion(node, current, origin, dests[i]);
         else
             current = updateChainByRegularMove(node, current, origin, dests[i]);
@@ -94,14 +95,15 @@ nodeChain* updateChainByDests(MinMaxNode* node, nodeChain *chain, Location *orig
 
 nodeChain* getAllMinMaxNodes(MinMaxNode* node)
 {
+    int x,y;
     nodeChain* root = (nodeChain*) calloc(1,sizeof(nodeChain));
     if(root == NULL)
         return NULL;
     Location loc;
     nodeChain* current = root;
-    for(int x=0;x<CHESS_BOARD_SIZE;++x)
+    for(x=0;x<CHESS_BOARD_SIZE;++x)
     {
-        for(int y=0;y<CHESS_BOARD_SIZE;++y)
+        for(y=0;y<CHESS_BOARD_SIZE;++y)
         {
             if(getPieceColor(node->state->board[x][y]) != node->state->currentPlayer)
                 continue;
@@ -234,10 +236,16 @@ void destroyMinMaxNode(MinMaxNode *node)
 
 GET_SCORE_RESULT endGameNodeScore(MinMaxNode* node)
 {
-    if(isKingThreatened(node->state))
+    IS_KING_THREATENED msg;
+    if((msg =isKingThreatened(node->state)) == IS_KING_THREATENED_TRUE)
         node->score = (node->state->currentPlayer == WHITE_PLAYER)? -END_GAME_SCORE : END_GAME_SCORE;
     else
+    {
         node->score = 0;
+        if (msg == IS_KING_THREATENED_MALLOC_ERROR)
+            printf("ERROR: in allocating memory\n");
+    }
+
 
     return GET_SCORE_SUCCEED;
 }
@@ -339,9 +347,10 @@ MIN_MAX_NODE_TYPE oppsiteType(MIN_MAX_NODE_TYPE type)
 
 int boardScore(Board board)
 {
+    int x,y;
     int score = 0;
-    for(int x=0; x<CHESS_BOARD_SIZE; ++x)
-        for (int y = 0; y < CHESS_BOARD_SIZE; ++y)
+    for(x=0; x<CHESS_BOARD_SIZE; ++x)
+        for (y = 0; y < CHESS_BOARD_SIZE; ++y)
             score += pieceScore(board[x][y]);
 
     return score;
@@ -379,4 +388,19 @@ int pieceScore(char piece)
             break;
     }
     return pieceValue * playerFactor;
+}
+
+
+char toLower(char piece)
+{
+    if(piece >=65 && piece<=90)
+        piece = piece + 32;
+    return piece;
+}
+
+char toUpper(char piece)
+{
+    if(piece >=97 && piece<=122)
+        piece = piece - 32;
+    return piece;
 }

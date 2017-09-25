@@ -86,9 +86,11 @@ GAME_MOVE_MESSAGE movePiece(GameManager* game, Location* org, Location* des)
 
 GAME_STATE getGameState(GameManager* game)
 {
-    for(int x=0; x<CHESS_BOARD_SIZE; x++)
+    int x,y;
+    IS_KING_THREATENED isKingThreatenedMsg;
+    for(x=0; x<CHESS_BOARD_SIZE; x++)
     {
-        for(int y=0;y<CHESS_BOARD_SIZE;y++) {
+        for(y=0;y<CHESS_BOARD_SIZE;y++) {
             Location location = {.x=x,.y=y};
             Location** dests = getAllAvailableMovesFromLocation(game->state, &location);
             if(dests == NULL)
@@ -102,8 +104,17 @@ GAME_STATE getGameState(GameManager* game)
                 destroyLocationsList(dests);
         }
     }
-    if(isKingThreatened(game->state))
+    if((isKingThreatenedMsg = isKingThreatened(game->state)) == IS_KING_THREATENED_TRUE)
         return GAME_CHECKMATE;
+    else
+    {
+        if(isKingThreatenedMsg == IS_KING_THREATENED_MALLOC_ERROR)
+        {
+            printf("ERROR: in allocating memory\n");
+            return GAME_ERROR;
+        }
+
+    }
     return GAME_TIE;
 }
 

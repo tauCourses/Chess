@@ -10,6 +10,11 @@
 #include "ColorWindow.h"
 #include "GameWindow.h"
 
+/**
+ * GUIManager summary:
+ * the GUIManager module is the main module of the GUI and handle all game management
+ */
+
 typedef enum{
     MAIN_WINDOW_ACTIVE,
     LOAD_WINDOW_ACTIVE,
@@ -41,23 +46,118 @@ typedef struct {
     BoardLayout* rightBoard;
 } GUIManager;
 
+/**
+ *  create new Game window
+ *  @param renderer - the renderer for the window
+ *  game - the game for which the game window is created
+ *  @return
+ *  the new Game window.
+ */
 int mainGUI();
+
+/**
+ *  create new Game manager
+ *  @param none
+ *  @return the new Game manager.
+ */
 GUIManager* managerCreate();
+
+/**
+ *  create sides board in menus
+ *  @param src - game manager to create in
+ *  @return void
+ */
 void createSidesBoards(GUIManager* src);
+
+/**
+ *  create new windows for Game manager
+ *  @param src - game manager to create in
+ *  @return true if success, false otherwise.
+ */
 bool createWindows(GUIManager* gui);
+
+/**
+ *  destroy Game manager
+ *  @param src - game manager to destroy
+ *  @return void
+ */
 void managerDestroy(GUIManager* src);
+
+/**
+ *  draw Game manager
+ *  @param src - game manager to draw
+ *  @return true if success, false otherwise
+ */
 bool managerDraw(GUIManager* src);
 
+/**
+ *  hides the current window
+ *  @param src - game manager to hide window in
+ *  @return void
+ */
 void hideCurrentWindow(GUIManager* src);
+
+/**
+ *  switch the current window with another
+ *  @param src - game manager to switch in
+ *  next - the window to be switched to
+ *  @return void
+ */
 void switchWindow(GUIManager* src, ACTIVE_WINDOW next);
 
+/**
+ *  hides the current window
+ *  @param src - game manager to hide window in
+ *  @return void
+ */
 MANAGER_EVENT managerHandleEvent(GUIManager* src, SDL_Event* event) ;
 
+/**
+ *  handle main event
+ *  @param src - game manager to handle event
+ *  event - the event
+ *  @return manager event
+ */
 MANAGER_EVENT handleManagerDueToMainEvent(GUIManager* src, MAIN_WINDOW_EVENTS event);
+
+/**
+ *  handle load event
+ *  @param src - game manager to handle event
+ *  event - the event
+ *  @return manager event
+ */
 MANAGER_EVENT handleManagerDueToLoadEvent(GUIManager* src, LOAD_WINDOW_EVENTS event);
+
+/**
+ *  handle mode event
+ *  @param src - game manager to handle event
+ *  event - the event
+ *  @return manager event
+ */
 MANAGER_EVENT handleManagerDueToModeEvent(GUIManager* src, MODE_WINDOW_EVENTS event);
+
+/**
+ *  handle difficulty event
+ *  @param src - game manager to handle event
+ *  event - the event
+ *  @return manager event
+ */
 MANAGER_EVENT handleManagerDueToDifficultyEvent(GUIManager* src, DIFFICULTY_WINDOW_EVENTS event);
+
+/**
+ *  handle color event
+ *  @param src - game manager to handle event
+ *  event - the event
+ *  @return manager event
+ */
 MANAGER_EVENT handleManagerDueToColorEvent(GUIManager* src, COLOR_WINDOW_EVENTS event);
+
+/**
+ *  handle game event
+ *  @param src - game manager to handle event
+ *  event - the event
+ *  @return manager event
+ */
 MANAGER_EVENT handleManagerDueToGameEvent(GUIManager* src, GAME_WINDOW_EVENTS event);
 
 #endif //CHESS_GUIMANAGER_H

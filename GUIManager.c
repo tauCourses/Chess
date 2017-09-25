@@ -289,7 +289,7 @@ MANAGER_EVENT handleManagerDueToModeEvent(GUIManager* gui, MODE_WINDOW_EVENTS ev
             GameManager* game = createTwoPlayersGame();
             if(game == NULL)
             {
-                printf("unable to create game \n");
+                printf("unable to create game\n");
                 return MANAGER_ERROR;
             }
             gui->gameWindow = createGameWindow(gui->renderer, game);
@@ -374,7 +374,7 @@ MANAGER_EVENT handleManagerDueToColorEvent(GUIManager* gui, COLOR_WINDOW_EVENTS 
                                             getColorFromColorWindow(gui->colorWindow));
             if(game == NULL)
             {
-                printf("unable to create game \n");
+                printf("unable to create game\n");
                 return MANAGER_ERROR;
             }
             if(game->userColor == BLACK_PLAYER)

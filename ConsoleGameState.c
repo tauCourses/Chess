@@ -19,7 +19,7 @@ void getGameStateCommandFromUser(GameStateCommand** GCommand)
 
 GAME_INPUT_STATE executeGameStateCommand(GameManager* game, GameStateCommand* GCommand)
 {
-	printf("TestPrint executeGameStateCommand BEGIN\n");
+	//printf("TestPrint executeGameStateCommand BEGIN\n");
 	switch (GCommand->type)
 	{
 	case GAME_STATE_COMMAND_MOVE:
@@ -50,12 +50,13 @@ GAME_INPUT_STATE executeGameStateCommand(GameManager* game, GameStateCommand* GC
 		return GAME_INPUT_GAME_STATE;
 
 	case GAME_STATE_COMMAND_QUIT:
+		printf(MSG_QUIT);
 		break;
 
 	default:
 		break;
 	}
-	return GAME_STATE_COMMAND_INVALID; //TODO -> IS THIS A REAL VALUE? WHY CLION HATE IT?
+	return GAME_INPUT_GAME_STATE;
 }
 
 
@@ -74,12 +75,9 @@ GameStateCommand* PraseGameStateLine(const char* str) {
 	token = strtok(line, delimeter);
 	result->type = gameStateCommandFromStr(token);
 
-	printf("TestPrint PraseGameStateLine: this is result.type %d\n",result->type);
+	//printf("TestPrint PraseGameStateLine: this is result.type %d\n",result->type);
 
-	if (result->type == GAME_STATE_COMMAND_SAVE) {
-		token = strtok(NULL, delimeter);
-		strcpy(result->path,token);
-	}
+	parseSaveCommand(result,token,delimeter);
 	parseMoveCommand(result,token,delimeter);
 	parsePossibleMovesCommand(result,token,delimeter);
     parseCastle(result,token,delimeter);
@@ -88,7 +86,7 @@ GameStateCommand* PraseGameStateLine(const char* str) {
 	if (token != NULL )
 		result->type = GAME_STATE_COMMAND_INVALID;
 
-	printf("TestPrint PraseGameStateLine: this is result.type %d\n",result->type);
+	//printf("TestPrint PraseGameStateLine: this is result.type %d\n",result->type);
 
 	return result;
 }
@@ -97,37 +95,40 @@ void parseSaveCommand(GameStateCommand* result, const char* token,const char del
 {
 	if (result->type == GAME_STATE_COMMAND_SAVE) {
 		token = strtok(NULL, delimeter);
-		strcpy(result->path,token);
+		if (token != NULL )
+			strcpy(result->path,token);
+		else
+			result->type = GAME_STATE_COMMAND_INVALID;
 	}
 }
 
 void parseMoveCommand(GameStateCommand* result, const char* token,const char delimeter[])
 {
-	printf("TestPrint in parseMoveCommand\n");
+	//printf("TestPrint in parseMoveCommand\n");
 	if (result->type == GAME_STATE_COMMAND_MOVE) {
 		token = strtok(NULL, delimeter);
-		printf("TestPrint in parseMoveCommand before parseLocation\n ");
+		//printf("TestPrint in parseMoveCommand before parseLocation\n ");
 		result->org = parseLocation(token);
-		printf("TestPrint in parseMoveCommand after parseLocation\n ");
+		//("TestPrint in parseMoveCommand after parseLocation\n ");
 		token = strtok(NULL, delimeter);
-		if (strcmp(token, "to") == 0) {
+		if (token != NULL && strcmp(token, "to") == 0) {
 			token = strtok(NULL, delimeter);
 			result->des = parseLocation(token);
 		} else
 			result->type = GAME_STATE_COMMAND_INVALID;
-		if ((result->org == NULL )||(result->des == NULL))
-			result->type = GAME_STATE_COMMAND_INVALID;
+//		if ((result->org == NULL )||(result->des == NULL))
+//			result->type = GAME_STATE_COMMAND_INVALID;
 	}
 }
 
 void parsePossibleMovesCommand(GameStateCommand* result, const char* token,const char delimeter[])
 {
-    printf("TestPrint in parsePossibleMovesCommand\n");
+    //printf("TestPrint in parsePossibleMovesCommand\n");
     if (result->type == GAME_STATE_COMMAND_GET_POSSIBLE_MOVES) {
 		token = strtok(NULL, delimeter);
 		result->org = parseLocation(token);
-		if (result->org == NULL )
-			result->type = GAME_STATE_COMMAND_INVALID;
+//		if (result->org == NULL )
+//			result->type = GAME_STATE_COMMAND_INVALID;
 	}
 }
 
@@ -136,8 +137,8 @@ void parseCastle(GameStateCommand* result, const char* token,const char delimete
     if (result->type == GAME_STATE_COMMAND_CASTLE) {
         token = strtok(NULL, delimeter);
         result->org = parseLocation(token);
-        if (result->org == NULL )
-            result->type = GAME_STATE_COMMAND_INVALID;
+//        if (result->org == NULL )
+//            result->type = GAME_STATE_COMMAND_INVALID;
     }
 }
 
@@ -175,11 +176,11 @@ GAME_STATE_COMMAND_TYPE gameStateCommandFromStr(char* token) {
 GAME_INPUT_STATE executeCommandMove(GameManager* game, GameStateCommand* GCommand)
 {
 	GAME_MOVE_MESSAGE moveMessage;
-	bool isKingCastleInMove = isKing(game->state->board,GCommand->org) && (GCommand->des->y + 2 == GCommand->org->y || GCommand->des->y - 2 == GCommand->org->y);
+	bool isKingCastleInMove;
+	if (GCommand->org != NULL && GCommand->des != NULL)
+		isKingCastleInMove = isKing(game->state->board,GCommand->org) && (GCommand->des->y + 2 == GCommand->org->y || GCommand->des->y - 2 == GCommand->org->y);
 	if (GCommand->org != NULL && GCommand->des != NULL && !isKingCastleInMove)
-	{
 		moveMessage = movePiece(game,GCommand->org,GCommand->des);
-	}
 	else
 	{
 		printf(MSG_INVALID_POSTION);
@@ -191,12 +192,16 @@ GAME_INPUT_STATE executeCommandMove(GameManager* game, GameStateCommand* GComman
 		case MOVE_VALID:
 			if (afterValidMove(game) == GAME_INPUT_GAME_QUIT)
 				return GAME_INPUT_GAME_QUIT;
+			if (game->mode == TWO_PLAYERS_GAME_MODE)
+				printBoard(game->state->board);
 			break;
 		case MOVE_PAWN_REACH_END:
             printf(MSG_PAWN_PROMOTION);
 			executePawnPromotion(game,GCommand->des);
 			if (afterValidMove(game) == GAME_INPUT_GAME_QUIT)
 				return GAME_INPUT_GAME_QUIT;
+			if (game->mode == TWO_PLAYERS_GAME_MODE)
+				printBoard(game->state->board);
 			break;
 		case MOVE_INVALID_POSITION:
 			printf(MSG_INVALID_POSTION);
@@ -220,6 +225,7 @@ GAME_INPUT_STATE executeCommandMove(GameManager* game, GameStateCommand* GComman
 GAME_INPUT_STATE afterValidMove(GameManager* game)
 {
 	GAME_STATE gameStateMessage;
+	IS_KING_THREATENED isKingThreatenedMsg;
 	gameStateMessage = getGameState(game);
 	if (gameStateMessage == GAME_CHECKMATE)
 	{
@@ -234,7 +240,7 @@ GAME_INPUT_STATE afterValidMove(GameManager* game)
 		printf(MSG_TIE);
 		return GAME_INPUT_GAME_QUIT;
 	}
-	if (isKingThreatened(game->state))
+	if ((isKingThreatenedMsg = isKingThreatened(game->state)) == IS_KING_THREATENED_TRUE)
 	{
 		if (game->mode == ONE_PLAYER_GAME_MODE && game->state->currentPlayer == game->userColor)
 			printf(MSG_CHECK_BY_COM);
@@ -245,20 +251,21 @@ GAME_INPUT_STATE afterValidMove(GameManager* game)
 			else
 				printf(MSG_CHECK_AGAINST_BLACK);
 		}
-
 	}
-
+	else
+		if (isKingThreatenedMsg == IS_KING_THREATENED_MALLOC_ERROR)
+			printf(ERR_MALLOC);
 	return GAME_INPUT_GAME_STATE;
 }
 
 void executeCommandGetPossibleMoves(GameManager* game, GameStateCommand* GCommand)
 {
-	printf("TestPrint executeCommandGetPossibleMoves Begin\n");
+	//printf("TestPrint executeCommandGetPossibleMoves Begin\n");
     if (isLegalGetPossibleMoves(game,GCommand))
 	{
 		Location** allMoves = getAllAvailableMovesFromLocation(game->state,GCommand->org);
 		if (allMoves == NULL)
-			printf(ERR_MALLOC); //TODO->shouldn't we terminate in this case
+			printf(ERR_MALLOC);
 		else
 		{
 			printLocationsList(game->state,allMoves,GCommand->org);
@@ -314,7 +321,6 @@ void printLocationsList(GameState* gameState,Location** locations, Location* org
             if (!isCastleKingMoveLeft && !isCastleKingMoveLeft)
             {
                 printf("%s",currentLoc);
-
                 if (isThreatened(gameState,locations[index],oppositeColor(gameState->currentPlayer)))
                     printf("*");
                 if (getPieceColor(gameState->board[locations[index]->x][locations[index]->y]) == oppositeColor(gameState->currentPlayer))
@@ -350,7 +356,7 @@ void printLocationsList(GameState* gameState,Location** locations, Location* org
 
 void executeCommandSave(GameManager* game, GameStateCommand GCommand)
 {
-	printf("\nexecuteCommandSave: started function\n");
+	//printf("\nexecuteCommandSave: started function\n");
 	if (!saveGame(game,GCommand.path))
 		printf(MSG_FILE_CANNOT_CREATED_MODIFIED);
 }
@@ -385,10 +391,10 @@ void executeCommandUndo(GameManager* game)
 
     if (!isCastleMoveRight && !isCastleMoveLeft)
     {
-        if (game->state->currentPlayer == WHITE_PLAYER)
-            printf(MSG_UNDO_BLACK,originString,destString);
+        if (game->state->currentPlayer == BLACK_PLAYER)
+            printf(MSG_UNDO_BLACK,destString,originString);
         else
-            printf(MSG_UNDO_WHITE,originString,destString);
+            printf(MSG_UNDO_WHITE,destString,originString);
     }
 
     free(originString);
@@ -398,10 +404,13 @@ void executeCommandUndo(GameManager* game)
     originString = getStringFromLocation(move->origin);
     destString = getStringFromLocation(move->des);
 	if (game->state->currentPlayer == WHITE_PLAYER)
-		printf(MSG_UNDO_WHITE,originString,destString);
+		printf(MSG_UNDO_WHITE,destString,originString);
 	else
-		printf(MSG_UNDO_BLACK,originString,destString);
-    free(originString);
+		printf(MSG_UNDO_BLACK,destString,originString);
+
+	printBoard(game->state->board);
+
+	free(originString);
     free(destString);
 }
 
@@ -413,23 +422,35 @@ void executeCommandReset(GameManager* game)
 
 void executeCommandCastle(GameManager* game,GameStateCommand* GCommand)
 {
-    Location* kingLoc = findKingLocation(game->state, game->state->currentPlayer); //TODO-> MIGHT FAIL! MALLOC INSIDE!
-	Location* kingDes = castleGetKingDes(game,GCommand); //TODO -> AND WHAT IF, IN A VERY NOT COMMON SENARIO, THE MALLOC INSIDE WILL FAIL?!?!
+    Location* kingLoc = findKingLocation(game->state, game->state->currentPlayer);
+	Location* kingDes = castleGetKingDes(game,GCommand);
 	bool isPieceRook = false;
 	if (!isLocationOutOfBounds(GCommand->org) && game->state->currentPlayer == WHITE_PLAYER && game->state->board[GCommand->org->x][GCommand->org->y] == 'r' )
 		isPieceRook = true;
 	if (!isLocationOutOfBounds(GCommand->org) && game->state->currentPlayer == BLACK_PLAYER && game->state->board[GCommand->org->x][GCommand->org->y] == 'R' )
 		isPieceRook = true;
-	if (isPieceRook)
-	{
-		if (kingDes != NULL && checkCastleMove(game->state,kingLoc,kingDes))
-			movePiece(game,kingLoc,kingDes); //TODO -> applyMove may FAILED because of malloc!!!
-		else
-			printf(MSG_CASTLE_ILLEGAL);
-	}
-	else
-		printf(MSG_CASTLE_WRONG_POSITION_ROOK);
 
+	if (kingLoc == NULL)
+		printf(ERR_MALLOC);
+
+	else
+	{
+		if (isPieceRook)
+		{
+			if (kingDes != NULL && checkCastleMove(game->state,kingLoc,kingDes))
+			{
+				if (movePiece(game,kingLoc,kingDes)== MOVE_ERROR)
+					printf(ERR_MALLOC);
+				else
+					if (game->mode == TWO_PLAYERS_GAME_MODE)
+						printBoard(game->state->board);
+			}
+			else
+				printf(MSG_CASTLE_ILLEGAL);
+		}
+		else
+			printf(MSG_CASTLE_WRONG_POSITION_ROOK);
+	}
 	destroyLocation(kingLoc);
 	destroyLocation(kingDes);
 	destroyLocation(GCommand->org);
@@ -439,13 +460,31 @@ Location* castleGetKingDes(GameManager* game,GameStateCommand* GCommand)
 {
 	Location* kingDes = NULL;
 	if (game->state->currentPlayer == WHITE_PLAYER && GCommand->org->x == 0 && GCommand->org->y == 7)
+	{
 		kingDes = createLocation(0,6);
+		if (kingDes == NULL)
+			printf(ERR_MALLOC);
+	}
+
 	if (game->state->currentPlayer == WHITE_PLAYER && GCommand->org->x == 0 && GCommand->org->y == 0)
+	{
 		kingDes = createLocation(0,2);
+		if (kingDes == NULL)
+			printf(ERR_MALLOC);
+	}
 	if (game->state->currentPlayer == BLACK_PLAYER && GCommand->org->x == 7 && GCommand->org->y == 7)
+	{
 		kingDes = createLocation(7,6);
+		if (kingDes == NULL)
+			printf(ERR_MALLOC);
+	}
+
 	if (game->state->currentPlayer == BLACK_PLAYER && GCommand->org->x == 7 && GCommand->org->y == 0)
+	{
 		kingDes = createLocation(7,2);
+		if (kingDes == NULL)
+			printf(ERR_MALLOC);
+	}
 	return kingDes;
 }
 
@@ -528,7 +567,8 @@ char parsePawnPromotion(PLAYER_COLOR playerColor, char* input)
 
 GAME_INPUT_STATE makeComputerMove(GameManager* game)
 {
-    GameMove* move = applyAIMove(game);
+	GAME_INPUT_STATE gameInputStateMsg;
+	GameMove* move = applyAIMove(game);
 	bool isCastleMoveRight = isKing(game->state->board,move->des) && move->des->y + 2 == move->origin->y;
     bool isCastleMoveLeft = isKing(game->state->board,move->des) && move->des->y - 2 == move->origin->y;
     if (!move->pawnChanged && !(isCastleMoveRight||isCastleMoveLeft))
@@ -543,7 +583,12 @@ GAME_INPUT_STATE makeComputerMove(GameManager* game)
         printf(MSG_COM_CASTLE,getStringFromLocation(move->origin),"<1,A>" );
     if (isCastleMoveLeft && game->userColor == BLACK_PLAYER)
         printf(MSG_COM_CASTLE,getStringFromLocation(move->origin),"<8,A>" );
-    return afterValidMove(game);
+
+	gameInputStateMsg = afterValidMove(game);
+	if (gameInputStateMsg == GAME_INPUT_GAME_STATE)
+		printBoard(game->state->board);
+
+	return gameInputStateMsg;
 }
 
 void printComMove(GameMove* move, char piece)

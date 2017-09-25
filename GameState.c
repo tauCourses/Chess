@@ -1,5 +1,4 @@
 #include "GameState.h"
-#include "GameBoard.h"
 
 GameState* createEmptyGameState()
 {
@@ -52,6 +51,7 @@ void destroyCastleState(castleState* castle)
 
 GameState* duplicateGameState(GameState* state)
 {
+    int x,y;
     GameState* newState = createEmptyGameState();
     if(newState == NULL)
         return NULL;
@@ -69,8 +69,8 @@ GameState* duplicateGameState(GameState* state)
         return NULL;
     }
     newState->currentPlayer = state->currentPlayer;
-    for(int x=0;x<CHESS_BOARD_SIZE;++x)
-        for (int y = 0; y < CHESS_BOARD_SIZE; ++y)
+    for(x = 0;x<CHESS_BOARD_SIZE; ++x)
+        for (y = 0; y < CHESS_BOARD_SIZE; ++y)
             newState->board[x][y] = state->board[x][y];
 
     return newState;
@@ -97,10 +97,11 @@ Location** getAllAvailableMovesFromLocation(GameState* state,Location* origin)
         return NULL;
 
     int numberOfElements = 0;
+    int x,y;
     Location destination;
-    for(int x=0; x<CHESS_BOARD_SIZE; x++)
+    for(x=0; x<CHESS_BOARD_SIZE; x++)
     {
-        for(int y=0;y<CHESS_BOARD_SIZE && numberOfElements < (int)maxPossibleMoves-1;y++)
+        for(y=0;y<CHESS_BOARD_SIZE && numberOfElements < (int)maxPossibleMoves-1;y++)
         {
             destination = (Location){.x=x,.y=y};
             if (isMoveLegal(state,origin, &destination) == IS_LEGAL_VALID)
@@ -116,14 +117,13 @@ Location** getAllAvailableMovesFromLocation(GameState* state,Location* origin)
         }
     }
     qsort(possibleMoves, (size_t)numberOfElements, sizeof(Location*), compareLocations);
-    if(numberOfElements > 50) //TODO-> remove!
-        printf("what?");
     return possibleMoves;
 }
 
 GAME_IS_LEGAL_MESSAGE isMoveLegal(GameState* state, Location* org, Location* des)
 {
-	if (isLocationOutOfBounds(org) || isLocationOutOfBounds(des))
+	IS_KING_THREATENED isKingThreatenedMsg;
+    if (isLocationOutOfBounds(org) || isLocationOutOfBounds(des))
 		return IS_LEGAL_INVALID_POSITION;
 	if(getPieceColor(state->board[org->x][org->y]) != state->currentPlayer)
         return IS_LEGAL_NOT_USER_PIECE;
@@ -138,44 +138,58 @@ GAME_IS_LEGAL_MESSAGE isMoveLegal(GameState* state, Location* org, Location* des
     char oldPiece = state->board[des->x][des->y];
     state->board[des->x][des->y] = state->board[org->x][org->y];
     state->board[org->x][org->y] = EMPTY_PLACE_SYMBOL;
-    if(isKingThreatened(state))
-    	isChessAgainstUser = true;
+    isKingThreatenedMsg = isKingThreatened(state);
+    if(isKingThreatenedMsg == IS_KING_THREATENED_TRUE)
+        isChessAgainstUser = true;
+    else
+    {
+        if(isKingThreatenedMsg == IS_KING_THREATENED_MALLOC_ERROR)
+        {
+            printf("ERROR: in allocating memory\n");
+            return IS_LEGAL_INVALID_DUE_TO_CHESS_RULES;
+        }
+    }
 
     state->board[org->x][org->y] = state->board[des->x][des->y];
     state->board[des->x][des->y] = oldPiece;
     if (isChessAgainstUser)
     	return IS_LEGAL_INVALID_DUE_TO_CHESS_RULES;
     else
-    	return IS_LEGAL_VALID;
+        return IS_LEGAL_VALID;
 }
 
-bool isKingThreatened(GameState* state)  //TODO-> THIS FUNCTION CONTAIN MALLOC! SHOULD RETURN SOMETHING ELSE
+IS_KING_THREATENED isKingThreatened(GameState* state)
 {
     Location* kingLocation = findKingLocation(state, state->currentPlayer);
     if(kingLocation == NULL)
-        return false;
+        return IS_KING_THREATENED_MALLOC_ERROR;
 	bool res = isThreatened(state, kingLocation, oppositeColor(state->currentPlayer));
     destroyLocation(kingLocation);
-    return res;
+    if (res)
+        return IS_KING_THREATENED_TRUE;
+    else
+        return IS_KING_THREATENED_FALSE;
 }
 
 Location* findKingLocation(GameState* state, PLAYER_COLOR kingColor)
 {
+    int x,y;
     char kingChar = (char)((kingColor == WHITE_PLAYER) ? WHITE_KING_SYMBOL : BLACK_KING_SYMBOL);
-    for(int x=0; x<CHESS_BOARD_SIZE; ++x)
-        for (int y=0; y<CHESS_BOARD_SIZE; ++y)
+    for(x=0; x<CHESS_BOARD_SIZE; ++x)
+        for (y=0; y<CHESS_BOARD_SIZE; ++y)
             if(state->board[x][y] == kingChar)
                 return createLocation(x,y);
 
-    printf("Error - no king found!");
+    printf("ERROR: - no king found!");
     return NULL;
 }
 
 bool isThreatened(GameState *state, Location *loc, PLAYER_COLOR byPlayer)
 {
-    for(int x=0; x<CHESS_BOARD_SIZE; ++x)
+    int x,y;
+    for(x=0; x<CHESS_BOARD_SIZE; ++x)
     {
-        for (int y = 0; y < CHESS_BOARD_SIZE; ++y)
+        for (y = 0; y < CHESS_BOARD_SIZE; ++y)
         {
             if(getPieceColor(state->board[x][y]) == byPlayer)
             {
@@ -200,9 +214,10 @@ bool isThreatened(GameState *state, Location *loc, PLAYER_COLOR byPlayer)
 
 bool isREALLYThreatened(GameState *state, Location *loc)
 {
-    for(int x=0; x<CHESS_BOARD_SIZE; ++x)
+    int x,y;
+    for(x=0; x<CHESS_BOARD_SIZE; ++x)
     {
-        for (int y = 0; y < CHESS_BOARD_SIZE; ++y)
+        for (y = 0; y < CHESS_BOARD_SIZE; ++y)
         {
             Location org = {.x=x,.y=y};
             if(isMoveLegal(state,&org,loc) == IS_LEGAL_VALID)
@@ -372,6 +387,8 @@ void applyUndoMove(GameState *state, GameMove *move)
 
 bool checkCastleMove(GameState* state, Location* org, Location* des)
 {
+    bool result;
+    IS_KING_THREATENED  isKingThreatenedMsg;
     castleState* castleState = state->currentPlayer == WHITE_PLAYER ? state->whiteCastle : state->blackCastle;
     if(state->board[org->x][org->y] != (state->currentPlayer == WHITE_PLAYER ? WHITE_KING_SYMBOL : BLACK_KING_SYMBOL))
         return false;
@@ -384,23 +401,39 @@ bool checkCastleMove(GameState* state, Location* org, Location* des)
     {
         Location first = {.x = des->x, .y=5};
         Location second = {.x = des->x, .y=6};
-        return !isKingThreatened(state) &&
+        isKingThreatenedMsg = isKingThreatened(state);
+        result = ((isKingThreatenedMsg == IS_KING_THREATENED_FALSE) &&
                !isThreatened(state, &first, oppositeColor(state->currentPlayer)) &&
                !isThreatened(state, &second, oppositeColor(state->currentPlayer)) &&
                state->board[des->x][5] == EMPTY_PLACE_SYMBOL &&
-               state->board[des->x][6] == EMPTY_PLACE_SYMBOL;
+               state->board[des->x][6] == EMPTY_PLACE_SYMBOL);
+        if (isKingThreatenedMsg == IS_KING_THREATENED_MALLOC_ERROR)
+        {
+            printf("ERROR: in allocating memory\n");
+            return false;
+        }
+        else
+            return result;
     }
     if(org->y == 4 && des->y == 2 && org->x == des->x
        && castleState->hasKingMoved == false && castleState->hasLeftRookMoved == false) //left castle
     {
         Location first = {.x = des->x, .y=3};
         Location second = {.x = des->x, .y=2};
-        return !isKingThreatened(state) &&
+        isKingThreatenedMsg = isKingThreatened(state);
+        result = ((isKingThreatenedMsg == IS_KING_THREATENED_FALSE) &&
                !isThreatened(state, &first, oppositeColor(state->currentPlayer)) &&
                !isThreatened(state, &second, oppositeColor(state->currentPlayer)) &&
                state->board[des->x][3] == EMPTY_PLACE_SYMBOL &&
                state->board[des->x][2] == EMPTY_PLACE_SYMBOL &&
-               state->board[des->x][1] == EMPTY_PLACE_SYMBOL;
+               state->board[des->x][1] == EMPTY_PLACE_SYMBOL);
+        if (isKingThreatenedMsg == IS_KING_THREATENED_MALLOC_ERROR)
+        {
+            printf("ERROR: in allocating memory\n");
+            return false;
+        }
+        else
+            return result;
     }
     return false;
 }
