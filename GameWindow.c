@@ -68,7 +68,6 @@ void createGameButtons(GameWindow* window)
 
 void destroyGameWindow(GameWindow *window)
 {
-    printf("destory game window\n");
     if (window == NULL)
         return;
     //buttons:
@@ -157,7 +156,7 @@ GAME_WINDOW_EVENTS handleLeftMouseUpGameLayout(GameWindow *window, SDL_Event *ev
                 GameMove* move = applyAIMove(window->game);
                 if(move == NULL)
                 {
-                    printf("Error in preform AI move\n");
+                    printf("ERROR: in perform AI move\n");
                     return GAME_WINDOW_ERROR;
                 }
             }
@@ -184,7 +183,7 @@ GAME_WINDOW_EVENTS handleLeftMouseUpRestart(GameWindow *window)
 
     if(newGame == NULL)
     {
-        printf("Failed to create a new restarted game!\n");
+        printf("ERROR: Failed to create a new restarted game!\n");
         return GAME_WINDOW_ERROR;
     }
     if(newGame->mode == ONE_PLAYER_GAME_MODE &&newGame->userColor == BLACK_PLAYER)
@@ -192,7 +191,7 @@ GAME_WINDOW_EVENTS handleLeftMouseUpRestart(GameWindow *window)
         GameMove* move = applyAIMove(newGame);
         if(move == NULL)
         {
-            printf("Failed to preform an AI move\n");
+            printf("ERROR: Failed to perform an AI move\n");
             return GAME_WINDOW_ERROR;
         }
     }
@@ -255,7 +254,7 @@ GAME_WINDOW_EVENTS  handleLeftMouseDownGameWindow(GameWindow *window, SDL_Event 
             char piece = window->game->state->board[square.x][square.y];
             if(setDragedPiece(window->board, square, piece) == false)
             {
-                printf("Failed to drag the piece\n");
+                printf("ERROR: Failed to drag the piece\n");
                 return GAME_WINDOW_ERROR;
             }
         }
@@ -286,7 +285,7 @@ GAME_WINDOW_EVENTS  handleRightMouseDownGameWindow(GameWindow *window, SDL_Event
     window->board->suggestMoves = duplicateLocation(&square);
     if(window->board->suggestMoves == NULL)
     {
-        printf("Unable to create location for suggest piece\n");
+        printf("ERROR: Unable to create location for suggest piece\n");
         return GAME_WINDOW_ERROR;
     }
     return GAME_NONE;

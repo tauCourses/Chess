@@ -2,19 +2,10 @@
 #include "GameManager.h"
 #include "GameState.h"
 
-#include <errno.h>//for testing, can be deleted after load and save game in console works
 
 bool saveGame(GameManager* game, char* filename)
 {
-    printf("saveGame: this is filename |%s|\n",filename);
-
-    errno = 0;//for testing
-
     FILE * file = fopen(filename, "w");
-
-    if (file==NULL) //for testing
-        printf("Error %d \n", errno);//for testing
-
     if(file == NULL)
         return false;
     fprintf(file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -75,9 +66,7 @@ GameManager* loadGame(char* filename)
     GameManager* game = createEmptyGame();
     if(game == NULL)
         return NULL;
-    //printf("TestPrint: this is loadGame is game null? %d\n", game==NULL);
     FILE * file = fopen(filename, "r");
-    //printf("TestPrint: this is loadGame is file null? %d\n", file==NULL);
     if (file == NULL)
     {
         destroyGame(game);
@@ -111,7 +100,6 @@ bool updateCastlesStateFromFile(GameState* state, FILE* file) //please do not re
         if (state->blackCastle == NULL || state->whiteCastle == NULL)
             return false;
     }
-    //printf("TestPrint: updateCastlesStateFromFile is returning true\n");
     return true;
 }
 void updateGameParams(GameManager* game, FILE* file)

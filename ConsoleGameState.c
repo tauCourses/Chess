@@ -19,7 +19,6 @@ void getGameStateCommandFromUser(GameStateCommand** GCommand)
 
 GAME_INPUT_STATE executeGameStateCommand(GameManager* game, GameStateCommand* GCommand)
 {
-	//printf("TestPrint executeGameStateCommand BEGIN\n");
 	switch (GCommand->type)
 	{
 	case GAME_STATE_COMMAND_MOVE:
@@ -75,8 +74,6 @@ GameStateCommand* PraseGameStateLine(const char* str) {
 	token = strtok(line, delimeter);
 	result->type = gameStateCommandFromStr(token);
 
-	//printf("TestPrint PraseGameStateLine: this is result.type %d\n",result->type);
-
 	parseSaveCommand(result,token,delimeter);
 	parseMoveCommand(result,token,delimeter);
 	parsePossibleMovesCommand(result,token,delimeter);
@@ -85,9 +82,6 @@ GameStateCommand* PraseGameStateLine(const char* str) {
 	token = strtok(NULL, delimeter);
 	if (token != NULL )
 		result->type = GAME_STATE_COMMAND_INVALID;
-
-	//printf("TestPrint PraseGameStateLine: this is result.type %d\n",result->type);
-
 	return result;
 }
 
@@ -104,31 +98,23 @@ void parseSaveCommand(GameStateCommand* result, const char* token,const char del
 
 void parseMoveCommand(GameStateCommand* result, const char* token,const char delimeter[])
 {
-	//printf("TestPrint in parseMoveCommand\n");
 	if (result->type == GAME_STATE_COMMAND_MOVE) {
 		token = strtok(NULL, delimeter);
-		//printf("TestPrint in parseMoveCommand before parseLocation\n ");
 		result->org = parseLocation(token);
-		//("TestPrint in parseMoveCommand after parseLocation\n ");
 		token = strtok(NULL, delimeter);
 		if (token != NULL && strcmp(token, "to") == 0) {
 			token = strtok(NULL, delimeter);
 			result->des = parseLocation(token);
 		} else
 			result->type = GAME_STATE_COMMAND_INVALID;
-//		if ((result->org == NULL )||(result->des == NULL))
-//			result->type = GAME_STATE_COMMAND_INVALID;
 	}
 }
 
 void parsePossibleMovesCommand(GameStateCommand* result, const char* token,const char delimeter[])
 {
-    //printf("TestPrint in parsePossibleMovesCommand\n");
     if (result->type == GAME_STATE_COMMAND_GET_POSSIBLE_MOVES) {
 		token = strtok(NULL, delimeter);
 		result->org = parseLocation(token);
-//		if (result->org == NULL )
-//			result->type = GAME_STATE_COMMAND_INVALID;
 	}
 }
 
@@ -137,8 +123,6 @@ void parseCastle(GameStateCommand* result, const char* token,const char delimete
     if (result->type == GAME_STATE_COMMAND_CASTLE) {
         token = strtok(NULL, delimeter);
         result->org = parseLocation(token);
-//        if (result->org == NULL )
-//            result->type = GAME_STATE_COMMAND_INVALID;
     }
 }
 
@@ -260,7 +244,6 @@ GAME_INPUT_STATE afterValidMove(GameManager* game)
 
 void executeCommandGetPossibleMoves(GameManager* game, GameStateCommand* GCommand)
 {
-	//printf("TestPrint executeCommandGetPossibleMoves Begin\n");
     if (isLegalGetPossibleMoves(game,GCommand))
 	{
 		Location** allMoves = getAllAvailableMovesFromLocation(game->state,GCommand->org);
@@ -356,7 +339,6 @@ void printLocationsList(GameState* gameState,Location** locations, Location* org
 
 void executeCommandSave(GameManager* game, GameStateCommand GCommand)
 {
-	//printf("\nexecuteCommandSave: started function\n");
 	if (!saveGame(game,GCommand.path))
 		printf(MSG_FILE_CANNOT_CREATED_MODIFIED);
 }

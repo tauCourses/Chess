@@ -217,12 +217,12 @@ MANAGER_EVENT handleManagerDueToMainEvent(GUIManager* gui, MAIN_WINDOW_EVENTS ev
             switchWindow(gui, LOAD_WINDOW_ACTIVE);
             return MANAGER_NONE;
         case MAIN_ERROR:
-            printf("Error in main window\n");
+            printf("ERROR: Error in main window\n");
             return MANAGER_ERROR;
         case MAIN_NONE:
             return MANAGER_NONE;
         default:
-            printf("Invalid main window response\n");
+            printf("ERROR: Invalid main window response\n");
             return MANAGER_ERROR;
     }
 }
@@ -246,25 +246,25 @@ MANAGER_EVENT handleManagerDueToLoadEvent(GUIManager* gui, LOAD_WINDOW_EVENTS ev
             GameManager* game = loadGameFromSlots(gui->loadWindow->slotChosed+1);
             if(game == NULL)
             {
-                printf("unable to create game\n");
+                printf("ERROR: unable to create game\n");
                 return MANAGER_ERROR;
             }
             gui->gameWindow = createGameWindow(gui->renderer,game);
             if(gui->gameWindow == NULL)
             {
-                printf("unable to create game window\n");
+                printf("ERROR: unable to create game window\n");
                 return MANAGER_ERROR;
             }
             gui->lastWindow = gui->activeWindow;
             gui->activeWindow = GAME_WINDOW_ACTIVE;
             return MANAGER_NONE;
         case LOAD_ERROR:
-            printf("Error in load window\n");
+            printf("ERROR: Error in load window\n");
             return MANAGER_ERROR;
         case LOAD_NONE:
             return MANAGER_NONE;
         default:
-            printf("Invalid load window response\n");
+            printf("ERROR: Invalid load window response\n");
             return MANAGER_ERROR;
     }
 }
@@ -289,13 +289,13 @@ MANAGER_EVENT handleManagerDueToModeEvent(GUIManager* gui, MODE_WINDOW_EVENTS ev
             GameManager* game = createTwoPlayersGame();
             if(game == NULL)
             {
-                printf("unable to create game\n");
+                printf("ERROR: unable to create game\n");
                 return MANAGER_ERROR;
             }
             gui->gameWindow = createGameWindow(gui->renderer, game);
             if(gui->gameWindow == NULL)
             {
-                printf("unable to create game window\n");
+                printf("ERROR: unable to create game window\n");
                 return MANAGER_ERROR;
             }
             gui->lastWindow = gui->activeWindow;
@@ -308,13 +308,13 @@ MANAGER_EVENT handleManagerDueToModeEvent(GUIManager* gui, MODE_WINDOW_EVENTS ev
             return MANAGER_NONE;
 
         case MODE_ERROR:
-            printf("Error in mode window\n");
+            printf("ERROR: Error in mode window\n");
             return MANAGER_ERROR;
 
         case MODE_NONE:
             return MANAGER_NONE;
         default:
-            printf("Invalid mode window response\n");
+            printf("ERROR: Invalid mode window response\n");
             return MANAGER_ERROR;
     }
 
@@ -342,11 +342,11 @@ MANAGER_EVENT handleManagerDueToDifficultyEvent(GUIManager* gui, DIFFICULTY_WIND
             return MANAGER_NONE;
 
         case DIFFICULTY_ERROR:
-            printf("Error in difficulty window\n");
+            printf("ERROR: Error in difficulty window\n");
             return MANAGER_ERROR;
 
         default:
-            printf("Invalid difficulty window response\n");
+            printf("ERROR: Invalid difficulty window response\n");
             return MANAGER_ERROR;
     }
 
@@ -374,14 +374,14 @@ MANAGER_EVENT handleManagerDueToColorEvent(GUIManager* gui, COLOR_WINDOW_EVENTS 
                                             getColorFromColorWindow(gui->colorWindow));
             if(game == NULL)
             {
-                printf("unable to create game\n");
+                printf("ERROR: unable to create game\n");
                 return MANAGER_ERROR;
             }
             if(game->userColor == BLACK_PLAYER)
             {
                 if(applyAIMove(game) == NULL)
                 {
-                    printf("unable to run AI move\n");
+                    printf("ERROR: unable to run AI move\n");
                     destroyGame(game);
                     return MANAGER_ERROR;
                 }
@@ -390,7 +390,7 @@ MANAGER_EVENT handleManagerDueToColorEvent(GUIManager* gui, COLOR_WINDOW_EVENTS 
             gui->gameWindow = createGameWindow(gui->renderer, game);
             if(gui->gameWindow == NULL)
             {
-                printf("unable to create game window\n");
+                printf("ERROR: unable to create game window\n");
                 return MANAGER_ERROR;
             }
             gui->lastWindow = gui->activeWindow;
@@ -402,11 +402,11 @@ MANAGER_EVENT handleManagerDueToColorEvent(GUIManager* gui, COLOR_WINDOW_EVENTS 
             return MANAGER_NONE;
 
         case COLOR_ERROR:
-            printf("Error in color window\n");
+            printf("ERROR: Error in color window\n");
             return MANAGER_ERROR;
 
         default:
-            printf("Invalid color window response\n");
+            printf("ERROR: Invalid color window response\n");
             return MANAGER_ERROR;
     }
 
@@ -434,11 +434,11 @@ MANAGER_EVENT handleManagerDueToGameEvent(GUIManager* gui, GAME_WINDOW_EVENTS ev
             return MANAGER_NONE;
 
         case GAME_WINDOW_ERROR:
-            printf("Error in game window\n");
+            printf("ERROR: Error in game window\n");
             return MANAGER_ERROR;
 
         default:
-            printf("Invalid game window response\n");
+            printf("ERROR: Invalid game window response\n");
             return MANAGER_ERROR;
     }
 }

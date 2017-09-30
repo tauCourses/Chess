@@ -1,7 +1,3 @@
-//
-// Created by LenovoPc on 11-Sep-17.
-//
-
 #ifndef CHESS_PARSER_H
 #define CHESS_PARSER_H
 

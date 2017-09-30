@@ -105,8 +105,7 @@ void drawButton(Button* button)
             texture = button->mainTexture;
             break;
         default:
-            printf("BUG!");
-            texture = button->mainTexture;
+            texture = button->mainTexture;//should not reach here
 
     }
     SDL_RenderCopy(button->renderer, texture, NULL, &button->location);
@@ -134,8 +133,7 @@ bool clickOnButton(Button* button, int x, int y)
         case BUTTON_TYPE_DEGENERATED:
             return false; // non option is valid;
         default:
-            printf("BUG!");
-            return false;
+            return false;//should not reach here
 
     }
 

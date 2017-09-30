@@ -40,7 +40,6 @@ void getSettingsCommandFromUser(SettingsCommand** SCommand)
 
 SETTINGS_INPUT_STATE executeSettingsCommand(GameManager** game, SettingsCommand* SCommand, Settings* settings)
 {
-	//printf("TestPrint executeSettingsCommand: this is SCommand.type: |%d|\n", SCommand->type);
 	switch (SCommand->type)
 	{
 	case SETTINGS_COMMAND_GAME_MODE:
@@ -65,7 +64,6 @@ SETTINGS_INPUT_STATE executeSettingsCommand(GameManager** game, SettingsCommand*
 
 	case SETTINGS_COMMAND_PRINT_SETTINGS:
 		executeCommandPrintSettings(settings);
-        //printf("TestPrint executeSettingsCommand: about to return SETTINGS_INPUT_SETTINGS_STATE\n");
 		return SETTINGS_INPUT_SETTINGS_STATE;
 
 	case SETTINGS_COMMAND_START:
@@ -83,7 +81,7 @@ SETTINGS_INPUT_STATE executeSettingsCommand(GameManager** game, SettingsCommand*
 	default:
 		break;
 	}
-	return SETTINGS_COMMAND_INVALID;
+	return SETTINGS_INPUT_SETTINGS_STATE;
 }
 
 SettingsCommand* ParseSettingsLine(const char* str)
@@ -97,18 +95,11 @@ SettingsCommand* ParseSettingsLine(const char* str)
         printf(ERR_MALLOC);
         return NULL;
     }
-
-
     strcpy(line, str);
     token = strtok(line, delimeter);
-
-	//printf("TestPrint ParseSettingsLine: this is token: |%s|\n", token);
     result->type = settingsCommandFromStr(token);
-	//printf("TestPrint ParseSettingsLine: this is ScommandType: |%d|\n", result->type);
-
     parseSettingsCommandWithInt(result,token,delimeter);
 	parseSettingsCommandWithPath(result,token,delimeter);
-
     token = strtok(NULL, delimeter);
     if (token != NULL)
         result->type = SETTINGS_COMMAND_INVALID;
@@ -122,11 +113,8 @@ void parseSettingsCommandWithInt(SettingsCommand* result, const char* token, con
     		result->type == SETTINGS_COMMAND_USER_COLOR )
     {
         token = strtok(NULL, delimeter);
-		//printf("TestPrint parseSettingsCommandWithInt this isInt:%d\n", IsInt(token));
-		if (IsInt(token)){
+		if (IsInt(token))
 			result->value = atoi(token);
-			//printf("TestPrint parseSettingsCommandWithInt this is resulat.value:%d\n", result->value);
-		}
         else
             result->type = SETTINGS_COMMAND_INVALID;
     }
@@ -190,7 +178,6 @@ void executeCommandGameMode(SettingsCommand* SCommand, Settings* settings)
 
 void executeCommandDifficulty(SettingsCommand* SCommand, Settings* settings)
 {
-	//printf("TestPrint executeCommandDifficulty: this SCommand type and value <%d,%d>\n",SCommand->type, SCommand->value);
 	if (settings->gameMode == ONE_PLAYER_GAME_MODE)
 	{
 		if (0 < SCommand->value && SCommand->value < 6)

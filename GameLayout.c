@@ -246,8 +246,7 @@ SDL_Texture* charToTexture(GameLayout* game, char c)
             return pieces->queen;
         case 'm':
             return pieces->pawn;
-        default:
-            printf("BUG %c\n", c);
+        default://should not reach here
             return NULL;
     }
     return NULL;

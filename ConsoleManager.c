@@ -24,25 +24,18 @@ int mainConsole()
 		switch (inputState)
         {
             case INPUT_SETTINGS_STATE:
-                free(SCommand);
                 getSettingsCommandFromUser(&SCommand);
-                //printf("This is SCommand.type BEFORE execute %d\n",SCommand->type);
             	settingsInputState = executeSettingsCommand(&game,SCommand,settings);
-                //printf("This is SCommand.type AFTER execute %d\n",SCommand->type);
                 inputState = updateInputStateSetting(settingsInputState);
             	break;
             case INPUT_GAME_STATE:
                 if (game->mode == TWO_PLAYERS_GAME_MODE || game->userColor == game->state->currentPlayer)
-                {
-                    free(GCommand);
                     gameInputState = makeUserMove(&game, &GCommand, &settings);
-                }
-                else//computer's turn
+                else //computer's turn
                     gameInputState = makeComputerMove(game);
                 inputState = updateInputStateGame(gameInputState);
             	break;
             case INPUT_GAME_QUIT:
-            	printf("ERROR: should have quit");
             	break;
             default:
             	break;
@@ -63,7 +56,6 @@ int mainConsole()
 GAME_INPUT_STATE makeUserMove(GameManager** game, GameStateCommand** GCommand, Settings** settings)
 {
     GAME_INPUT_STATE gameInputState;
-    //printf("PRINT BOARD execute this is turn of:%d\n", (*game)->state->currentPlayer);
     if ((*game)->state->currentPlayer == WHITE_PLAYER)
         printf(MSG_NEXT_MOVE_WHITE);
     else
